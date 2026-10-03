@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\HouseholdRole;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -14,6 +15,7 @@ use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property int $id
@@ -33,7 +35,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     /**
      * Get the attributes that should be cast.
@@ -59,5 +61,19 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             ->as('membership')
             ->withPivot('id', 'role')
             ->withTimestamps();
+    }
+
+    public function isMemberOf(Household|string $household): bool
+    {
+        return $this->roleIn($household) !== null;
+    }
+
+    public function roleIn(Household|string $household): ?HouseholdRole
+    {
+        $role = $this->households()
+            ->whereKey($household instanceof Household ? $household->getKey() : $household)
+            ->value('household_user.role');
+
+        return $role ? HouseholdRole::from($role) : null;
     }
 }

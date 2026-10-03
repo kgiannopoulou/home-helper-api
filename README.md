@@ -15,12 +15,57 @@
 |---|---|---|
 | 0 | Tools, Laravel app with React starter kit, Sail | ✅ |
 | 1 | MySQL schema: 23 household tables, models, factories, 6-month demo seeder | ✅ |
-| 2 | REST API: Sanctum tokens, households, invites, policies | |
+| 2 | REST API: Sanctum tokens, households, signed invites, 20 module resources, policies | ✅ |
 | 3 | SQL reports: window functions, CTEs, views, `EXPLAIN` | |
 | 4 | Sync endpoint for the phone (`updated_at` + soft deletes) | |
 | 5 | Queues and scheduler: recurring bills, reminders, push | |
 | 6 | React dashboard | |
 | 7 | Oracle lab: partitioning, archiving, RMAN | |
+
+## API
+
+JSON over HTTPS with a Sanctum bearer token. Every module lives under one household, and the API only ever returns rows of households you belong to.
+
+```http
+POST /api/login            {email, password, device_name}  → {token, user}
+POST /api/logout                                            revokes this token
+GET  /api/me                                                you + your households
+
+GET  /api/households                                        yours, with your role
+POST /api/households       {name, currency}                 you become the owner
+GET  /api/households/{household}/members
+POST /api/households/{household}/invites   {email}          owner only; emails a signed link
+POST /api/invites/{invite}/accept?expires=…&signature=…     the link from the email
+
+GET|POST            /api/households/{household}/{module}
+GET|PUT|PATCH|DELETE /api/households/{household}/{module}/{id}
+```
+
+**Modules:** `expenses`, `recurring-bills`, `budgets`, `inventory-items`, `purchases`, `shopping-items`, `shopping-trips`, `item-prices`, `rooms`, `chores`, `chore-completions`, `supplies`, `food-entries`, `water-entries`, `sleep-entries`, `workouts`, `weights`, `events`, `todos`, `admin-items`.
+
+Lists are paginated (`?per_page=`, at most 100) and newest first. Dated modules filter with `?from=2026-09-01&to=2026-09-30` (both days included).
+
+```bash
+TOKEN=$(curl -s -X POST localhost:8000/api/login -H 'Accept: application/json' \
+  -d email=demo@homehelper.test -d password=password | jq -r .token)
+curl -s localhost:8000/api/households -H "Authorization: Bearer $TOKEN" | jq
+curl -s "localhost:8000/api/households/{id}/expenses?from=2026-07-01&to=2026-07-31" -H "Authorization: Bearer $TOKEN" | jq
+```
+
+### How access is enforced
+
+- **Route:** `can:view,household`. If you aren't a member, every URL under that household is **403**.
+- **Query:** rows are always looked up through the household's relation, so another household's row under your household's URL is **404**. It is never loaded, so nothing about it can leak.
+- **Policies:** one per model (`app/Policies`), sharing `HouseholdDataPolicy`. Food, water, sleep, workouts and weight use `PersonalDataPolicy`: other members of your household can't see them either.
+- **Validation:** ids in a body (`recurring_bill_id`, `room_id`, `assignee_id`…) must belong to the same household, so nobody can link to another household's rows.
+- **Ownership:** `household_id` and `user_id` are never taken from the body. They come from the URL and the token.
+
+### Conventions
+
+- **One Form Request per module** (`app/Http/Requests/Api`), written as the rules for creating a row. `PATCH` turns `required` into `sometimes`, except for fields checked together, like bed and wake times.
+- **Times** are ISO 8601 with an offset and are stored in UTC. Calendar days are plain `YYYY-MM-DD`.
+- **Errors:** 422 for validation, 409 when a unique key clashes (the same item name twice), 403 when you aren't a member, 404 when a row isn't in this household. A CHECK constraint that validation missed becomes 422, not 500.
+- **Controllers** per module are a few lines each. Their shared behaviour (scoping, filters, pagination, policies) lives in `HouseholdDataController`.
 
 ## Database
 
@@ -187,6 +232,8 @@ php artisan test                       # or ./vendor/bin/sail test
 ```
 
 The tests run against the real MySQL `testing` database (Sail creates it), so the foreign keys, CHECK constraints and generated columns are tested too. `tests/Feature/Database/SchemaTest.php` covers cascades, constraints, unique keys with soft deletes, and the demo seeder's story.
+
+The API tests (`tests/Feature/Api`) run the same checks on every module: list, create, invalid input, update, delete, and that another household's rows are refused (403 for the household URL, 404 for a row under yours). Another test makes sure a real token from another household is refused too. Separate tests cover login, logout and rate limiting, households and signed invites (tampered, expired, wrong person, used twice), date filters and pagination, private personal logs, cross-household ids, 409 conflicts and UTC times.
 
 Check the keys yourself:
 

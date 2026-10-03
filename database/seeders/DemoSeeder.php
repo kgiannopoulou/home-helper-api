@@ -86,7 +86,6 @@ class DemoSeeder extends Seeder
         $this->home->invites()->create([
             'email' => 'maria@example.com',
             'role' => HouseholdRole::Member,
-            'token_hash' => hash('sha256', 'demo-invite'),
             'expires_at' => $this->today->copy()->addDays(5),
             'invited_by' => $this->owner->id,
         ]);
