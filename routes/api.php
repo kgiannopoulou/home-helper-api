@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\FoodEntryController;
 use App\Http\Controllers\Api\HouseholdController;
+use App\Http\Controllers\Api\InsightController;
 use App\Http\Controllers\Api\InventoryItemController;
 use App\Http\Controllers\Api\InviteController;
 use App\Http\Controllers\Api\ItemPriceController;
@@ -63,6 +64,14 @@ Route::name('api.')->group(function () {
                 'todos' => TodoController::class,
                 'admin-items' => AdminItemController::class,
             ]);
+
+            Route::prefix('insights')->name('insights.')->controller(InsightController::class)->group(function () {
+                Route::get('weekly-spending', 'weeklySpending')->name('weekly-spending');
+                Route::get('run-out', 'runOut')->name('run-out');
+                Route::get('slipping-chores', 'slippingChores')->name('slipping-chores');
+                Route::get('shopping-day', 'shoppingDay')->name('shopping-day');
+                Route::get('budget-forecast', 'budgetForecast')->name('budget-forecast');
+            });
         });
     });
 });
