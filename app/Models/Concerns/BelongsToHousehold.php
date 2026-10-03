@@ -12,6 +12,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 trait BelongsToHousehold
 {
     /**
+     * Timestamps keep their milliseconds: last write wins compares them (Phase 4 sync).
+     */
+    public function getDateFormat(): string
+    {
+        return 'Y-m-d H:i:s.v';
+    }
+
+    /**
      * @return BelongsTo<Household, $this>
      */
     public function household(): BelongsTo

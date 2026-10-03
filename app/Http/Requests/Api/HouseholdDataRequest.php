@@ -69,9 +69,26 @@ abstract class HouseholdDataRequest extends FormRequest
         return data_get($data, $key, $default);
     }
 
+    /** Set when the rules are used outside a request to the module's own route (sync) */
+    private ?Household $forHousehold = null;
+
+    /**
+     * The rules for creating a row in this household, for checking rows that
+     * arrive another way (the sync endpoint).
+     *
+     * @return array<string, array<int, mixed>>
+     */
+    public static function rulesFor(Household $household): array
+    {
+        $request = new static;
+        $request->forHousehold = $household;
+
+        return $request->fields();
+    }
+
     protected function household(): Household
     {
-        return $this->route('household');
+        return $this->forHousehold ?? $this->route('household');
     }
 
     /**

@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\ShoppingItemController;
 use App\Http\Controllers\Api\ShoppingTripController;
 use App\Http\Controllers\Api\SleepEntryController;
 use App\Http\Controllers\Api\SupplyController;
+use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\TodoController;
 use App\Http\Controllers\Api\WaterEntryController;
 use App\Http\Controllers\Api\WeightController;
@@ -64,6 +65,8 @@ Route::name('api.')->group(function () {
                 'todos' => TodoController::class,
                 'admin-items' => AdminItemController::class,
             ]);
+
+            Route::post('sync', SyncController::class)->middleware('throttle:60,1')->name('sync');
 
             Route::prefix('insights')->name('insights.')->controller(InsightController::class)->group(function () {
                 Route::get('weekly-spending', 'weeklySpending')->name('weekly-spending');
