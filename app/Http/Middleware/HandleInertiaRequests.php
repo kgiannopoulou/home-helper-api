@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Household;
+use App\Web\CurrentHousehold;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -42,6 +44,20 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            // The household the dashboard shows, and the others you can switch to
+            'household' => fn () => $this->household($request),
+            'households' => fn () => $request->user()?->households()->orderBy('name')->get(['households.id', 'households.name'])
+                ->map(fn (Household $h) => ['id' => $h->id, 'name' => $h->name])->all() ?? [],
         ];
+    }
+
+    /**
+     * @return array{id: string, name: string, currency: string, role: string}|null
+     */
+    private function household(Request $request): ?array
+    {
+        $h = CurrentHousehold::get($request);
+
+        return $h ? ['id' => $h->id, 'name' => $h->name, 'currency' => $h->currency, 'role' => $request->user()->roleIn($h)?->value ?? 'member'] : null;
     }
 }

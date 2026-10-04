@@ -8,6 +8,7 @@ use App\Models\InventoryItem;
 use App\Models\Room;
 use App\Models\ShoppingItem;
 use App\Models\SleepEntry;
+use App\Models\StepCount;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
@@ -234,4 +235,20 @@ test('this month\'s rent added on both phones is one expense', function () {
     expect($reply->json('remapped'))->toBe(['recurring_bills' => ['billB' => 'billA'], 'expenses' => ['rentB' => 'rentA']])
         ->and(Expense::where('source', 'recurring')->count())->toBe(1)
         ->and(Expense::count())->toBe(2);
+});
+
+test('steps sync per day with the id every phone of that person makes', function () {
+    $id = StepCount::idFor($this->me->id, '2026-10-02');
+    $day = ['id' => $id, 'date' => '2026-10-02', 'steps' => 8123, 'updated_at' => '2026-10-03T06:00:00Z'];
+
+    sync(null, ['step_counts' => [$day]])->assertJsonPath('rejected', []);
+    // My second phone counted more that day
+    sync(null, ['step_counts' => [[...$day, 'steps' => 9010, 'updated_at' => '2026-10-03T07:00:00Z']]])->assertJsonPath('rejected', []);
+
+    expect(StepCount::sole()->only('id', 'user_id', 'steps'))->toBe(['id' => $id, 'user_id' => $this->me->id, 'steps' => 9010]);
+
+    // Made on the server (seeder, API): the same id the phone would make
+    $partners = StepCount::factory()->for($this->home)->for($this->partner)->create(['date' => '2026-10-02']);
+    expect($partners->id)->toBe(StepCount::idFor($this->partner->id, '2026-10-02'))
+        ->and($partners->id)->not->toBe($id);
 });

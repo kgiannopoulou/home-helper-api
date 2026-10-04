@@ -45,6 +45,8 @@ final class Collections
                 personal: true, naturalKey: ['date']),
             new SyncCollection('workouts', Models\Workout::class, Api\WorkoutRequest::class, Resources\WorkoutResource::class,
                 personal: true),
+            new SyncCollection('step_counts', Models\StepCount::class, Api\StepCountRequest::class, Resources\StepCountResource::class,
+                personal: true, naturalKey: ['date']),
             new SyncCollection('weights', Models\Weight::class, Api\WeightRequest::class, Resources\WeightResource::class,
                 personal: true, naturalKey: ['date']),
             new SyncCollection('events', Models\Event::class, Api\EventRequest::class, Resources\EventResource::class,

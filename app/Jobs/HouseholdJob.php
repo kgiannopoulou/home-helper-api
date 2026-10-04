@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Household;
 use App\Models\JobRun;
+use App\Support\HomeTime;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -82,12 +83,12 @@ abstract class HouseholdJob implements ShouldQueue
 
     public static function timezone(): string
     {
-        return (string) config('homehelper.timezone');
+        return HomeTime::zone();
     }
 
     /** Today at home, at midnight. */
     public static function today(): CarbonImmutable
     {
-        return CarbonImmutable::now(self::timezone())->startOfDay();
+        return HomeTime::today();
     }
 }

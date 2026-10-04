@@ -132,6 +132,40 @@
     --sidebar-ring: oklch(0.439 0 0);
 }
 
+/*
+ * Chart colours for the dashboard (Phase 6). Categorical slots in a fixed order,
+ * checked for colour-blind separation against the card surface in both modes;
+ * dark mode has its own steps, not a flip. Each spending category always gets the
+ * same slot (resources/js/lib/charts.ts), and rarer ones fold into a grey "Other".
+ */
+:root {
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+    --series-4: #eda100;
+    --series-5: #e87ba4;
+    --series-6: #008300;
+    --series-other: #a8a69f;
+    --viz-grid: #e1e0d9;
+    --viz-axis: #898781;
+    --viz-good: #006300;
+    --viz-critical: #d03b3b;
+}
+
+.dark {
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --series-6: #008300;
+    --series-other: #6b6a65;
+    --viz-grid: #2c2c2a;
+    --viz-axis: #898781;
+    --viz-good: #0ca30c;
+    --viz-critical: #e66767;
+}
+
 @layer base {
     * {
         @apply border-border;

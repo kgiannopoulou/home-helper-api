@@ -21,6 +21,7 @@ use App\Enums\WorkoutSource;
 use App\Enums\WorkoutType;
 use App\Models\Household;
 use App\Models\User;
+use App\Support\HomeTime;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -378,6 +379,13 @@ class DemoSeeder extends Seeder
                 ]);
             }
 
+            // More on workout and weekend days; the coach nudges it up over the months
+            $this->home->stepCounts()->create([
+                'user_id' => $user,
+                'date' => $day,
+                'steps' => mt_rand(4500, 8500) + ($day->isWeekend() ? 2500 : 0) + $i * 8,
+            ]);
+
             if ($day->isSunday()) {
                 $kg = round($kg - 0.12 + mt_rand(-25, 20) / 100, 1);
                 $this->home->weights()->create(['user_id' => $user, 'date' => $day, 'kg' => $kg]);
@@ -387,7 +395,9 @@ class DemoSeeder extends Seeder
 
     private function planner(): void
     {
-        $at = fn (int $days, string $time) => $this->today->copy()->addDays($days)->setTimeFromTimeString($time);
+        // Clock times at home (HOME_TIMEZONE), stored in UTC like everything else
+        $at = fn (int $days, string $time) => Carbon::parse($this->today->toDateString(), HomeTime::zone())
+            ->addDays($days)->setTimeFromTimeString($time)->utc();
 
         $this->home->events()->createMany([
             ['user_id' => $this->owner->id, 'title' => 'Dentist', 'starts_at' => $at(3, '10:30'), 'ends_at' => $at(3, '11:15'), 'location' => 'Dr. Papadaki, Kypseli'],

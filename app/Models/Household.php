@@ -143,6 +143,12 @@ class Household extends Model
         return $this->hasMany(Workout::class);
     }
 
+    /** @return HasMany<StepCount, $this> */
+    public function stepCounts(): HasMany
+    {
+        return $this->hasMany(StepCount::class);
+    }
+
     /** @return HasMany<Weight, $this> */
     public function weights(): HasMany
     {
