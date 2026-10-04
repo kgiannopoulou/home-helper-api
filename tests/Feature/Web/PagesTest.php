@@ -9,6 +9,7 @@ use App\Models\ChoreCompletion;
 use App\Models\Expense;
 use App\Models\Household;
 use App\Models\Room;
+use App\Models\ShoppingItem;
 use App\Models\SleepEntry;
 use App\Models\StepCount;
 use App\Models\User;
@@ -124,7 +125,15 @@ describe('pages', function () {
     test('dashboard and planner render', function () {
         $this->actingAs($this->me);
 
-        $this->get('/dashboard')->assertInertia(fn (Assert $page) => $page->component('dashboard')->has('forecast')->where('toBuy', 0));
+        $this->get('/dashboard')->assertInertia(fn (Assert $page) => $page->component('dashboard')->has('forecast')->where('toBuy', 0)->where('shoppingList', []));
+
+        // What a phone put on the shared list shows on the dashboard; what's checked off doesn't
+        ShoppingItem::factory()->for($this->home)->create(['name' => 'Milk', 'quantity' => '2', 'checked' => false]);
+        ShoppingItem::factory()->for($this->home)->create(['name' => 'Bread', 'checked' => true]);
+        $this->get('/dashboard')->assertInertia(fn (Assert $page) => $page
+            ->where('toBuy', 1)
+            ->where('shoppingList.0.name', 'Milk')
+            ->where('shoppingList.0.quantity', '2'));
         $this->get('/planner')->assertInertia(fn (Assert $page) => $page->component('planner')->where('plan.week_start', '2026-10-12')->has('plan.days', 7));
     });
 });

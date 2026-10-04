@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, usePoll } from '@inertiajs/react';
 import { BudgetCard } from '@/components/budget-card';
 import Heading from '@/components/heading';
 import {
@@ -22,16 +22,22 @@ type Props = {
         share: number;
     } | null;
     overdue: OverdueChore[];
+    shoppingList: { id: string; name: string; quantity: string | null }[];
     toBuy: number;
 };
+
+/** How often the dashboard asks for fresh numbers, so what a phone syncs shows up on its own */
+const REFRESH_MS = 10_000;
 
 export default function Dashboard({
     forecast,
     spentThisWeek,
     shoppingDay,
     overdue,
+    shoppingList,
     toBuy,
 }: Props) {
+    usePoll(REFRESH_MS);
     const { household } = usePage<{ household: CurrentHousehold }>().props;
     const currency = household.currency;
 
@@ -76,6 +82,44 @@ export default function Dashboard({
                         href={chores()}
                     />
                 </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Shopping list</CardTitle>
+                        <CardDescription>
+                            Shared with the phones · updates on its own
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {shoppingList.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                                Nothing to buy.
+                            </p>
+                        ) : (
+                            <ul className="flex flex-wrap gap-2">
+                                {shoppingList.map((item) => (
+                                    <li
+                                        key={item.id}
+                                        className="rounded-full border px-3 py-1 text-sm"
+                                    >
+                                        {item.name}
+                                        {item.quantity && (
+                                            <span className="text-muted-foreground">
+                                                {' '}
+                                                × {item.quantity}
+                                            </span>
+                                        )}
+                                    </li>
+                                ))}
+                                {toBuy > shoppingList.length && (
+                                    <li className="px-1 py-1 text-sm text-muted-foreground">
+                                        and {toBuy - shoppingList.length} more
+                                    </li>
+                                )}
+                            </ul>
+                        )}
+                    </CardContent>
+                </Card>
 
                 <BudgetCard forecast={forecast} currency={currency} />
 

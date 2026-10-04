@@ -1,13 +1,71 @@
 # 🏠 Home Helper API
 
-**Shared household sync for [Personal Home Helper](https://github.com/kgiannopoulou/personal-home-helper).** The Expo app keeps working offline on the phone; this Laravel app gives a household one shared copy of its money, kitchen, shopping, chores and planner, so two phones (and a browser dashboard) see the same list.
+[![tests](https://github.com/kgiannopoulou/home-helper-api/actions/workflows/tests.yml/badge.svg)](https://github.com/kgiannopoulou/home-helper-api/actions/workflows/tests.yml)
+
+**The shared household server for [Personal Home Helper](https://github.com/kgiannopoulou/personal-home-helper)**, an offline-first Expo app for money, kitchen, shopping, chores, health and planning. This Laravel app gives a household one shared copy of its data. It has a sync API for the phones, scheduled jobs that push to them, and a React dashboard for the browser, all on MySQL. An Oracle lab runs the same data through partitioning, backup and recovery.
+
+![Adding yoghurt on the phone and seeing it on the web dashboard](docs/demo/phone-to-web.gif)
+
+*Yoghurt is added on the phone (the Expo app's web build, left) and appears on the web dashboard (right) 16 seconds later. The phone syncs 4 s after a change, and the dashboard refreshes every 10 s.*
+
+## In two minutes
+
+| What the job asks for | Where it is |
+|---|---|
+| **PHP, Laravel** | A REST and sync API with Sanctum tokens, policies and Form Requests ([API](#api), [Sync](#sync-between-phones)). Queued jobs on Redis with the scheduler, Expo push, a Mailable ([Jobs](#scheduled-jobs-and-push)). 268 Pest tests on real MySQL |
+| **MySQL** | 24 normalized household tables with foreign keys, CHECK constraints, generated columns and soft-delete-safe unique keys ([Database](#database)). Window functions, CTEs, a view, and **`EXPLAIN ANALYZE` before and after** an index and a rewrite: [1,400× faster](#insights-trends-and-predictions-in-sql) |
+| **React** | Inertia + React + TypeScript pages with Recharts: spending, health, chores, a week planner whose Apply runs in one transaction, and the household ([Web dashboard](#web-dashboard)). Vitest + React Testing Library. Plus the [React Native app](https://github.com/kgiannopoulou/personal-home-helper) |
+| **Oracle basics** | Oracle Free in Docker: interval partitions and pruning, ARCHIVELOG mode, `EXCHANGE PARTITION` archiving, RMAN level 0/1, Data Pump, and four timed recovery drills. **[The runbook](ops/oracle/RUNBOOK.md)** has every command and its output |
+| **CI** | GitHub Actions on every push: MySQL 8.4 service, migrate, Pint, Pest, the production build, `tsc`, Vitest ([workflow](.github/workflows/tests.yml)) |
+
+## Architecture
+
+```mermaid
+flowchart LR
+    phone["📱 Expo app<br/>offline-first stores + sync ledger"]
+    browser["🖥️ Browser"]
+
+    subgraph app["Laravel 13 app"]
+        api["REST + sync API<br/>Sanctum tokens, policies"]
+        web["Inertia + React dashboard<br/>session login"]
+        queries["SQL insight queries<br/>app/Queries"]
+        scheduler["Scheduler<br/>routes/console.php"]
+        jobs["Household jobs<br/>app/Jobs"]
+    end
+
+    mysql[("MySQL 8.4")]
+    redis[("Redis<br/>queue")]
+    expo["Expo Push API"]
+    mail["Mail"]
+    oracle[("Oracle Free lab<br/>ops/oracle")]
+
+    phone -- "POST /api/households/{id}/sync<br/>every change, 4 s later" --> api
+    browser -- "Inertia pages" --> web
+    api --> mysql
+    web --> queries
+    api --> queries
+    queries --> mysql
+    scheduler -- "dispatch, one job per household" --> redis
+    redis --> jobs
+    jobs --> mysql
+    jobs -- "push" --> expo
+    expo --> phone
+    jobs -- "weekly summary" --> mail
+    mysql -. "same data as CSV, SQL*Loader" .-> oracle
+```
+
+- **The phone stays offline-first.** It keeps its own copy and swaps changes with `POST …/sync`: last write wins on the device's time, deletions travel as tombstones, and a cursor runs on the server's clock.
+- **The browser** logs in with the same account and reads the same rows through the same SQL query classes as the API.
+- **The scheduler** queues one job per household on Redis: fill the shopping list the day before shopping day, add bills, learn chore frequencies, budget alerts, a Sunday summary. The jobs push to the phones through Expo.
+- **[Oracle lab](ops/oracle/RUNBOOK.md):** the same data in Oracle Database Free, for partitioning, archiving, RMAN and recovery drills.
 
 | | |
 |---|---|
 | **Backend** | Laravel 13, PHP 8.4, Pest |
-| **Database** | MySQL 8.4 (normalized schema, foreign keys, CHECK constraints, generated columns) |
+| **Database** | MySQL 8.4 (normalized schema, foreign keys, CHECK constraints, generated columns); Oracle AI Database 26ai Free (lab) |
 | **Dashboard** | Inertia + React 19 + TypeScript (Laravel React starter kit), Recharts, Vitest + React Testing Library |
-| **Infra** | Docker (Laravel Sail: MySQL + Redis), Redis queues, the Laravel scheduler, Expo push |
+| **Infra** | Docker (Laravel Sail: MySQL + Redis), Redis queues, the Laravel scheduler, Expo push, GitHub Actions |
+| **The phone app** | [personal-home-helper](https://github.com/kgiannopoulou/personal-home-helper): Expo SDK 57, React Native, TypeScript |
 
 ## Roadmap
 
@@ -21,6 +79,7 @@
 | 5 | Queues and scheduler: shopping list, bills, budget alerts, weekly summary, push | ✅ |
 | 6 | React dashboard: spending, health, chores, week planner, household | ✅ |
 | 7 | Oracle lab: interval partitions, ARCHIVELOG and data archiving, RMAN, Data Pump, four recovery drills | ✅ |
+| 8 | CI on every push, this README, the demo | ✅ |
 
 ## API
 
@@ -203,6 +262,34 @@ ORDER BY runs_out_on, i.name;
 ```
 
 "Today" is always a binding, never `CURDATE()`, so tests can pin the day and the server's time zone doesn't matter.
+
+### Three queries and their plans
+
+1. **Weekly spending** (`WeeklySpendingQuery`): the view, read once, with `LAG()` for the week before. It went from 521 ms to 0.37 ms (below).
+
+    ```sql
+    WITH weeks AS (
+        SELECT v.week_start, v.category, v.total, v.expenses
+        FROM v_weekly_spending v
+        WHERE v.household_id = ?                     -- a constant: pushed down into the grouped view
+          AND v.week_start BETWEEN CAST(? AS DATE) - INTERVAL 7 DAY AND CAST(? AS DATE)
+    ),
+    compared AS (
+        SELECT weeks.*,
+               CASE WHEN LAG(week_start) OVER w = week_start - INTERVAL 7 DAY THEN LAG(total) OVER w END AS previous_total
+        FROM weeks
+        WINDOW w AS (PARTITION BY category ORDER BY week_start)
+    )
+    SELECT week_start, category, total, expenses, previous_total,
+           ROUND((total - previous_total) / previous_total * 100) AS change_pct
+    FROM compared WHERE week_start >= CAST(? AS DATE)
+    ORDER BY week_start, total DESC, category;
+    ```
+
+2. **Run-out** (`RunOutQuery`, above): `LAG()` over purchase days. It went from 1.2 ms to 0.72 ms with a covering index.
+3. **Budget forecast** (`BudgetForecastQuery`): one-row CTEs that MySQL works out while planning. It went from 2.7 ms to 1.9 ms.
+
+The plans for all three follow, from [`docs/explain/`](docs/explain).
 
 ### EXPLAIN ANALYZE: before and after
 
@@ -445,6 +532,8 @@ To use it from a phone, set `APP_URL` to an address the phone can reach (for exa
 php artisan test                       # or ./vendor/bin/sail test
 npm test                               # Vitest + React Testing Library
 ```
+
+[GitHub Actions](.github/workflows/tests.yml) runs them on every push, against a MySQL 8.4 service: `composer install`, `php artisan migrate`, Pint, the production build, Pest, `tsc` and Vitest.
 
 On Windows with Docker Desktop, PHP talking to MySQL through the forwarded port sometimes stalls during `migrate:fresh`: MySQL has answered, but PHP never gets the reply. Running PHP in a container on the same Docker network avoids that:
 

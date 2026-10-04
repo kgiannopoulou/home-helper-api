@@ -86,3 +86,6 @@ jobs:
 
       - name: JS tests (Vitest)
         run: npm test
+        env:
+          # Vitest starts a Vite dev server; laravel-vite-plugin refuses one in CI (it's meant to stop HMR there)
+          LARAVEL_BYPASS_ENV_CHECK: 1
