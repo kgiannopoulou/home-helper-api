@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\ChoreCompletionController;
 use App\Http\Controllers\Api\ChoreController;
+use App\Http\Controllers\Api\DeviceController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\FoodEntryController;
@@ -33,6 +34,8 @@ Route::name('api.')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('me', [AuthController::class, 'me'])->name('me');
+        Route::post('devices', [DeviceController::class, 'store'])->name('devices.store');
+        Route::delete('devices', [DeviceController::class, 'destroy'])->name('devices.destroy');
 
         Route::get('households', [HouseholdController::class, 'index'])->name('households.index');
         Route::post('households', [HouseholdController::class, 'store'])->name('households.store');

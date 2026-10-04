@@ -166,4 +166,10 @@ class Household extends Model
     {
         return $this->hasMany(AdminItem::class);
     }
+
+    /** @return HasMany<JobRun, $this> */
+    public function jobRuns(): HasMany
+    {
+        return $this->hasMany(JobRun::class);
+    }
 }
