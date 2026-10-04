@@ -1,0 +1,4 @@
+*.sh text eol=lf
+*.sql text eol=lf
+*.ctl text eol=lf
+*.rman text eol=lf

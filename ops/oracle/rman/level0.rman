@@ -1,0 +1,3 @@
+# Weekly: every used block of every datafile, plus the archived logs up to now
+BACKUP INCREMENTAL LEVEL 0 DATABASE TAG 'WEEKLY_L0' PLUS ARCHIVELOG TAG 'WEEKLY_ARCH';
+DELETE NOPROMPT OBSOLETE;

@@ -1,0 +1,133 @@
+== One month of one household's spending (the dashboard's question)
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 977768908
+
+---------------------------------------------------------------------------------------------------
+| Id  | Operation                                   | Name                        | Pstart| Pstop |
+---------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                            |                             |       |       |
+|   1 |  HASH GROUP BY                              |                             |       |       |
+|   2 |   PARTITION RANGE SINGLE                    |                             |    46 |    46 |
+|   3 |    TABLE ACCESS BY LOCAL INDEX ROWID BATCHED| EXPENSES                    |    46 |    46 |
+|*  4 |     INDEX RANGE SCAN                        | EXPENSES_HOUSEHOLD_DATE_LIX |    46 |    46 |
+|   5 |      SORT AGGREGATE                         |                             |       |       |
+|   6 |       INDEX FULL SCAN (MIN/MAX)             | HOUSEHOLDS_PK               |       |       |
+---------------------------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   4 - access("HOUSEHOLD_ID"= (SELECT MIN("ID") FROM "HOUSEHOLDS" "HOUSEHOLDS") AND
+              "ENTRY_DATE">=TO_DATE(' 2026-09-01 00:00:00', 'syyyy-mm-dd hh24:mi:ss') AND
+              "ENTRY_DATE"<TO_DATE(' 2026-10-01 00:00:00', 'syyyy-mm-dd hh24:mi:ss'))
+
+20 rows selected.
+
+== A quarter: three neighbouring partitions
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 3141970510
+
+---------------------------------------------------------------------------------------------------
+| Id  | Operation                                   | Name                        | Pstart| Pstop |
+---------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                            |                             |       |       |
+|   1 |  SORT AGGREGATE                             |                             |       |       |
+|   2 |   PARTITION RANGE ITERATOR                  |                             |    44 |    46 |
+|   3 |    TABLE ACCESS BY LOCAL INDEX ROWID BATCHED| EXPENSES                    |    44 |    46 |
+|   4 |     INDEX SKIP SCAN                         | EXPENSES_HOUSEHOLD_DATE_LIX |    44 |    46 |
+---------------------------------------------------------------------------------------------------
+
+11 rows selected.
+
+== No date at all: every partition
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 639495742
+
+---------------------------------------------------------
+| Id  | Operation            | Name     | Pstart| Pstop |
+---------------------------------------------------------
+|   0 | SELECT STATEMENT     |          |       |       |
+|   1 |  SORT AGGREGATE      |          |       |       |
+|   2 |   PARTITION RANGE ALL|          |     1 |1048575|
+|   3 |    TABLE ACCESS FULL | EXPENSES |     1 |1048575|
+---------------------------------------------------------
+
+10 rows selected.
+
+== A function on the key hides it from the optimizer: no pruning
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 639495742
+
+---------------------------------------------------------
+| Id  | Operation            | Name     | Pstart| Pstop |
+---------------------------------------------------------
+|   0 | SELECT STATEMENT     |          |       |       |
+|   1 |  SORT AGGREGATE      |          |       |       |
+|   2 |   PARTITION RANGE ALL|          |     1 |1048575|
+|   3 |    TABLE ACCESS FULL | EXPENSES |     1 |1048575|
+---------------------------------------------------------
+
+10 rows selected.
+
+== food_entries: one person's September
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 3044075523
+
+----------------------------------------------------------------------------------
+| Id  | Operation                           | Name               | Pstart| Pstop |
+----------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                    |                    |       |       |
+|   1 |  PARTITION RANGE SINGLE             |                    |    46 |    46 |
+|   2 |   SORT GROUP BY NOSORT              |                    |       |       |
+|   3 |    TABLE ACCESS BY LOCAL INDEX ROWID| FOOD_ENTRIES       |    46 |    46 |
+|   4 |     INDEX RANGE SCAN                | FOOD_USER_DATE_LIX |    46 |    46 |
+----------------------------------------------------------------------------------
+
+11 rows selected.
+
+== chore_completions: a TIMESTAMP key prunes the same way
+
+Explained.
+
+
+PLAN_TABLE_OUTPUT
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Plan hash value: 2609831115
+
+--------------------------------------------------------------------------------------------------
+| Id  | Operation                                   | Name                       | Pstart| Pstop |
+--------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                            |                            |       |       |
+|   1 |  HASH GROUP BY                              |                            |       |       |
+|   2 |   PARTITION RANGE ITERATOR                  |                            |    46 |    47 |
+|   3 |    TABLE ACCESS BY LOCAL INDEX ROWID BATCHED| CHORE_COMPLETIONS          |    46 |    47 |
+|   4 |     INDEX SKIP SCAN                         | COMPLETIONS_CHORE_DONE_LIX |    46 |    47 |
+--------------------------------------------------------------------------------------------------
+
+11 rows selected.
+

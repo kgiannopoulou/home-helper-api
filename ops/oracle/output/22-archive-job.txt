@@ -1,0 +1,52 @@
+
+Procedure created.
+
+No errors.
+
+PL/SQL procedure successfully completed.
+
+
+JOB_NAME                   REPEAT_INTERVAL                                  NEXT_RUN_DATE                        ENABL
+-------------------------- ------------------------------------------------ ------------------------------------ -----
+ARCHIVE_EXPENSES_MONTHLY   FREQ=MONTHLY; BYMONTHDAY=1; BYHOUR=3; BYMINUTE=0 01-NOV-26 03.00.29.545671 AM +00:00  TRUE
+
+1 row selected.
+
+2023-04: 911 rows archived in .102484 s
+2023-05: 943 rows archived in .086682 s
+2023-06: 894 rows archived in .093564 s
+2023-07: 954 rows archived in .086573 s
+2023-08: 979 rows archived in .084418 s
+2023-09: 897 rows archived in .08613 s
+2023-10: 939 rows archived in .088578 s
+2023-11: 905 rows archived in .086531 s
+2023-12: 930 rows archived in .084598 s
+2024-01: 925 rows archived in .08633 s
+2024-02: 900 rows archived in .08729 s
+2024-03: 955 rows archived in .084274 s
+2024-04: 928 rows archived in .082414 s
+2024-05: 921 rows archived in .083487 s
+2024-06: 940 rows archived in .08589 s
+2024-07: 947 rows archived in .084318 s
+2024-08: 950 rows archived in .083602 s
+2024-09: 905 rows archived in .081628 s
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:01.59
+
+OLDEST_IN_  ROWS_LEFT
+---------- ----------
+2024-10-01      22227
+
+1 row selected.
+
+Elapsed: 00:00:00.00
+
+ROWS_ARCHIVED NEWEST_ARC
+------------- ----------
+        19441 2024-09-30
+
+1 row selected.
+
+Elapsed: 00:00:00.01

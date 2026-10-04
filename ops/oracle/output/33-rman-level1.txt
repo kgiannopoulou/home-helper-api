@@ -1,0 +1,12 @@
+Starting backup at 2026-10-04 09:33:31
+piece handle=/opt/oracle/oradata/fra/FREE/backupset/2026_10_04/o1_mf_annnn_DAILY_ARCH_od47cdoh_.bkp tag=DAILY_ARCH comment=NONE
+Finished backup at 2026-10-04 09:33:33
+Starting backup at 2026-10-04 09:33:33
+piece handle=/opt/oracle/oradata/fra/FREE/5A4CDD399CF90FFBE0632600010A057A/backupset/2026_10_04/o1_mf_nnnd1_DAILY_L1_od47cg1y_.bkp tag=DAILY_L1 comment=NONE
+piece handle=/opt/oracle/oradata/fra/FREE/backupset/2026_10_04/o1_mf_nnnd1_DAILY_L1_od47ck47_.bkp tag=DAILY_L1 comment=NONE
+Finished backup at 2026-10-04 09:33:38
+Starting backup at 2026-10-04 09:33:38
+piece handle=/opt/oracle/oradata/fra/FREE/backupset/2026_10_04/o1_mf_annnn_DAILY_ARCH_od47clf4_.bkp tag=DAILY_ARCH comment=NONE
+Finished backup at 2026-10-04 09:33:39
+piece handle=/opt/oracle/oradata/fra/FREE/autobackup/2026_10_04/o1_mf_s_1245749619_od47cmn1_.bkp comment=NONE
+log: /tmp/rman/level1-20261004-0933.log

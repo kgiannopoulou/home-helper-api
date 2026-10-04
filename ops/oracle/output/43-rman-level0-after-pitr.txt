@@ -1,0 +1,13 @@
+Starting backup at 2026-10-04 09:35:54
+piece handle=/opt/oracle/oradata/fra/FREE/backupset/2026_10_04/o1_mf_annnn_WEEKLY_ARCH_od47hvlx_.bkp tag=WEEKLY_ARCH comment=NONE
+Finished backup at 2026-10-04 09:35:56
+Starting backup at 2026-10-04 09:35:56
+piece handle=/opt/oracle/oradata/fra/FREE/5A4CDD399CF90FFBE0632600010A057A/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od47hx08_.bkp tag=WEEKLY_L0 comment=NONE
+piece handle=/opt/oracle/oradata/fra/FREE/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od47jd20_.bkp tag=WEEKLY_L0 comment=NONE
+piece handle=/opt/oracle/oradata/fra/FREE/55E26E818ABB346CE063499B5E643C8D/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od47k55v_.bkp tag=WEEKLY_L0 comment=NONE
+Finished backup at 2026-10-04 09:36:44
+Starting backup at 2026-10-04 09:36:44
+piece handle=/opt/oracle/oradata/fra/FREE/backupset/2026_10_04/o1_mf_annnn_WEEKLY_ARCH_od47kdfx_.bkp tag=WEEKLY_ARCH comment=NONE
+Finished backup at 2026-10-04 09:36:45
+piece handle=/opt/oracle/oradata/fra/FREE/autobackup/2026_10_04/o1_mf_s_1245749805_od47kfnx_.bkp comment=NONE
+log: /tmp/rman/level0-20261004-0935.log

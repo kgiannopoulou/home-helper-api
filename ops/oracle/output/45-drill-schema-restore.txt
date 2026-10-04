@@ -1,0 +1,111 @@
+== Before
+
+Session altered.
+
+
+  EXPENSES   ARCHIVED       FOOD COMPLETIONS      TODOS
+---------- ---------- ---------- ----------- ----------
+     22267      19441     148893       81142       5254
+
+1 row selected.
+
+
+OBJECT_TYPE        COUNT(*)
+---------------- ----------
+INDEX                    16
+INDEX PARTITION         120
+JOB                       1
+PROCEDURE                 1
+TABLE                    12
+TABLE PARTITION         120
+
+6 rows selected.
+
+== Drop the user
+
+Session altered.
+
+
+User dropped.
+
+
+  HH_USERS
+----------
+         0
+
+1 row selected.
+
+== Import it back
+Processing object type SCHEMA_EXPORT/USER
+Processing object type SCHEMA_EXPORT/SYSTEM_GRANT
+Processing object type SCHEMA_EXPORT/DEFAULT_ROLE
+Processing object type SCHEMA_EXPORT/TABLESPACE_QUOTA
+Processing object type SCHEMA_EXPORT/PRE_SCHEMA/PROCACT_SCHEMA/LOGREP
+Processing object type SCHEMA_EXPORT/TABLE/TABLE
+Processing object type SCHEMA_EXPORT/TABLE/TABLE_DATA
+. . imported "HH"."FOOD_ENTRIES":"P_START"                   0 KB       0 rows
+. . imported "HH"."CHORES"                                39.7 KB     320 rows
+. . imported "HH"."HOUSEHOLD_USERS"                        9.2 KB      80 rows
+. . imported "HH"."ROOMS"                                 16.5 KB     160 rows
+. . imported "HH"."CHORE_COMPLETIONS":"P_START"              0 KB       0 rows
+. . imported "HH"."EXPENSES_ARCHIVE"                         2 MB   19441 rows
+. . imported "HH"."EXPENSES_ARCHIVE_STAGE"                   0 KB       0 rows
+. . imported "HH"."RECURRING_BILLS"                       19.7 KB     160 rows
+. . imported "HH"."USERS"                                 10.1 KB      80 rows
+. . imported "HH"."EXPENSES":"P_START"                       0 KB       0 rows
+. . imported "HH"."TODOS"                                461.7 KB    5254 rows
+. . imported "HH"."HOUSEHOLDS"                             8.6 KB      40 rows
+Processing object type SCHEMA_EXPORT/PROCEDURE/PROCEDURE
+Processing object type SCHEMA_EXPORT/PROCEDURE/ALTER_PROCEDURE
+Processing object type SCHEMA_EXPORT/TABLE/INDEX/INDEX
+Processing object type SCHEMA_EXPORT/TABLE/CONSTRAINT/CONSTRAINT
+Processing object type SCHEMA_EXPORT/TABLE/INDEX/STATISTICS/INDEX_STATISTICS
+Processing object type SCHEMA_EXPORT/TABLE/CONSTRAINT/REF_CONSTRAINT
+Processing object type SCHEMA_EXPORT/TABLE/STATISTICS/TABLE_STATISTICS
+Processing object type SCHEMA_EXPORT/POST_SCHEMA/PROCOBJ/SCHEDULER
+Job "SYSTEM"."SYS_IMPORT_SCHEMA_01" successfully completed at Sun Oct 4 09:37:44 2026 elapsed 0 00:00:33
+drill took 40 s
+== After
+
+Session altered.
+
+
+  EXPENSES   ARCHIVED       FOOD COMPLETIONS      TODOS
+---------- ---------- ---------- ----------- ----------
+     22267      19441     148893       81142       5254
+
+1 row selected.
+
+
+OBJECT_TYPE        COUNT(*)
+---------------- ----------
+INDEX                    16
+INDEX PARTITION         120
+JOB                       1
+PROCEDURE                 1
+TABLE                    12
+TABLE PARTITION         120
+
+6 rows selected.
+
+
+INVALID_OBJECTS
+---------------
+              0
+
+1 row selected.
+
+
+USERNAME   DEFAULT_TABLESPACE ACCOUNT_STATUS
+---------- ------------------ --------------
+HH         HH_DATA            OPEN
+
+1 row selected.
+
+
+JOB_NAME                   ENABL
+-------------------------- -----
+ARCHIVE_EXPENSES_MONTHLY   TRUE
+
+1 row selected.
+

@@ -1,0 +1,100 @@
+== Before: the partition and the empty staging table
+
+MARCH_ROWS
+----------
+       922
+
+1 row selected.
+
+Elapsed: 00:00:00.06
+
+STAGE_ROWS
+----------
+         0
+
+1 row selected.
+
+Elapsed: 00:00:00.01
+
+WHAT             DATA_OBJECT_ID
+---------------- --------------
+march partition           73333
+stage table               73328
+
+2 rows selected.
+
+Elapsed: 00:00:00.04
+== The exchange: a dictionary update, the rows don't move
+
+Table altered.
+
+Elapsed: 00:00:00.24
+== After: the rows are in the staging table, the partition is empty
+
+MARCH_ROWS
+----------
+         0
+
+1 row selected.
+
+Elapsed: 00:00:00.00
+
+STAGE_ROWS
+----------
+       922
+
+1 row selected.
+
+Elapsed: 00:00:00.00
+
+WHAT             DATA_OBJECT_ID
+---------------- --------------
+stage table               73333
+
+1 row selected.
+
+Elapsed: 00:00:00.01
+== Into the archive, then empty the stage and drop the empty partition
+
+922 rows created.
+
+Elapsed: 00:00:00.02
+
+Commit complete.
+
+Elapsed: 00:00:00.01
+
+Table truncated.
+
+Elapsed: 00:00:00.07
+
+Table altered.
+
+Elapsed: 00:00:00.02
+
+OLDEST_IN_
+----------
+2023-04-01
+
+1 row selected.
+
+Elapsed: 00:00:00.00
+
+MONTH   ROWS_ARCHIVED
+------- -------------
+2023-01           930
+2023-02           866
+2023-03           922
+
+3 rows selected.
+
+Elapsed: 00:00:00.01
+
+INDEX_NAME                   STATUS
+---------------------------- ---------
+EXPENSES_HOUSEHOLD_DATE_LIX  N/A
+EXPENSES_ID_GIX              VALID
+
+2 rows selected.
+
+Elapsed: 00:00:00.01

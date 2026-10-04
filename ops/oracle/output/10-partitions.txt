@@ -1,0 +1,41 @@
+
+TABLE_NAME             PARTITION INTERVAL                       PARTITION_COUNT
+---------------------- --------- ------------------------------ ---------------
+CHORE_COMPLETIONS      RANGE     NUMTOYMINTERVAL(1, 'MONTH')            1048575
+EXPENSES               RANGE     NUMTOYMINTERVAL(1, 'MONTH')            1048575
+FOOD_ENTRIES           RANGE     NUMTOYMINTERVAL(1, 'MONTH')            1048575
+
+3 rows selected.
+
+
+       POS PARTITION_NAME   HIGH_VALUE                                                                             NUM_ROWS
+---------- ---------------- ------------------------------------------------------------------------------------ ----------
+         1 P_START          TO_DATE(' 2023-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIA              0
+         2 SYS_P763         TO_DATE(' 2023-02-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIA            930
+         3 SYS_P764         TO_DATE(' 2023-03-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIA            866
+         4 SYS_P765         TO_DATE(' 2023-04-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIA            922
+        45 SYS_P806         TO_DATE(' 2026-09-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIA            929
+        46 SYS_P807         TO_DATE(' 2026-10-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIA            885
+        47 SYS_P808         TO_DATE(' 2026-11-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIA            138
+
+7 rows selected.
+
+
+  SEGMENTS         MB
+---------- ----------
+        46        368
+
+1 row selected.
+
+
+INDEX_NAME                   UNIQUENES LOCALITY                 STATUS
+---------------------------- --------- ------------------------ ---------
+COMPLETIONS_CHORE_DONE_LIX   NONUNIQUE LOCAL                    N/A
+COMPLETIONS_ID_GIX           UNIQUE    GLOBAL (not partitioned) VALID
+EXPENSES_HOUSEHOLD_DATE_LIX  NONUNIQUE LOCAL                    N/A
+EXPENSES_ID_GIX              UNIQUE    GLOBAL (not partitioned) VALID
+FOOD_ID_GIX                  UNIQUE    GLOBAL (not partitioned) VALID
+FOOD_USER_DATE_LIX           NONUNIQUE LOCAL                    N/A
+
+6 rows selected.
+

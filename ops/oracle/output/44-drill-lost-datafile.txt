@@ -1,0 +1,103 @@
+== The tablespace's file
+file 25: /opt/oracle/oradata/FREE/FREEPDB1/hh_data01.dbf
+
+Session altered.
+
+
+   FILE_ID FILE_NAME                                                       MB STATUS    ONLINE_
+---------- ------------------------------------------------------- ---------- --------- -------
+        25 /opt/oracle/oradata/FREE/FREEPDB1/hh_data01.dbf               1300 AVAILABLE ONLINE
+
+1 row selected.
+
+
+  EXPENSES      TOTAL
+---------- ----------
+     22267 1544323.94
+
+1 row selected.
+
+== Lose it: offline, then deleted
+
+Session altered.
+
+
+Database altered.
+
+removed '/opt/oracle/oradata/FREE/FREEPDB1/hh_data01.dbf'
+SELECT COUNT(*) FROM expenses
+                     *
+ERROR at line 1:
+ORA-00376: file 25 cannot be read at this time
+ORA-01110: data file 25: '/opt/oracle/oradata/FREE/FREEPDB1/hh_data01.dbf'
+Help: https://docs.oracle.com/error-help/db/ora-00376/
+
+
+== Restore and recover file 25
+
+Recovery Manager: Release 23.26.3.0.0 - Production on Sun Oct 4 09:36:48 2026
+Version 23.26.3.0.0
+
+Copyright (c) 1982, 2026, Oracle and/or its affiliates.  All rights reserved.
+
+connected to target database: FREE (DBID=1514744796)
+
+RMAN> RESTORE DATAFILE 25;
+Starting restore at 2026-10-04 09:36:49
+using target database control file instead of recovery catalog
+allocated channel: ORA_DISK_1
+channel ORA_DISK_1: SID=214 device type=DISK
+
+channel ORA_DISK_1: starting datafile backup set restore
+channel ORA_DISK_1: specifying datafile(s) to restore from backup set
+channel ORA_DISK_1: restoring datafile 00025 to /opt/oracle/oradata/FREE/FREEPDB1/hh_data01.dbf
+channel ORA_DISK_1: reading from backup piece /opt/oracle/oradata/fra/FREE/5A4CDD399CF90FFBE0632600010A057A/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od47hx08_.bkp
+channel ORA_DISK_1: piece handle=/opt/oracle/oradata/fra/FREE/5A4CDD399CF90FFBE0632600010A057A/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od47hx08_.bkp tag=WEEKLY_L0
+channel ORA_DISK_1: restored backup piece 1
+channel ORA_DISK_1: restore complete, elapsed time: 00:00:15
+Finished restore at 2026-10-04 09:37:04
+
+
+RMAN> RECOVER DATAFILE 25;
+Starting recover at 2026-10-04 09:37:04
+using channel ORA_DISK_1
+
+starting media recovery
+media recovery complete, elapsed time: 00:00:00
+
+Finished recover at 2026-10-04 09:37:05
+
+
+RMAN> 
+
+Recovery Manager complete.
+
+Session altered.
+
+
+Database altered.
+
+
+   FILE_ID STATUS    ONLINE_
+---------- --------- -------
+        25 AVAILABLE ONLINE
+
+1 row selected.
+
+drill took 18 s
+== After
+-rw-r----- 1 oracle oinstall 1363156992 Oct  4 09:37 /opt/oracle/oradata/FREE/FREEPDB1/hh_data01.dbf
+
+  EXPENSES      TOTAL
+---------- ----------
+     22267 1544323.94
+
+1 row selected.
+
+
+FOOD_ENTRIES
+------------
+      148893
+
+1 row selected.
+

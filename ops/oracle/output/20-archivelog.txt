@@ -1,0 +1,89 @@
+== Before
+Database log mode              No Archive Mode
+Automatic archival             Disabled
+Archive destination            /opt/oracle/product/26ai/dbhomeFree/dbs/arch
+Oldest online log sequence     18
+Current log sequence           18
+
+LOG_MODE
+------------
+NOARCHIVELOG
+
+1 row selected.
+
+== The Fast Recovery Area: archived logs, RMAN backups and control file autobackups go here
+
+System altered.
+
+
+System altered.
+
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+ORACLE instance started.
+
+Total System Global Area 1603398928 bytes
+Fixed Size                  5033232 bytes
+Variable Size             603979776 bytes
+Database Buffers          989855744 bytes
+Redo Buffers                4530176 bytes
+Database mounted.
+
+Database altered.
+
+
+Database altered.
+
+
+Pluggable database altered.
+
+
+Pluggable database altered.
+
+== After
+Database log mode              Archive Mode
+Automatic archival             Enabled
+Archive destination            USE_DB_RECOVERY_FILE_DEST
+Oldest online log sequence     18
+Next log sequence to archive   18
+Current log sequence           17
+
+LOG_MODE
+------------
+ARCHIVELOG
+
+1 row selected.
+
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+db_recovery_file_dest                string      /opt/oracle/oradata/fra
+db_recovery_file_dest_size           big integer 10G
+== Close the current online redo log: it's copied (archived) to the FRA
+
+System altered.
+
+
+System altered.
+
+
+System altered.
+
+
+ SEQUENCE# NAME                                                                                             MB FIRST_TIME         COMPLETION_TIME
+---------- ---------------------------------------------------------------------------------------- ---------- ------------------ ------------------
+        18 /opt/oracle/oradata/fra/FREE/archivelog/2026_10_04/o1_mf_1_18_od479cx7_.arc                    12.7 04-OCT-26          04-OCT-26
+        19 /opt/oracle/oradata/fra/FREE/archivelog/2026_10_04/o1_mf_1_19_od479d5d_.arc                       0 04-OCT-26          04-OCT-26
+        20 /opt/oracle/oradata/fra/FREE/archivelog/2026_10_04/o1_mf_1_20_od479d6x_.arc                       0 04-OCT-26          04-OCT-26
+
+3 rows selected.
+
+
+    GROUP#  SEQUENCE# STATUS    ARC
+---------- ---------- --------- ---
+         1         21 CURRENT   NO
+         2         20 ACTIVE    YES
+
+2 rows selected.
+

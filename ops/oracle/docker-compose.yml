@@ -1,0 +1,31 @@
+# Oracle Database Free next to the app's MySQL, for the Oracle lab (RUNBOOK.md).
+#   cp .env.example .env    # set ORACLE_PASSWORD
+#   docker compose up -d && docker logs -f oracle   # wait for "DATABASE IS READY TO USE!"
+#   docker exec -it oracle sqlplus / as sysdba
+#
+# Free edition limits: 2 CPU threads, 2 GB of memory for the database, 12 GB of user data.
+services:
+    oracle:
+        image: gvenzl/oracle-free:23
+        container_name: oracle
+        environment:
+            # SYS and SYSTEM. Only from .env, never in this file.
+            ORACLE_PASSWORD: ${ORACLE_PASSWORD:?Set ORACLE_PASSWORD in ops/oracle/.env}
+            # The lab schema's owner (scripts/setup.sh creates it)
+            HH_PASSWORD: ${HH_PASSWORD:?Set HH_PASSWORD in ops/oracle/.env}
+        ports:
+            - '1521:1521'
+        volumes:
+            # Data files, redo logs, the Fast Recovery Area (archived logs, RMAN backups)
+            - oracle-data:/opt/oracle/oradata
+            # The lab's scripts and CSV data, read-only
+            - ./:/opt/hh:ro
+        healthcheck:
+            test: ['CMD', 'healthcheck.sh']
+            interval: 10s
+            timeout: 5s
+            retries: 30
+            start_period: 60s
+
+volumes:
+    oracle-data:

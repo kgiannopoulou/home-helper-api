@@ -1,0 +1,104 @@
+== Before
+
+CONSTRAINT_NAME                  C STATUS
+-------------------------------- - ---------
+SYS_C008781                      C ENABLED
+SYS_C008782                      C ENABLED
+TODOS_HOUSEHOLD_FK               R ENABLED
+TODOS_PK                         P ENABLED
+
+4 rows selected.
+
+Elapsed: 00:00:01.22
+
+     TODOS       DONE
+---------- ----------
+      5254       4241
+
+1 row selected.
+
+Elapsed: 00:00:00.06
+
+Table dropped.
+
+Elapsed: 00:00:00.23
+== Dropped: the table is in the recycle bin, under a BIN$ name
+SELECT COUNT(*) FROM todos
+                     *
+ERROR at line 1:
+ORA-00942: table or view "HH"."TODOS" does not exist
+Help: https://docs.oracle.com/error-help/db/ora-00942/
+
+
+Elapsed: 00:00:00.00
+
+ORIGINAL_NAME            OBJECT_NAME                      TYPE                      DROPTIME
+------------------------ -------------------------------- ------------------------- -------------------
+TODOS                    BIN$XQF8DKjuBD7gYwIAFqyY+A==$0   TABLE                     2026-10-04:09:35:22
+TODOS_HOUSEHOLD_DUE_IX   BIN$XQF8DKjsBD7gYwIAFqyY+A==$0   INDEX                     2026-10-04:09:35:22
+TODOS_PK                 BIN$XQF8DKjtBD7gYwIAFqyY+A==$0   INDEX                     2026-10-04:09:35:22
+
+3 rows selected.
+
+Elapsed: 00:00:00.02
+
+Flashback complete.
+
+Elapsed: 00:00:00.08
+== Back: the rows, and the indexes (which keep their BIN$ names)
+
+     TODOS       DONE
+---------- ----------
+      5254       4241
+
+1 row selected.
+
+Elapsed: 00:00:00.00
+
+INDEX_NAME                   STATUS
+---------------------------- ---------
+BIN$XQF8DKjsBD7gYwIAFqyY+A== VALID
+$0
+
+BIN$XQF8DKjtBD7gYwIAFqyY+A== VALID
+$0
+
+
+2 rows selected.
+
+Elapsed: 00:00:00.02
+
+CONSTRAINT_NAME                  C STATUS
+-------------------------------- - ---------
+BIN$XQF8DKjpBD7gYwIAFqyY+A==$0   C ENABLED
+BIN$XQF8DKjqBD7gYwIAFqyY+A==$0   C ENABLED
+BIN$XQF8DKjrBD7gYwIAFqyY+A==$0   P ENABLED
+
+3 rows selected.
+
+Elapsed: 00:00:00.00
+
+PL/SQL procedure successfully completed.
+
+
+Table altered.
+
+
+INDEX_NAME                   STATUS
+---------------------------- ---------
+TODOS_HOUSEHOLD_DUE_IX       VALID
+TODOS_PK                     VALID
+
+2 rows selected.
+
+
+CONSTRAINT_NAME                  C STATUS
+-------------------------------- - ---------
+BIN$XQF8DKjpBD7gYwIAFqyY+A==$0   C ENABLED
+BIN$XQF8DKjqBD7gYwIAFqyY+A==$0   C ENABLED
+TODOS_HOUSEHOLD_FK               R ENABLED
+TODOS_PK                         P ENABLED
+
+4 rows selected.
+
+drill took 2972 ms

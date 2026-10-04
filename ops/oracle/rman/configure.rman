@@ -1,0 +1,11 @@
+# One-off settings, kept in the control file: rman target / @/opt/hh/rman/configure.rman
+SHOW ALL;
+# After every backup (and structural change), back up the control file and spfile too
+CONFIGURE CONTROLFILE AUTOBACKUP ON;
+# Keep what's needed to restore to any moment of the last 7 days; older is OBSOLETE
+CONFIGURE RETENTION POLICY TO RECOVERY WINDOW OF 7 DAYS;
+# Compressed backup sets: the FRA is 10 GB
+CONFIGURE DEVICE TYPE DISK BACKUP TYPE TO COMPRESSED BACKUPSET;
+# Archived logs may be deleted from the FRA only once they're in a backup
+CONFIGURE ARCHIVELOG DELETION POLICY TO BACKED UP 1 TIMES TO DISK;
+SHOW ALL;

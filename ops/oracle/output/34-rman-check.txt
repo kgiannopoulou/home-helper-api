@@ -1,0 +1,64 @@
+
+Recovery Manager: Release 23.26.3.0.0 - Production on Sun Oct 4 09:33:41 2026
+Version 23.26.3.0.0
+
+Copyright (c) 1982, 2026, Oracle and/or its affiliates.  All rights reserved.
+
+connected to target database: FREE (DBID=1514744796)
+
+RMAN> LIST BACKUP SUMMARY;
+2> REPORT NEED BACKUP;
+3> REPORT OBSOLETE;
+4> # Reads the backups as a restore would, without writing anything
+5> RESTORE DATABASE VALIDATE;
+6> 
+using target database control file instead of recovery catalog
+
+List of Backups
+===============
+Key     TY LV S Device Type Completion Time     #Pieces #Copies Compressed Tag
+------- -- -- - ----------- ------------------- ------- ------- ---------- ---
+1       B  A  A DISK        2026-10-04 09:32:39 1       1       YES        WEEKLY_ARCH
+2       B  0  A DISK        2026-10-04 09:32:49 1       1       YES        WEEKLY_L0
+3       B  0  A DISK        2026-10-04 09:33:12 1       1       YES        WEEKLY_L0
+4       B  0  A DISK        2026-10-04 09:33:26 1       1       YES        WEEKLY_L0
+5       B  A  A DISK        2026-10-04 09:33:27 1       1       YES        WEEKLY_ARCH
+6       B  F  A DISK        2026-10-04 09:33:28 1       1       YES        TAG20261004T093328
+7       B  A  A DISK        2026-10-04 09:33:32 1       1       YES        DAILY_ARCH
+8       B  1  A DISK        2026-10-04 09:33:35 1       1       YES        DAILY_L1
+9       B  1  A DISK        2026-10-04 09:33:37 1       1       YES        DAILY_L1
+10      B  A  A DISK        2026-10-04 09:33:38 1       1       YES        DAILY_ARCH
+11      B  F  A DISK        2026-10-04 09:33:39 1       1       YES        TAG20261004T093339
+
+RMAN retention policy will be applied to the command
+RMAN retention policy is set to recovery window of 7 days
+Report of files that must be backed up to satisfy 7 days recovery window
+File Days  Name
+---- ----- -----------------------------------------------------
+
+RMAN retention policy will be applied to the command
+RMAN retention policy is set to recovery window of 7 days
+no obsolete backups found
+
+Starting restore at 2026-10-04 09:33:43
+allocated channel: ORA_DISK_1
+channel ORA_DISK_1: SID=54 device type=DISK
+
+channel ORA_DISK_1: starting validation of datafile backup set
+channel ORA_DISK_1: reading from backup piece /opt/oracle/oradata/fra/FREE/5A4CDD399CF90FFBE0632600010A057A/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od479rdy_.bkp
+channel ORA_DISK_1: piece handle=/opt/oracle/oradata/fra/FREE/5A4CDD399CF90FFBE0632600010A057A/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od479rdy_.bkp tag=WEEKLY_L0
+channel ORA_DISK_1: restored backup piece 1
+channel ORA_DISK_1: validation complete, elapsed time: 00:00:15
+channel ORA_DISK_1: starting validation of datafile backup set
+channel ORA_DISK_1: reading from backup piece /opt/oracle/oradata/fra/FREE/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od47b7bn_.bkp
+channel ORA_DISK_1: piece handle=/opt/oracle/oradata/fra/FREE/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od47b7bn_.bkp tag=WEEKLY_L0
+channel ORA_DISK_1: restored backup piece 1
+channel ORA_DISK_1: validation complete, elapsed time: 00:00:25
+channel ORA_DISK_1: starting validation of datafile backup set
+channel ORA_DISK_1: reading from backup piece /opt/oracle/oradata/fra/FREE/55E26E818ABB346CE063499B5E643C8D/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od47c0cv_.bkp
+channel ORA_DISK_1: piece handle=/opt/oracle/oradata/fra/FREE/55E26E818ABB346CE063499B5E643C8D/backupset/2026_10_04/o1_mf_nnnd0_WEEKLY_L0_od47c0cv_.bkp tag=WEEKLY_L0
+channel ORA_DISK_1: restored backup piece 1
+channel ORA_DISK_1: validation complete, elapsed time: 00:00:15
+Finished restore at 2026-10-04 09:34:38
+
+Recovery Manager complete.

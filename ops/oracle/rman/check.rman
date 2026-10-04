@@ -1,0 +1,5 @@
+LIST BACKUP SUMMARY;
+REPORT NEED BACKUP;
+REPORT OBSOLETE;
+# Reads the backups as a restore would, without writing anything
+RESTORE DATABASE VALIDATE;

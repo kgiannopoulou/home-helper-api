@@ -1,0 +1,117 @@
+== Before
+
+INDEX_NAME                   STATUS
+---------------------------- ---------
+EXPENSES_ID_GIX              VALID
+
+1 row selected.
+
+Elapsed: 00:00:00.02
+
+LOCAL_INDEX_PARTITIONS
+----------------------
+                    47
+
+1 row selected.
+
+Elapsed: 00:00:00.04
+== January 2023: copy, then DROP PARTITION with no index clause
+
+930 rows created.
+
+Elapsed: 00:00:00.02
+
+Commit complete.
+
+Elapsed: 00:00:00.00
+
+Table altered.
+
+Elapsed: 00:00:00.08
+
+INDEX_NAME                   STATUS
+---------------------------- ---------
+EXPENSES_ID_GIX              UNUSABLE
+
+1 row selected.
+
+Elapsed: 00:00:00.00
+
+LOCAL_INDEX_PARTITIONS
+----------------------
+                    46
+
+1 row selected.
+
+Elapsed: 00:00:00.04
+== An UNUSABLE primary key index: a lookup by id can't use it, and inserts fail
+
+  COUNT(*)
+----------
+         0
+
+1 row selected.
+
+Elapsed: 00:00:00.02
+INSERT INTO expenses (id, household_id, entry_date, amount, category)
+*
+ERROR at line 1:
+ORA-01502: index 'HH.EXPENSES_ID_GIX' or partition of such index is in unusable state
+Help: https://docs.oracle.com/error-help/db/ora-01502/
+
+
+Elapsed: 00:00:00.01
+
+Rollback complete.
+
+Elapsed: 00:00:00.00
+== Rebuild it: reads every row of every partition
+
+Index altered.
+
+Elapsed: 00:00:00.47
+
+INDEX_NAME                   STATUS
+---------------------------- ---------
+EXPENSES_ID_GIX              VALID
+
+1 row selected.
+
+Elapsed: 00:00:00.00
+== February 2023: DROP PARTITION ... UPDATE GLOBAL INDEXES
+
+866 rows created.
+
+Elapsed: 00:00:00.00
+
+Commit complete.
+
+Elapsed: 00:00:00.01
+
+Table altered.
+
+Elapsed: 00:00:00.01
+
+INDEX_NAME                   STATUS    ORP
+---------------------------- --------- ---
+EXPENSES_ID_GIX              VALID     YES
+
+1 row selected.
+
+Elapsed: 00:00:00.02
+
+LOCAL_INDEX_PARTITIONS
+----------------------
+                    45
+
+1 row selected.
+
+Elapsed: 00:00:00.05
+
+  ARCHIVED
+----------
+      1796
+
+1 row selected.
+
+Elapsed: 00:00:00.00

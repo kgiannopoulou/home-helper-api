@@ -1,0 +1,179 @@
+== user and tablespace
+
+Session altered.
+
+
+Tablespace created.
+
+
+User created.
+
+
+Grant succeeded.
+
+
+Grant succeeded.
+
+
+USERNAME
+--------------------------------------------------------------------------------
+DEFAULT_TABLESPACE	       ACCOUNT_STATUS
+------------------------------ --------------------------------
+HH
+HH_DATA 		       OPEN
+
+
+== schema
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Index created.
+
+
+Index created.
+
+
+Table altered.
+
+
+Table created.
+
+
+Index created.
+
+
+Index created.
+
+
+Table altered.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Index created.
+
+
+Index created.
+
+
+Table altered.
+
+
+Table created.
+
+
+Index created.
+
+
+Table altered.
+
+
+Table altered.
+
+
+Table altered.
+
+
+Table created.
+
+
+Table created.
+
+== load (SQL*Loader, conventional path so every constraint is checked)
+  40 Rows successfully loaded.
+households               40 loaded, 0 rejected,   3122 ms
+  80 Rows successfully loaded.
+users                    80 loaded, 0 rejected,    134 ms
+  80 Rows successfully loaded.
+household_users          80 loaded, 0 rejected,     80 ms
+  160 Rows successfully loaded.
+recurring_bills         160 loaded, 0 rejected,     82 ms
+  160 Rows successfully loaded.
+rooms                   160 loaded, 0 rejected,     82 ms
+  320 Rows successfully loaded.
+chores                  320 loaded, 0 rejected,     88 ms
+  41668 Rows successfully loaded.
+expenses              41668 loaded, 0 rejected,   1449 ms
+  148110 Rows successfully loaded.
+food_entries         148110 loaded, 0 rejected,  12576 ms
+  81142 Rows successfully loaded.
+chore_completions     81142 loaded, 0 rejected,   4271 ms
+  5254 Rows successfully loaded.
+todos                  5254 loaded, 0 rejected,    122 ms
+== statistics
+
+PL/SQL procedure successfully completed.
+
+
+TABLE_NAME
+--------------------------------------------------------------------------------
+  NUM_ROWS
+----------
+FOOD_ENTRIES
+    148110
+
+CHORE_COMPLETIONS
+     81142
+
+EXPENSES
+     41668
+
+
+TABLE_NAME
+--------------------------------------------------------------------------------
+  NUM_ROWS
+----------
+TODOS
+      5254
+
+CHORES
+       320
+
+ROOMS
+       160
+
+
+TABLE_NAME
+--------------------------------------------------------------------------------
+  NUM_ROWS
+----------
+RECURRING_BILLS
+       160
+
+HOUSEHOLD_USERS
+	80
+
+USERS
+	80
+
+
+TABLE_NAME
+--------------------------------------------------------------------------------
+  NUM_ROWS
+----------
+HOUSEHOLDS
+	40
+
+
+10 rows selected.
+

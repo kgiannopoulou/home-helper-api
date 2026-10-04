@@ -1,0 +1,28 @@
+
+783 rows created.
+
+Elapsed: 00:00:00.08
+
+40 rows created.
+
+Elapsed: 00:00:00.00
+
+Commit complete.
+
+Elapsed: 00:00:00.01
+
+  EXPENSES
+----------
+     22267
+
+1 row selected.
+
+Elapsed: 00:00:00.00
+
+FOOD_ENTRIES
+------------
+      148893
+
+1 row selected.
+
+Elapsed: 00:00:00.04

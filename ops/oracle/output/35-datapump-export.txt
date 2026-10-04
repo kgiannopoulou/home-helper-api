@@ -1,0 +1,158 @@
+
+Export: Release 23.26.3.0.0 - Production on Sun Oct 4 09:34:39 2026
+Version 23.26.3.0.0
+
+Copyright (c) 1982, 2026, Oracle and/or its affiliates.  All rights reserved.
+
+Connected to: Oracle AI Database 26ai Free Release 23.26.3.0.0 - Develop, Learn, and Run for Free
+Starting "SYSTEM"."SYS_EXPORT_SCHEMA_01":  system/********@//localhost:1521/FREEPDB1 parfile=/tmp/tmp.m7ckrqUhLs 
+Processing object type SCHEMA_EXPORT/TABLE/TABLE_DATA
+Processing object type SCHEMA_EXPORT/TABLE/INDEX/STATISTICS/INDEX_STATISTICS
+Processing object type SCHEMA_EXPORT/TABLE/STATISTICS/TABLE_STATISTICS
+Processing object type SCHEMA_EXPORT/USER
+Processing object type SCHEMA_EXPORT/SYSTEM_GRANT
+Processing object type SCHEMA_EXPORT/DEFAULT_ROLE
+Processing object type SCHEMA_EXPORT/TABLESPACE_QUOTA
+Processing object type SCHEMA_EXPORT/PRE_SCHEMA/PROCACT_SCHEMA/LOGREP
+Processing object type SCHEMA_EXPORT/TABLE/TABLE
+Processing object type SCHEMA_EXPORT/PROCEDURE/PROCEDURE
+Processing object type SCHEMA_EXPORT/PROCEDURE/ALTER_PROCEDURE
+Processing object type SCHEMA_EXPORT/TABLE/INDEX/INDEX
+Processing object type SCHEMA_EXPORT/TABLE/CONSTRAINT/CONSTRAINT
+Processing object type SCHEMA_EXPORT/TABLE/CONSTRAINT/REF_CONSTRAINT
+Processing object type SCHEMA_EXPORT/POST_SCHEMA/PROCOBJ/SCHEDULER
+. . exported "HH"."TODOS"                                461.7 KB    5254 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P833"              384.5 KB    3435 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P823"              382.3 KB    3414 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P835"              379.2 KB    3387 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P839"              377.7 KB    3372 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P842"              377.6 KB    3372 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P818"              377.2 KB    3369 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P832"              375.2 KB    3351 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P852"              375.3 KB    3351 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P816"              374.9 KB    3348 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P837"              374.8 KB    3348 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P815"              374.7 KB    3345 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P845"              374.6 KB    3345 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P847"              374.6 KB    3345 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P849"              374.4 KB    3342 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P827"                374 KB    3339 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P809"              373.7 KB    3336 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P821"              373.3 KB    3333 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P830"              372.6 KB    3327 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P851"              372.6 KB    3327 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P825"                372 KB    3321 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P828"              371.3 KB    3315 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P811"              370.5 KB    3309 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P840"              370.6 KB    3309 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P813"              370.4 KB    3306 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P853"              406.4 KB    3636 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P820"              367.6 KB    3282 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P838"              367.7 KB    3282 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P844"              367.7 KB    3282 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P841"              366.6 KB    3273 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P819"              366.4 KB    3270 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P826"              364.3 KB    3252 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P843"              363.8 KB    3246 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P829"              363.1 KB    3240 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P848"              362.5 KB    3234 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P824"              361.8 KB    3228 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P831"              361.5 KB    3225 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P814"              360.8 KB    3219 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P850"              360.9 KB    3219 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P812"              360.1 KB    3213 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P817"              358.9 KB    3201 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P822"              356.5 KB    3180 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P836"              356.6 KB    3180 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P846"              339.5 KB    3024 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P810"              338.9 KB    3018 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P834"              333.3 KB    2967 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P861"         186.8 KB    1855 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P859"         186.3 KB    1850 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P881"         186.3 KB    1850 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P873"         185.9 KB    1846 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P895"         185.8 KB    1845 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P855"         185.5 KB    1842 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P876"         185.5 KB    1842 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P862"         185.2 KB    1839 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P871"         185.2 KB    1839 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P897"         185.2 KB    1839 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P878"         184.9 KB    1836 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P890"         184.7 KB    1834 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P869"         184.4 KB    1831 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P879"         184.4 KB    1830 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P885"         184.4 KB    1830 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P866"         184.3 KB    1829 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P874"         184.3 KB    1829 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P898"         184.3 KB    1829 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P857"         183.9 KB    1825 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P883"         183.8 KB    1824 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P891"         183.7 KB    1823 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P893"         182.8 KB    1814 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P867"         182.3 KB    1809 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P886"         182.1 KB    1807 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P888"         181.7 KB    1803 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P865"         181.4 KB    1800 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P864"         180.9 KB    1794 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P882"         180.1 KB    1786 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P894"         180.1 KB    1786 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P870"         179.8 KB    1783 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P887"         179.7 KB    1782 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P858"         179.6 KB    1781 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P863"         179.4 KB    1779 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P877"         178.8 KB    1773 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P860"         178.5 KB    1770 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P889"         178.4 KB    1768 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P872"         178.2 KB    1766 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P884"         178.2 KB    1766 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P899"         177.9 KB    1763 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P875"         176.5 KB    1749 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P896"         176.1 KB    1745 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P868"         175.6 KB    1740 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P856"         169.4 KB    1675 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P892"           169 KB    1671 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P880"         165.6 KB    1636 rows
+. . exported "HH"."EXPENSES":"SYS_P799"                    101 KB     970 rows
+. . exported "HH"."EXPENSES":"SYS_P791"                   99.8 KB     958 rows
+. . exported "HH"."EXPENSES":"SYS_P801"                   99.9 KB     958 rows
+. . exported "HH"."EXPENSES":"SYS_P786"                   99.6 KB     953 rows
+. . exported "HH"."EXPENSES":"SYS_P796"                   98.3 KB     940 rows
+. . exported "HH"."EXPENSES":"SYS_P789"                   97.9 KB     934 rows
+. . exported "HH"."EXPENSES":"SYS_P790"                   96.8 KB     924 rows
+. . exported "HH"."EXPENSES":"SYS_P784"                   97.8 KB     933 rows
+. . exported "HH"."EXPENSES":"SYS_P805"                   97.6 KB     932 rows
+. . exported "HH"."EXPENSES":"SYS_P797"                   96.5 KB     922 rows
+. . exported "HH"."EXPENSES":"SYS_P806"                   97.2 KB     929 rows
+. . exported "HH"."EXPENSES":"SYS_P787"                   96.3 KB     918 rows
+. . exported "HH"."EXPENSES":"SYS_P795"                   96.5 KB     918 rows
+. . exported "HH"."EXPENSES":"SYS_P798"                   97.1 KB     926 rows
+. . exported "HH"."EXPENSES":"SYS_P793"                   96.1 KB     915 rows
+. . exported "HH"."EXPENSES":"SYS_P803"                   95.9 KB     915 rows
+. . exported "HH"."EXPENSES":"SYS_P802"                     96 KB     914 rows
+. . exported "HH"."EXPENSES":"SYS_P794"                   95.7 KB     911 rows
+. . exported "HH"."EXPENSES":"SYS_P785"                   95.6 KB     910 rows
+. . exported "HH"."EXPENSES_ARCHIVE_STAGE"                   0 KB       0 rows
+. . exported "HH"."EXPENSES":"SYS_P792"                   94.5 KB     897 rows
+. . exported "HH"."EXPENSES":"SYS_P804"                   94.1 KB     894 rows
+. . exported "HH"."EXPENSES":"SYS_P807"                   93.5 KB     885 rows
+. . exported "HH"."EXPENSES":"SYS_P788"                   92.2 KB     871 rows
+. . exported "HH"."EXPENSES":"SYS_P800"                   91.2 KB     862 rows
+. . exported "HH"."FOOD_ENTRIES":"SYS_P854"              104.9 KB     876 rows
+. . exported "HH"."CHORES"                                39.7 KB     320 rows
+. . exported "HH"."CHORE_COMPLETIONS":"SYS_P900"          29.6 KB     229 rows
+. . exported "HH"."EXPENSES":"SYS_P808"                   26.1 KB     178 rows
+. . exported "HH"."RECURRING_BILLS"                       19.7 KB     160 rows
+. . exported "HH"."ROOMS"                                 16.5 KB     160 rows
+. . exported "HH"."USERS"                                 10.1 KB      80 rows
+. . exported "HH"."HOUSEHOLD_USERS"                        9.2 KB      80 rows
+. . exported "HH"."HOUSEHOLDS"                             8.6 KB      40 rows
+. . exported "HH"."CHORE_COMPLETIONS":"P_START"              0 KB       0 rows
+. . exported "HH"."EXPENSES":"P_START"                       0 KB       0 rows
+. . exported "HH"."EXPENSES_ARCHIVE"                         2 MB   19441 rows
+. . exported "HH"."FOOD_ENTRIES":"P_START"                   0 KB       0 rows
+Master table "SYSTEM"."SYS_EXPORT_SCHEMA_01" successfully loaded/unloaded
+******************************************************************************
+Dump file set for SYSTEM.SYS_EXPORT_SCHEMA_01 is:
+  /opt/oracle/admin/FREE/dpdump/5A4CDD399CF90FFBE0632600010A057A/hh.dmp
+Job "SYSTEM"."SYS_EXPORT_SCHEMA_01" successfully completed at Sun Oct 4 09:35:18 2026 elapsed 0 00:00:36
+
