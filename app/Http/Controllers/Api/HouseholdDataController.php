@@ -16,6 +16,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 /**
  * CRUD for one kind of household row, under /api/households/{household}/….
@@ -50,17 +51,28 @@ abstract class HouseholdDataController extends Controller
     {
         Gate::authorize('viewAny', [$this->model, $household]);
 
+        $sortable = $this->sortable();
         $filters = $request->validate([
             'from' => ['nullable', 'date_format:Y-m-d'],
             'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'],
+            'updated_since' => ['nullable', 'date'],
+            'sort' => ['nullable', 'string', Rule::in([...$sortable, ...array_map(fn ($c) => "-$c", $sortable)])],
+            'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'between:1,100'],
         ]);
+
+        // ?sort=amount is ascending, ?sort=-amount descending; the default is
+        // newest first for dated modules, otherwise $orderBy
+        $sort = $filters['sort'] ?? ($this->dateColumn ? "-{$this->dateColumn}" : $this->orderBy);
+        $sortColumn = ltrim($sort, '-');
 
         $rows = $this->query($household)
             ->when($this->dateColumn && isset($filters['from']), fn (Builder $q) => $q->where($this->dateColumn, '>=', $filters['from']))
             // Before the next day, so it works for DATE and TIMESTAMP columns and can use the index
             ->when($this->dateColumn && isset($filters['to']), fn (Builder $q) => $q->where($this->dateColumn, '<', Carbon::parse($filters['to'])->addDay()->toDateString()))
-            ->when($this->dateColumn, fn (Builder $q) => $q->orderByDesc($this->dateColumn), fn (Builder $q) => $q->orderBy($this->orderBy))
+            ->when(isset($filters['updated_since']), fn (Builder $q) => $q->where('updated_at', '>=', Carbon::parse($filters['updated_since'])->utc()))
+            ->orderBy($sortColumn, str_starts_with($sort, '-') ? 'desc' : 'asc')
+            // A unique tie-breaker keeps pages stable when many rows share a value
             ->orderBy('id')
             ->paginate($filters['per_page'] ?? 25)
             ->withQueryString();
@@ -112,6 +124,22 @@ abstract class HouseholdDataController extends Controller
 
         return response()->noContent();
     }
+
+    /**
+     * Columns a list can be sorted by: the date column, the default order
+     * column, the timestamps and any module-specific extras.
+     *
+     * @return list<string>
+     */
+    protected function sortable(): array
+    {
+        return array_values(array_unique(array_filter([
+            $this->dateColumn, $this->orderBy, 'created_at', 'updated_at', ...$this->extraSortable,
+        ])));
+    }
+
+    /** More sortable columns for one module, e.g. ['amount'] */
+    protected array $extraSortable = [];
 
     /**
      * @return HasMany<Model, Household>

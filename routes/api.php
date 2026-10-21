@@ -29,9 +29,10 @@ use App\Http\Controllers\Api\WorkoutController;
 use Illuminate\Support\Facades\Route;
 
 Route::name('api.')->group(function () {
-    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:6,1')->name('login');
+    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:api-login')->name('login');
 
-    Route::middleware('auth:sanctum')->group(function () {
+    // Limits: app/Providers/AppServiceProvider.php::configureRateLimits()
+    Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('me', [AuthController::class, 'me'])->name('me');
         Route::post('devices', [DeviceController::class, 'store'])->name('devices.store');
@@ -41,7 +42,7 @@ Route::name('api.')->group(function () {
         Route::post('households', [HouseholdController::class, 'store'])->name('households.store');
         Route::get('households/{household}', [HouseholdController::class, 'show'])->name('households.show');
         Route::get('households/{household}/members', [HouseholdController::class, 'members'])->name('households.members');
-        Route::post('households/{household}/invites', [InviteController::class, 'store'])->name('invites.store');
+        Route::post('households/{household}/invites', [InviteController::class, 'store'])->middleware('throttle:invites')->name('invites.store');
         Route::post('invites/{invite}/accept', [InviteController::class, 'accept'])->middleware('signed')->name('invites.accept');
 
         // Each module's rows, always inside one household
@@ -69,7 +70,7 @@ Route::name('api.')->group(function () {
                 'admin-items' => AdminItemController::class,
             ]);
 
-            Route::post('sync', SyncController::class)->middleware('throttle:60,1')->name('sync');
+            Route::post('sync', SyncController::class)->middleware('throttle:sync')->name('sync');
 
             Route::prefix('insights')->name('insights.')->controller(InsightController::class)->group(function () {
                 Route::get('weekly-spending', 'weeklySpending')->name('weekly-spending');

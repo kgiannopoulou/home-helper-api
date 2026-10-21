@@ -15,4 +15,6 @@ class InventoryItemController extends HouseholdDataController
     protected string $request = InventoryItemRequest::class;
 
     protected ?string $dateColumn = 'expires_on';
+
+    protected array $extraSortable = ['name'];
 }

@@ -17,4 +17,6 @@ class ExpenseController extends HouseholdDataController
     protected ?string $dateColumn = 'date';
 
     protected ?string $creatorColumn = 'user_id';
+
+    protected array $extraSortable = ['amount'];
 }

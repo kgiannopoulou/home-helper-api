@@ -15,4 +15,6 @@ class ShoppingItemController extends HouseholdDataController
     protected string $request = ShoppingItemRequest::class;
 
     protected ?string $creatorColumn = 'added_by';
+
+    protected array $extraSortable = ['name'];
 }
