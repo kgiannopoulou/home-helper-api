@@ -81,6 +81,14 @@ jobs:
       - name: PHP tests (Pest)
         run: php artisan test
 
+      # The OpenAPI document and the ER diagrams are generated from the code
+      # and committed; regenerate them and fail if they changed
+      - name: Generated docs are up to date
+        run: |
+          php artisan scramble:export
+          php artisan docs:schema
+          git diff --exit-code -- docs/openapi.json docs/database.md
+
       - name: Type check
         run: npm run types:check
 
