@@ -95,3 +95,7 @@ curl -s localhost:8000/api/households -H "Authorization: Bearer $TOKEN" | jq
 ## Stack
 
 Laravel 13 · PHP 8.4 · Pest · MySQL 8.4 · Redis · Inertia + React 19 + TypeScript · Recharts · Vitest · Scramble (OpenAPI) · Docker · GitHub Actions · Oracle AI Database 26ai Free (lab). Phone app: [personal-home-helper](https://github.com/kgiannopoulou/personal-home-helper) (Expo, React Native).
+
+## License
+
+[MIT](LICENSE) © 2026 kgiannopoulou
