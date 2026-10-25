@@ -14,7 +14,9 @@ POST /api/households/{household}/sync
 → { "since": "…", "changes": { "chores": [ … ] }, "remapped": { "rooms": { "phone-id": "server-id" } }, "rejected": [ … ] }
 ```
 
-The 18 synced collections are `recurring_bills`, `expenses`, `shopping_trips`, `shopping_items`, `inventory_items` (with their purchase days), `rooms`, `chores`, `chore_completions`, `supplies`, `events`, `todos`, `admin_items`, and, only your own, `food_entries`, `water_entries`, `sleep_entries`, `workouts`, `step_counts`, `weights`.
+The 20 synced collections are `recurring_bills`, `expenses`, `shopping_trips`, `shopping_items`, `inventory_items` (with their purchase days), `rooms`, `chores`, `chore_completions`, `plants`, `plant_care_logs`, `supplies`, `events`, `todos`, `admin_items`, and, only your own, `food_entries`, `water_entries`, `sleep_entries`, `workouts`, `step_counts`, `weights`.
+
+**Plant care** syncs events, not timestamps: two phones that water the Monstera offline both send a `plant_care_logs` row, and the server sets the plant's `last_watered_at` and `next_watering_at` from the latest one, whichever arrives first ([plants.md](plants.md)).
 
 **Steps** are kept on the phone as `{ "2026-10-04": 8123 }`, without ids. A day's id is made from the person and the day (`StepCount::idFor()` here, `stepsId()` on the phone: a ULID whose time is midnight UTC of the day and whose random part is the user id), so every phone of that person makes the same id and a day is never stored twice. Only finished days sync; today's count changes with every few steps.
 

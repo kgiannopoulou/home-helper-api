@@ -26,9 +26,15 @@ GET|PUT|PATCH|DELETE /api/households/{household}/{module}/{id}
 
 POST /api/households/{household}/sync                       phone sync, see sync.md
 GET  /api/households/{household}/insights/{weekly-spending|run-out|slipping-chores|shopping-day|budget-forecast}
+
+PATCH /api/households/{household}          {name, currency, latitude, longitude}   owner only
+POST /api/households/{household}/plants/{plant}/{water|fertilize|repot|prune|mist|move|inspect}
+GET  /api/households/{household}/plants/{plant}/care-history
+GET  /api/households/{household}/plant-alerts               POST …/plant-alerts/{id}/resolve
+GET  /api/households/{household}/plant-care/{today|plan}    see plants.md
 ```
 
-**Modules:** `expenses`, `recurring-bills`, `budgets`, `inventory-items`, `purchases`, `shopping-items`, `shopping-trips`, `item-prices`, `rooms`, `chores`, `chore-completions`, `supplies`, `food-entries`, `water-entries`, `sleep-entries`, `workouts`, `weights`, `events`, `todos`, `admin-items`.
+**Modules:** `expenses`, `recurring-bills`, `budgets`, `inventory-items`, `purchases`, `shopping-items`, `shopping-trips`, `item-prices`, `rooms`, `chores`, `chore-completions`, `supplies`, `food-entries`, `water-entries`, `sleep-entries`, `workouts`, `weights`, `events`, `todos`, `admin-items`, `plants`, `plant-care-logs`.
 
 ```bash
 TOKEN=$(curl -s -X POST localhost:8000/api/login -H 'Accept: application/json' \

@@ -34,4 +34,12 @@ class Room extends Model
     {
         return $this->hasMany(Chore::class);
     }
+
+    /**
+     * @return HasMany<Plant, $this>
+     */
+    public function plants(): HasMany
+    {
+        return $this->hasMany(Plant::class);
+    }
 }

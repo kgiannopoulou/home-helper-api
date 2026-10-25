@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\PlantCareType;
 use App\Http\Controllers\Api\AdminItemController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BudgetController;
@@ -14,6 +15,10 @@ use App\Http\Controllers\Api\InsightController;
 use App\Http\Controllers\Api\InventoryItemController;
 use App\Http\Controllers\Api\InviteController;
 use App\Http\Controllers\Api\ItemPriceController;
+use App\Http\Controllers\Api\PlantAlertController;
+use App\Http\Controllers\Api\PlantCareController;
+use App\Http\Controllers\Api\PlantCareLogController;
+use App\Http\Controllers\Api\PlantController;
 use App\Http\Controllers\Api\PurchaseController;
 use App\Http\Controllers\Api\RecurringBillController;
 use App\Http\Controllers\Api\RoomController;
@@ -41,6 +46,7 @@ Route::name('api.')->group(function () {
         Route::get('households', [HouseholdController::class, 'index'])->name('households.index');
         Route::post('households', [HouseholdController::class, 'store'])->name('households.store');
         Route::get('households/{household}', [HouseholdController::class, 'show'])->name('households.show');
+        Route::patch('households/{household}', [HouseholdController::class, 'update'])->name('households.update');
         Route::get('households/{household}/members', [HouseholdController::class, 'members'])->name('households.members');
         Route::post('households/{household}/invites', [InviteController::class, 'store'])->middleware('throttle:invites')->name('invites.store');
         Route::post('invites/{invite}/accept', [InviteController::class, 'accept'])->middleware('signed')->name('invites.accept');
@@ -68,7 +74,23 @@ Route::name('api.')->group(function () {
                 'events' => EventController::class,
                 'todos' => TodoController::class,
                 'admin-items' => AdminItemController::class,
+                'plants' => PlantController::class,
+                'plant-care-logs' => PlantCareLogController::class,
             ]);
+
+            // Plant care: one action per kind of care, POST …/plants/{plant}/water {amount_ml, performed_at}
+            foreach (PlantCareType::cases() as $care) {
+                Route::post("plants/{plant}/{$care->verb()}", [PlantCareLogController::class, 'record'])
+                    ->defaults('type', $care->value)
+                    ->name("plants.{$care->verb()}");
+            }
+            Route::get('plants/{plant}/care-history', [PlantCareLogController::class, 'history'])->name('plants.care-history');
+            Route::get('plant-alerts', [PlantAlertController::class, 'index'])->name('plant-alerts.index');
+            Route::post('plant-alerts/{plantAlert}/resolve', [PlantAlertController::class, 'resolve'])->name('plant-alerts.resolve');
+            Route::prefix('plant-care')->name('plant-care.')->controller(PlantCareController::class)->group(function () {
+                Route::get('today', 'today')->name('today');
+                Route::get('plan', 'plan')->name('plan');
+            });
 
             Route::post('sync', SyncController::class)->middleware('throttle:sync')->name('sync');
 

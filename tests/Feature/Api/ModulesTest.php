@@ -10,6 +10,8 @@ use App\Models\FoodEntry;
 use App\Models\Household;
 use App\Models\InventoryItem;
 use App\Models\ItemPrice;
+use App\Models\Plant;
+use App\Models\PlantCareLog;
 use App\Models\Purchase;
 use App\Models\RecurringBill;
 use App\Models\Room;
@@ -112,6 +114,14 @@ dataset('modules', [
         fn (Household $h) => AdminItem::factory()->for($h)->create(),
         fn (Household $h) => ['title' => 'Car insurance', 'kind' => 'renewal', 'due_on' => '2026-11-01', 'repeat_months' => 12],
         [['kind' => 'tax'], 'kind'], ['amount' => 310]],
+    'plants' => ['plants',
+        fn (Household $h) => Plant::factory()->for($h)->create(),
+        fn (Household $h) => ['name' => 'Monstera', 'location_type' => 'indoor', 'watering_interval_days' => 7, 'water_amount_ml' => 350],
+        [['location_type' => 'garden'], 'location_type'], ['water_amount_ml' => 400]],
+    'plant care logs' => ['plant-care-logs',
+        fn (Household $h, User $u) => PlantCareLog::factory()->for($h)->for(Plant::factory()->for($h))->create(['user_id' => $u->id]),
+        fn (Household $h) => ['plant_id' => Plant::factory()->for($h)->create()->id, 'type' => 'watered', 'amount_ml' => 300, 'performed_at' => '2026-10-14T08:00:00+03:00'],
+        [['type' => 'sung_to'], 'type'], ['amount_ml' => 250]],
 ]);
 
 beforeEach(function () {

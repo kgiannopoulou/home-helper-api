@@ -35,6 +35,11 @@ return [
         'access_token' => env('EXPO_ACCESS_TOKEN'),
     ],
 
+    // Weather for plant care: free, no key (https://open-meteo.com)
+    'open_meteo' => [
+        'url' => env('OPEN_METEO_URL', 'https://api.open-meteo.com/v1/forecast'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

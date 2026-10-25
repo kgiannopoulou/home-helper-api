@@ -24,6 +24,7 @@ class SchemaDiagram extends Command
         'Money' => ['recurring_bills', 'expenses', 'budgets'],
         'Shopping and kitchen' => ['shopping_trips', 'shopping_items', 'item_prices', 'inventory_items', 'purchases'],
         'Chores' => ['rooms', 'chores', 'chore_completions', 'supplies'],
+        'Plant care' => ['plants', 'plant_care_logs', 'plant_alerts'],
         'Health logs' => ['food_entries', 'water_entries', 'sleep_entries', 'workouts', 'weights', 'step_counts'],
         'Planner and life admin' => ['events', 'todos', 'admin_items'],
     ];

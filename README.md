@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/kgiannopoulou/home-helper-api/actions/workflows/tests.yml/badge.svg)](https://github.com/kgiannopoulou/home-helper-api/actions/workflows/tests.yml)
 
-**The shared household server for [Personal Home Helper](https://github.com/kgiannopoulou/personal-home-helper)**, an offline-first Expo app for money, kitchen, shopping, chores, health and planning. This Laravel app gives a household one shared copy of its data: a REST + sync API for the phones, scheduled jobs that push to them, and a React dashboard, all on MySQL. An Oracle lab runs the same data through partitioning, backup and recovery.
+**The shared household server for [Personal Home Helper](https://github.com/kgiannopoulou/personal-home-helper)**, an offline-first Expo app for money, kitchen, shopping, chores, plants, health and planning. This Laravel app gives a household one shared copy of its data: a REST + sync API for the phones, scheduled jobs that push to them, and a React dashboard, all on MySQL. An Oracle lab runs the same data through partitioning, backup and recovery.
 
 ![Adding yoghurt on the phone and seeing it on the web dashboard](docs/demo/phone-to-web.gif)
 
@@ -12,8 +12,9 @@
 
 | | |
 |---|---|
-| **PHP, Laravel 13** | REST + sync API with Sanctum, policies and Form Requests. [OpenAPI document](docs/openapi.json) generated from the code. Queued jobs on Redis, the scheduler and Expo push. **294 Pest tests on real MySQL**, including a sweep that proves every route needs a token and refuses non-members |
-| **MySQL 8.4** | 28 normalized tables with foreign keys, CHECK constraints, generated columns and soft-delete-safe unique keys ([ER diagrams](docs/database.md)). Window functions, CTEs, a view, and `EXPLAIN ANALYZE` before/after: [1,400× faster](docs/insights.md) |
+| **PHP, Laravel 13** | REST + sync API with Sanctum, policies and Form Requests. [OpenAPI document](docs/openapi.json) generated from the code. Queued jobs on Redis, the scheduler and Expo push. **359 Pest tests on real MySQL**, including a sweep that proves every route needs a token and refuses non-members |
+| **Plant care** | Plants, care logs and alerts. An hourly job reads one cached weather forecast per household (behind a `WeatherProvider` interface, Open-Meteo) and pushes watering, frost, heat, rain and wind reminders, without ever sending the same one twice ([plant care](docs/plants.md)) |
+| **MySQL 8.4** | 31 normalized tables with foreign keys, CHECK constraints, generated columns and soft-delete-safe unique keys ([ER diagrams](docs/database.md)). Window functions, CTEs, a view, and `EXPLAIN ANALYZE` before/after: [1,400× faster](docs/insights.md) |
 | **React** | Inertia + React + TypeScript dashboard with Recharts and a week planner ([dashboard](docs/dashboard.md)). Vitest + React Testing Library |
 | **Oracle basics** | Interval partitions, ARCHIVELOG, `EXCHANGE PARTITION` archiving, RMAN level 0/1, Data Pump and four timed recovery drills ([runbook](ops/oracle/RUNBOOK.md)) |
 | **API hygiene** | One error format with codes and request ids, per-user rate limits, consistent paging/sorting/filtering ([API reference](docs/api.md)) |
@@ -36,6 +37,7 @@ flowchart LR
     mysql[("MySQL 8.4")]
     redis[("Redis queue")]
     expo["Expo Push"]
+    weather["Open-Meteo<br/>forecast"]
     oracle[("Oracle Free lab")]
 
     phone -- "POST …/sync" --> api
@@ -47,6 +49,7 @@ flowchart LR
     redis --> jobs
     jobs --> mysql
     jobs -- "push" --> expo --> phone
+    jobs -. "plant care" .-> weather
     mysql -. "CSV, SQL*Loader" .-> oracle
 ```
 
@@ -64,7 +67,7 @@ Sail, Windows notes, queue workers and tests: [docs/development.md](docs/develop
 
 ### Demo accounts
 
-`DemoSeeder` builds one household ("Patission 12") with six months of data up to today, from a fixed random seed: weekly shops with creeping prices, rent and bills, one month over budget, a chore that keeps slipping, and health logs.
+`DemoSeeder` builds one household ("Patission 12") with six months of data up to today, from a fixed random seed: weekly shops with creeping prices, rent and bills, one month over budget, a chore that keeps slipping, health logs, and six plants (one due today, one late, two on the balcony).
 
 | Email | Password | Role |
 |---|---|---|
@@ -87,7 +90,8 @@ curl -s localhost:8000/api/households -H "Authorization: Bearer $TOKEN" | jq
 | [Database design](docs/database-design.md) | Households and personal data, ULIDs, soft-delete-safe unique keys, CHECK constraints |
 | [Sync between phones](docs/sync.md) | Last write wins, tombstones, natural keys, a server-clock cursor |
 | [Insights in SQL](docs/insights.md) | Window functions and CTEs, with `EXPLAIN ANALYZE` before and after |
-| [Scheduled jobs and push](docs/jobs.md) | Shopping list, bills, budget alerts, weekly summary |
+| [Scheduled jobs and push](docs/jobs.md) | Shopping list, bills, budget alerts, weekly summary, plant care |
+| [Plant care](docs/plants.md) | Plants, care logs, weather-aware alerts, the today and away-plan endpoints |
 | [Web dashboard](docs/dashboard.md) | Inertia pages, charts and the week planner |
 | [Oracle lab](docs/oracle.md) | Partitioning, archiving, RMAN, Data Pump and recovery drills |
 | [Development](docs/development.md) | Running it, the test suite, generated docs |

@@ -52,6 +52,29 @@ class HouseholdController extends Controller
         return new HouseholdResource($request->user()->households()->find($household->id));
     }
 
+    /**
+     * Rename the household, or set where it is (for plant care's weather). Owner only.
+     */
+    public function update(Request $request, Household $household): HouseholdResource
+    {
+        Gate::authorize('update', $household);
+
+        $data = $request->validate([
+            'name' => ['sometimes', 'required', 'string', 'max:100'],
+            'currency' => ['sometimes', 'required', 'string', 'size:3', 'alpha'],
+            // Both or neither; null clears the location
+            'latitude' => ['nullable', 'required_with:longitude', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'required_with:latitude', 'numeric', 'between:-180,180'],
+        ]);
+        if (isset($data['currency'])) {
+            $data['currency'] = strtoupper($data['currency']);
+        }
+
+        $household->update($data);
+
+        return new HouseholdResource($request->user()->households()->find($household->id));
+    }
+
     public function members(Household $household): AnonymousResourceCollection
     {
         Gate::authorize('view', $household);

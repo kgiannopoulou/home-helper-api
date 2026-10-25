@@ -10,6 +10,7 @@ use App\Enums\StockLevel;
 use App\Enums\SupplyLevel;
 use App\Jobs\ApplyRecurringBills;
 use App\Jobs\BudgetAlert;
+use App\Jobs\CheckPlantCare;
 use App\Jobs\HouseholdJob;
 use App\Jobs\LearnChoreFrequencies;
 use App\Jobs\PrepareShoppingList;
@@ -87,6 +88,7 @@ describe('scheduling and fan-out', function () {
             PrepareShoppingList::class => ['0 17 * * *', 'Europe/Athens'],
             BudgetAlert::class => ['0 18 * * *', 'Europe/Athens'],
             WeeklySummary::class => ['0 19 * * 0', 'Europe/Athens'],
+            CheckPlantCare::class => ['0 * * * *', 'Europe/Athens'],
         ]);
     });
 

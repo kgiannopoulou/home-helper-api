@@ -24,6 +24,10 @@ erDiagram
     users |o--o{ invites : "invited_by"
     shopping_trips |o--o{ item_prices : "shopping_trip_id"
     households ||--o{ job_runs : "household_id"
+    plants ||--o{ plant_alerts : "plant_id"
+    plants ||--o{ plant_care_logs : "plant_id"
+    users |o--o{ plant_care_logs : "user_id"
+    rooms |o--o{ plants : "room_id"
     inventory_items ||--o{ purchases : "inventory_item_id"
     shopping_trips |o--o{ purchases : "shopping_trip_id"
     users |o--o{ shopping_items : "added_by"
@@ -55,6 +59,8 @@ erDiagram
         char id PK
         varchar name
         char currency
+        decimal latitude "nullable"
+        decimal longitude "nullable"
     }
     household_user {
         bigint id PK
@@ -265,6 +271,68 @@ erDiagram
     rooms ||--o{ chores : "room_id"
     households ||--o{ rooms : "household_id"
     households ||--o{ supplies : "household_id"
+```
+
+## Plant care
+
+```mermaid
+erDiagram
+    plants {
+        char id PK
+        char household_id FK
+        char room_id FK "nullable"
+        varchar name
+        varchar species "nullable"
+        varchar nickname "nullable"
+        enum location_type
+        enum light_requirement "nullable"
+        smallint watering_interval_days
+        int water_amount_ml "nullable"
+        smallint fertilize_every_days "nullable"
+        smallint repot_every_months "nullable"
+        decimal minimum_temperature_c "nullable"
+        decimal maximum_temperature_c "nullable"
+        tinyint frost_sensitive
+        tinyint rain_sensitive
+        tinyint wind_sensitive
+        timestamp last_watered_at "nullable"
+        timestamp next_watering_at "nullable"
+        timestamp last_fertilized_at "nullable"
+        timestamp next_fertilizing_at "nullable"
+        timestamp last_repotted_at "nullable"
+        timestamp next_repotting_at "nullable"
+        text notes "nullable"
+    }
+    plant_care_logs {
+        char id PK
+        char household_id FK
+        char plant_id FK
+        bigint user_id FK "nullable"
+        enum type
+        int amount_ml "nullable"
+        varchar notes "nullable"
+        timestamp performed_at
+    }
+    plant_alerts {
+        char id PK
+        char household_id FK
+        char plant_id FK
+        enum type
+        enum severity
+        varchar title
+        varchar message
+        json metadata "nullable"
+        timestamp triggered_at
+        timestamp pushed_at "nullable"
+        timestamp resolved_at "nullable"
+    }
+    households ||--o{ plant_alerts : "household_id"
+    plants ||--o{ plant_alerts : "plant_id"
+    households ||--o{ plant_care_logs : "household_id"
+    plants ||--o{ plant_care_logs : "plant_id"
+    users |o--o{ plant_care_logs : "user_id"
+    households ||--o{ plants : "household_id"
+    rooms |o--o{ plants : "room_id"
 ```
 
 ## Health logs

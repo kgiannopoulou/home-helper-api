@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Weather\OpenMeteoWeatherProvider;
+use App\Weather\WeatherProvider;
 use Carbon\CarbonImmutable;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
@@ -22,7 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Plant care reads the weather through this interface (app/Weather)
+        $this->app->bind(WeatherProvider::class, OpenMeteoWeatherProvider::class);
     }
 
     /**

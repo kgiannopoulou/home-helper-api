@@ -2,6 +2,7 @@
 
 use App\Jobs\ApplyRecurringBills;
 use App\Jobs\BudgetAlert;
+use App\Jobs\CheckPlantCare;
 use App\Jobs\HouseholdJob;
 use App\Jobs\LearnChoreFrequencies;
 use App\Jobs\PrepareShoppingList;
@@ -27,6 +28,8 @@ Schedule::job(new LearnChoreFrequencies)->dailyAt('04:00')->timezone($home)->onO
 Schedule::job(new PrepareShoppingList)->dailyAt('17:00')->timezone($home)->onOneServer();
 Schedule::job(new BudgetAlert)->dailyAt('18:00')->timezone($home)->onOneServer();
 Schedule::job(new WeeklySummary)->sundays()->at('19:00')->timezone($home)->onOneServer();
+// One evaluator for every plant, not one schedule per plant (app/Jobs/CheckPlantCare.php)
+Schedule::job(new CheckPlantCare)->hourly()->timezone($home)->onOneServer();
 
 // Run one now, for every household: php artisan household:run PrepareShoppingList --date=2026-10-09
 Artisan::command('household:run {job} {--date= : "today" at home, YYYY-MM-DD}', function (string $job) {

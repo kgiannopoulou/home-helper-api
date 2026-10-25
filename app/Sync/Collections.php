@@ -35,6 +35,12 @@ final class Collections
                 naturalKey: ['room_id', 'name'], references: ['room_id' => 'rooms']),
             new SyncCollection('chore_completions', Models\ChoreCompletion::class, Api\ChoreCompletionRequest::class, Resources\ChoreCompletionResource::class,
                 creator: 'user_id', references: ['chore_id' => 'chores']),
+            // No natural key: two basils on two phones may well be two basils
+            new SyncCollection('plants', Models\Plant::class, Api\PlantRequest::class, Resources\PlantResource::class,
+                references: ['room_id' => 'rooms']),
+            // Care events, not "last watered": both phones' waterings arrive, and the plant's dates follow the latest
+            new SyncCollection('plant_care_logs', Models\PlantCareLog::class, Api\PlantCareLogRequest::class, Resources\PlantCareLogResource::class,
+                creator: 'user_id', references: ['plant_id' => 'plants']),
             new SyncCollection('supplies', Models\Supply::class, Api\SupplyRequest::class, Resources\SupplyResource::class,
                 naturalKey: ['name']),
             new SyncCollection('food_entries', Models\FoodEntry::class, Api\FoodEntryRequest::class, Resources\FoodEntryResource::class,

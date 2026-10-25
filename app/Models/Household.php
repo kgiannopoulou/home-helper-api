@@ -17,12 +17,28 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $id
  * @property string $name
  * @property string $currency
+ * @property float|null $latitude
+ * @property float|null $longitude
  */
-#[Fillable(['name', 'currency'])]
+#[Fillable(['name', 'currency', 'latitude', 'longitude'])]
 class Household extends Model
 {
     /** @use HasFactory<HouseholdFactory> */
     use HasFactory, HasUlids;
+
+    protected function casts(): array
+    {
+        return [
+            'latitude' => 'float',
+            'longitude' => 'float',
+        ];
+    }
+
+    /** Set where the home is, so plant care can read the weather */
+    public function hasLocation(): bool
+    {
+        return $this->latitude !== null && $this->longitude !== null;
+    }
 
     /**
      * @return BelongsToMany<User, $this, Membership, 'membership'>
@@ -171,6 +187,24 @@ class Household extends Model
     public function adminItems(): HasMany
     {
         return $this->hasMany(AdminItem::class);
+    }
+
+    /** @return HasMany<Plant, $this> */
+    public function plants(): HasMany
+    {
+        return $this->hasMany(Plant::class);
+    }
+
+    /** @return HasMany<PlantCareLog, $this> */
+    public function plantCareLogs(): HasMany
+    {
+        return $this->hasMany(PlantCareLog::class);
+    }
+
+    /** @return HasMany<PlantAlert, $this> */
+    public function plantAlerts(): HasMany
+    {
+        return $this->hasMany(PlantAlert::class);
     }
 
     /** @return HasMany<JobRun, $this> */

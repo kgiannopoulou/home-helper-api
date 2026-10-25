@@ -20,6 +20,8 @@ class HouseholdResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'currency' => $this->currency,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
             // The caller's role, when loaded through $user->households()
             'role' => $this->whenPivotLoadedAs('membership', 'household_user', fn () => $this->membership->role->value),
         ];

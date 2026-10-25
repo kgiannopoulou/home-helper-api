@@ -11,7 +11,10 @@ use App\Enums\FoodSource;
 use App\Enums\HouseholdRole;
 use App\Enums\Intensity;
 use App\Enums\ItemCategory;
+use App\Enums\LightRequirement;
 use App\Enums\Meal;
+use App\Enums\PlantCareType;
+use App\Enums\PlantLocation;
 use App\Enums\ShoppingSource;
 use App\Enums\StockLevel;
 use App\Enums\StorageLocation;
@@ -34,6 +37,7 @@ use Illuminate\Support\Facades\DB;
  * - one month over budget (the washing machine broke)
  * - "Clean the oven" set to every 14 days but done every 3–5 weeks
  * - food, water, sleep, workouts and a slowly falling weight for the owner
+ * - six plants with their waterings, one due today and one late
  *
  * The same random seed every time, so the numbers in the README stay true.
  */
@@ -66,6 +70,7 @@ class DemoSeeder extends Seeder
             $this->chores();
             $this->health();
             $this->planner();
+            $this->plants();
         });
     }
 
@@ -420,6 +425,67 @@ class DemoSeeder extends Seeder
             ['title' => 'Property tax (ENFIA) instalment', 'kind' => AdminKind::Bill, 'due_on' => $this->today->copy()->endOfMonth(), 'repeat_months' => 1, 'remind_days' => 5, 'amount' => 42.17],
             ['title' => 'Dentist check-up', 'kind' => AdminKind::Appointment, 'due_on' => $this->today->copy()->addDays(3), 'repeat_months' => 6, 'remind_days' => 3],
         ]);
+    }
+
+    /**
+     * Six plants with two months of care: the Monstera is due today, the Pothos is
+     * two days late, and two live on the balcony, in the weather.
+     */
+    private function plants(): void
+    {
+        // Patission, Athens: the forecast for the balcony plants
+        $this->home->update(['latitude' => 38.00, 'longitude' => 23.73]);
+        $room = fn (string $name) => $this->home->rooms()->where('name', $name)->value('id');
+
+        // name => [room, location, light, every days, ml, last watered (days ago), extra]
+        $plan = [
+            'Monstera' => ['Living room', PlantLocation::Indoor, LightRequirement::BrightIndirect, 7, 350, 7,
+                ['species' => 'Monstera deliciosa', 'fertilize_every_days' => 30, 'repot_every_months' => 18, 'minimum_temperature_c' => 12, 'maximum_temperature_c' => 32]],
+            'Pothos' => ['Kitchen', PlantLocation::Indoor, LightRequirement::Medium, 7, 250, 9, ['species' => 'Epipremnum aureum']],
+            'Snake plant' => ['Bedroom', PlantLocation::Indoor, LightRequirement::Low, 21, 200, 5, ['species' => 'Dracaena trifasciata']],
+            'Aloe' => ['Living room', PlantLocation::Indoor, LightRequirement::Direct, 14, 150, 10, ['species' => 'Aloe vera']],
+            'Basil' => [null, PlantLocation::Balcony, LightRequirement::Direct, 2, 150, 1,
+                ['species' => 'Ocimum basilicum', 'minimum_temperature_c' => 10, 'maximum_temperature_c' => 32, 'frost_sensitive' => true]],
+            'Lemon tree' => [null, PlantLocation::Balcony, LightRequirement::Direct, 4, 1500, 2,
+                ['species' => 'Citrus limon', 'nickname' => 'Lemonis', 'minimum_temperature_c' => 5, 'maximum_temperature_c' => 38,
+                    'frost_sensitive' => true, 'wind_sensitive' => true, 'repot_every_months' => 24]],
+        ];
+
+        foreach ($plan as $name => [$roomName, $location, $light, $every, $ml, $lastAgo, $extra]) {
+            $plant = $this->home->plants()->create([
+                'name' => $name,
+                'room_id' => $roomName ? $room($roomName) : null,
+                'location_type' => $location,
+                'light_requirement' => $light,
+                'watering_interval_days' => $every,
+                'water_amount_ml' => $ml,
+                ...$extra,
+            ]);
+            $who = fn () => mt_rand(0, 2) ? $this->owner : $this->partner;
+            $care = fn (PlantCareType $type, Carbon $at, ?int $amount = null, ?string $notes = null) => $this->home->plantCareLogs()->create([
+                'plant_id' => $plant->id, 'user_id' => $who()->id, 'type' => $type, 'amount_ml' => $amount, 'notes' => $notes,
+                'performed_at' => $at->copy()->setTime(mt_rand(8, 20), mt_rand(0, 59)),
+            ]);
+
+            // Waterings back to two months ago, around the schedule
+            for ($ago = $lastAgo; $ago <= 60; $ago += max(1, $every + mt_rand(-1, 1))) {
+                $care(PlantCareType::Watered, $this->today->copy()->subDays($ago), $ml + 10 * mt_rand(-3, 3));
+            }
+            if ($plant->fertilize_every_days) {
+                foreach ([5, 35] as $ago) {
+                    $care(PlantCareType::Fertilized, $this->today->copy()->subDays($ago));
+                }
+            }
+            $plant->refreshCareDates();
+        }
+
+        $monstera = $this->home->plants()->where('name', 'Monstera')->sole();
+        $this->home->plantCareLogs()->create(['plant_id' => $monstera->id, 'user_id' => $this->owner->id, 'type' => PlantCareType::Inspected,
+            'notes' => 'Yellowing on two lower leaves', 'performed_at' => $this->today->copy()->subDays(3)->setTime(9, 15)]);
+        $lemon = $this->home->plants()->where('name', 'Lemon tree')->sole();
+        $this->home->plantCareLogs()->create(['plant_id' => $lemon->id, 'user_id' => $this->partner->id, 'type' => PlantCareType::Repotted,
+            'notes' => 'Into the big terracotta pot', 'performed_at' => $this->today->copy()->subMonths(14)->setTime(11, 0)]);
+        $lemon->refreshCareDates();
     }
 
     private function spend(Carbon $day, User $who, ExpenseCategory $category, float $amount, string $note): void
