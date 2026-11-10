@@ -77,6 +77,30 @@ return [
     ],
 
     /*
+    | The assistant (docs/assistant.md). `provider`:
+    |   claude   Claude through the Anthropic API (needs ANTHROPIC_API_KEY)
+    |   offline  a keyword router with no model: answers the common questions
+    |            from the same tools, for local use without a key
+    | Every write the assistant proposes waits for the person to confirm it.
+    */
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'claude'),
+        'model' => env('AI_MODEL', 'claude-opus-5-5'),
+        // Thinking depth and token spend; household questions rarely need more
+        'effort' => env('AI_EFFORT', 'medium'),
+        'max_tokens' => (int) env('AI_MAX_TOKENS', 16000),
+        // Model → tools → model rounds in one reply, before it stops
+        'max_tool_rounds' => 8,
+        // A conversation longer than this has to start over (whole history is sent each turn)
+        'max_messages' => 200,
+        'confirmation_minutes' => 30,
+        // Messages a person may send per day, across all their conversations
+        'daily_messages' => (int) env('AI_DAILY_MESSAGES', 200),
+        // false: the assistant only reads, even with confirmation
+        'allow_writes' => (bool) env('AI_ALLOW_WRITES', true),
+    ],
+
+    /*
     | System health (/api/health, /system/health). The scheduler writes a
     | heartbeat every minute; older than this and it counts as stopped.
     */

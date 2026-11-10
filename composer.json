@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "anthropic-ai/sdk": "^1.7",
         "dedoc/scramble": "^0.13.49",
         "inertiajs/inertia-laravel": "^3.0",
         "laravel/chisel": "^0.1.0",
