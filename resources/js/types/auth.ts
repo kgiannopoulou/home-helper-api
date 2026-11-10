@@ -12,6 +12,9 @@ export type User = {
 
 export type Auth = {
     user: User;
+    can?: {
+        viewSystemHealth: boolean;
+    };
 };
 
 export type Passkey = {

@@ -50,7 +50,10 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Phone tokens: 90 days by default, then the app asks to log in again.
+    // Expired rows are deleted daily (sanctum:prune-expired in routes/console.php).
+    // Set SANCTUM_TOKEN_EXPIRATION= (empty) for tokens that never expire.
+    'expiration' => (int) env('SANCTUM_TOKEN_EXPIRATION', 60 * 24 * 90) ?: null,
 
     /*
     |--------------------------------------------------------------------------

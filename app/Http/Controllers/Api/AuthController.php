@@ -27,7 +27,11 @@ class AuthController extends Controller
 
         $user = User::where('email', $credentials['email'])->first();
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+        // Hash something even when there's no such account, so the answer takes
+        // as long either way and the timing doesn't tell which emails exist
+        $hash = $user->password ?? self::dummyHash();
+
+        if (! Hash::check($credentials['password'], $hash) || ! $user) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
@@ -39,6 +43,14 @@ class AuthController extends Controller
             'token' => $token->plainTextToken,
             'user' => new UserResource($user),
         ]);
+    }
+
+    /** A bcrypt hash at the configured cost, made once per process */
+    private static function dummyHash(): string
+    {
+        static $hash = null;
+
+        return $hash ??= Hash::make(bin2hex(random_bytes(16)));
     }
 
     public function logout(Request $request): Response

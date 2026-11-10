@@ -3,6 +3,8 @@
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\SecurityHeaders;
+use App\Ops\Alerts;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Application;
@@ -11,6 +13,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -33,8 +36,35 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             AssignRequestId::class,
         ]);
+
+        // nosniff, frame-ancestors, referrer policy, HSTS over HTTPS (docs/security.md)
+        $middleware->append(SecurityHeaders::class);
+
+        // Behind a load balancer or reverse proxy, TRUSTED_PROXIES (config/trustedproxy.php)
+        // makes request()->ip() (rate limits) and https URLs come from X-Forwarded-*
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // The same exception from the same line is logged once per request, not in a loop
+        $exceptions->dontReportDuplicates();
+
+        // Who and where, on every reported exception (request_id comes from the Context)
+        $exceptions->context(fn () => app()->runningInConsole() ? [] : array_filter([
+            'user_id' => request()->user()?->getAuthIdentifier(),
+            'method' => request()->method(),
+            'route' => request()->route()?->getName(),
+            'path' => request()->path(),
+        ], fn ($v) => $v !== null));
+
+        // A server error (not a 4xx: those aren't reported) also raises an ops
+        // alert, at most once per cooldown for the same class and line
+        $exceptions->report(function (Throwable $e) {
+            Alerts::raise(
+                'exception:'.substr(sha1(get_class($e).$e->getFile().$e->getLine()), 0, 12),
+                class_basename($e).': '.Str::limit($e->getMessage(), 150),
+                ['file' => $e->getFile().':'.$e->getLine(), 'request_id' => Context::get('request_id')],
+            );
+        });
+
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
@@ -69,6 +99,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 404 => 'not_found',
                 405 => 'method_not_allowed',
                 409 => 'conflict',
+                413 => 'payload_too_large',
+                415 => 'unsupported_media_type',
                 419 => 'session_expired',
                 422 => 'validation_failed',
                 429 => 'too_many_requests',
@@ -82,6 +114,14 @@ return Application::configure(basePath: dirname(__DIR__))
             }
             if ($status === 429) {
                 $body['message'] = 'Too many requests. Try again in a moment.';
+            }
+            // With APP_DEBUG=false Laravel already says only "Server Error"; say
+            // what to do, and never the exception's own message
+            if ($status >= 500 && ! config('app.debug')) {
+                $body = [
+                    'message' => $status === 503 ? 'The server is down for maintenance. Try again shortly.' : 'Something went wrong on our side. It has been logged; quote the request_id if you report it.',
+                    'code' => $body['code'],
+                ];
             }
 
             $id = $request->attributes->get('request_id') ?? (string) Str::uuid();

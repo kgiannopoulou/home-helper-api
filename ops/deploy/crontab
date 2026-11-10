@@ -1,0 +1,4 @@
+# The scheduler: one line for www-data (crontab -u www-data ops/deploy/crontab).
+# Everything else (household jobs, backups, queue:monitor, pruning, the health
+# heartbeat) is in routes/console.php. `php artisan schedule:list` shows it all.
+* * * * * cd /var/www/home-helper && php artisan schedule:run >> /dev/null 2>&1

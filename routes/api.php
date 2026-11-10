@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\DeviceController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\FoodEntryController;
+use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\HouseholdController;
 use App\Http\Controllers\Api\InsightController;
 use App\Http\Controllers\Api\InventoryItemController;
@@ -35,6 +36,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::name('api.')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:api-login')->name('login');
+
+    // For an uptime monitor; details only with an admin's token (docs/operations.md)
+    Route::get('health', HealthController::class)->middleware('throttle:health')->name('health');
 
     // Limits: app/Providers/AppServiceProvider.php::configureRateLimits()
     Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {

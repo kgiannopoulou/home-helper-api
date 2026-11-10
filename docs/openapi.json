@@ -2443,6 +2443,28 @@
                 }
             }
         },
+        "/health": {
+            "get": {
+                "operationId": "health",
+                "summary": "System health",
+                "tags": [
+                    "Health"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
         "/households": {
             "get": {
                 "operationId": "households.index",

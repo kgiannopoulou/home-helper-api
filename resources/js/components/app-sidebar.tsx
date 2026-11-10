@@ -1,5 +1,6 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
+    Activity,
     CalendarCheck,
     FolderGit2,
     HeartPulse,
@@ -23,6 +24,7 @@ import {
 } from '@/components/ui/sidebar';
 import { chores, dashboard, health, planner, spending } from '@/routes';
 import { show as household } from '@/routes/household';
+import { health as systemHealth } from '@/routes/system';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -43,6 +45,14 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const items: NavItem[] = auth.can?.viewSystemHealth
+        ? [
+              ...mainNavItems,
+              { title: 'System health', href: systemHealth(), icon: Activity },
+          ]
+        : mainNavItems;
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -58,7 +68,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={items} />
             </SidebarContent>
 
             <SidebarFooter>

@@ -15,7 +15,7 @@ use Laravel\Sanctum\Sanctum;
  */
 
 /** Routes anyone may call */
-const PUBLIC_API_ROUTES = ['api.login'];
+const PUBLIC_API_ROUTES = ['api.login', 'api.health'];
 
 /**
  * @return list<array{string, string, string}> [name, method, uri]

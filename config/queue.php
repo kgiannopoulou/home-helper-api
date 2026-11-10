@@ -68,9 +68,14 @@ return [
             'driver' => 'redis',
             'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
             'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
-            'block_for' => null,
-            'after_commit' => false,
+            // Must be longer than the longest job's $timeout (HouseholdJob: 120 s),
+            // or Redis hands a job that is still running to a second worker
+            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 180),
+            // Wait 5 s for a job instead of polling Redis in a tight loop
+            'block_for' => 5,
+            // A job dispatched inside a transaction waits for the commit, so it
+            // never runs against rows that were rolled back
+            'after_commit' => true,
         ],
 
         'deferred' => [

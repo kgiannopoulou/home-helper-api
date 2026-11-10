@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Household;
 use App\Models\JobRun;
+use App\Ops\Alerts;
 use App\Support\HomeTime;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -38,7 +39,21 @@ abstract class HouseholdJob implements ShouldQueue
     final public function __construct(
         public ?Household $household = null,
         public ?string $date = null,
-    ) {}
+    ) {
+        // Their own queue, so a burst of fan-out (one job per household)
+        // doesn't hold up mail and other work on `default`
+        $this->onQueue(config('homehelper.queues.households'));
+    }
+
+    /** After the last try: tell an operator (once per job per cooldown, not per household) */
+    public function failed(?Throwable $e): void
+    {
+        Alerts::raise('job-failed:'.static::name(), static::name().' failed after '.$this->tries.' tries', [
+            'household_id' => $this->household?->id,
+            'date' => $this->date,
+            'error' => $e?->getMessage(),
+        ]);
+    }
 
     /**
      * Does the work for one household.

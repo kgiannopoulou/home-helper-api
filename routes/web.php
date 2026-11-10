@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\HealthController;
 use App\Http\Controllers\Web\HouseholdController;
 use App\Http\Controllers\Web\PlannerController;
 use App\Http\Controllers\Web\SpendingController;
+use App\Http\Controllers\Web\SystemHealthController;
 use App\Http\Middleware\EnsureHousehold;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('planner', [PlannerController::class, 'show'])->name('planner');
         Route::post('planner/apply', [PlannerController::class, 'apply'])->name('planner.apply');
     });
+
+    // Admins (OPS_ADMIN_EMAILS) only; works without a household
+    Route::get('system/health', SystemHealthController::class)->middleware('can:viewSystemHealth')->name('system.health');
 });
 
 require __DIR__.'/settings.php';

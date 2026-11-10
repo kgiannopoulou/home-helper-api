@@ -29,6 +29,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 /**
  * One household with 6 months of realistic data, ending today:
@@ -55,8 +56,16 @@ class DemoSeeder extends Seeder
 
     private Carbon $today;
 
+    /** The demo logins (password "password"); app:production-check fails if they exist */
+    public const DEMO_EMAILS = ['demo@homehelper.test', 'alex@homehelper.test'];
+
     public function run(): void
     {
+        // Two accounts with the password "password" must never reach a real server
+        if (app()->isProduction()) {
+            throw new RuntimeException('DemoSeeder refuses to run in production: it creates logins with the password "password".');
+        }
+
         mt_srand(2026);
         fake()->seed(2026);
 

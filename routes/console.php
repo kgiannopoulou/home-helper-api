@@ -7,8 +7,10 @@ use App\Jobs\HouseholdJob;
 use App\Jobs\LearnChoreFrequencies;
 use App\Jobs\PrepareShoppingList;
 use App\Jobs\WeeklySummary;
+use App\Ops\SystemHealth;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
@@ -30,6 +32,28 @@ Schedule::job(new BudgetAlert)->dailyAt('18:00')->timezone($home)->onOneServer()
 Schedule::job(new WeeklySummary)->sundays()->at('19:00')->timezone($home)->onOneServer();
 // One evaluator for every plant, not one schedule per plant (app/Jobs/CheckPlantCare.php)
 Schedule::job(new CheckPlantCare)->hourly()->timezone($home)->onOneServer();
+
+/*
+| Keeping it running (docs/operations.md). Times are at home too.
+*/
+// The health page counts the scheduler as stopped when this is older than 5 minutes
+Schedule::call(fn () => Cache::forever(SystemHealth::SCHEDULER_HEARTBEAT, now()->toIso8601String()))
+    ->everyMinute()->name('scheduler-heartbeat')->onOneServer();
+
+// QueueBusy (→ an ops alert) when a queue holds more than QUEUE_MAX_WAITING jobs
+Schedule::command('queue:monitor', [
+    implode(',', array_map(fn (string $q) => "redis:{$q}", (array) config('homehelper.queues.monitored'))),
+    '--max='.config('homehelper.queues.max_waiting'),
+])->everyMinute()->onOneServer();
+
+// Backups: every night, and a restore into a scratch database every Sunday after it.
+// Both raise an ops alert themselves when they fail.
+Schedule::command('db:backup')->dailyAt('03:00')->timezone($home)->onOneServer();
+Schedule::command('db:restore-test')->sundays()->at('03:30')->timezone($home)->onOneServer();
+
+// Housekeeping
+Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily()->onOneServer();
+Schedule::command('queue:prune-failed', ['--hours' => 24 * 14])->daily()->onOneServer();
 
 // Run one now, for every household: php artisan household:run PrepareShoppingList --date=2026-10-09
 Artisan::command('household:run {job} {--date= : "today" at home, YYYY-MM-DD}', function (string $job) {

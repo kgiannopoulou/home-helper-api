@@ -1,5 +1,6 @@
 <?php
 
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -70,6 +71,27 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'max_files' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
+        // One JSON object per line, for a log shipper (production: LOG_STACK=json).
+        // The Context (request_id, user_id, household_id) lands in "extra".
+        'json' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/laravel.json.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'formatter' => JsonFormatter::class,
+            'replace_placeholders' => true,
+        ],
+
+        // Alerts for whoever runs the server (App\Ops\Alerts), kept longer
+        'ops' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/ops.log'),
+            'level' => 'info',
+            'days' => 90,
+            'formatter' => JsonFormatter::class,
             'replace_placeholders' => true,
         ],
 
