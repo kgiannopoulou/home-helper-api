@@ -1,4 +1,7 @@
 includes:
+    # 285 errors that were there before this check ran in CI (2026-11-10); new code
+    # must pass without adding to it. Shrink it: fix some, then --generate-baseline.
+    - phpstan-baseline.neon
     - vendor/larastan/larastan/extension.neon
     - vendor/nesbot/carbon/extension.neon
 

@@ -1,0 +1,1363 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \#2 \$expiration of static method Illuminate\\Support\\Facades\\URL\:\:temporarySignedRoute\(\) expects DateInterval\|DateTimeInterface\|int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Actions/Households/InviteMember.php
+
+		-
+			message: '#^Parameter \#1 \$stream of function fputcsv expects resource, resource\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/OracleGenerate.php
+
+		-
+			message: '#^Parameter \#1 \$value of function count expects array\|Countable, list\<string\>\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/OracleGenerate.php
+
+		-
+			message: '#^Property App\\Console\\Commands\\OracleGenerate\:\:\$files \(array\<string, resource\>\) does not accept array\<string, bool\|resource\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Console/Commands/OracleGenerate.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$extra\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$key\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$nullable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$table\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SchemaDiagram\:\:attribute\(\) has parameter \$foreignKeys with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SchemaDiagram\:\:columns\(\) has parameter \$tables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SchemaDiagram\:\:columns\(\) should return Illuminate\\Support\\Collection\<string, Illuminate\\Support\\Collection\<int, object\>\> but returns Illuminate\\Support\\Collection\<\(int\|string\), Illuminate\\Support\\Collection\<int, mixed\>\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SchemaDiagram\:\:foreignKeys\(\) has parameter \$tables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SchemaDiagram\:\:relationships\(\) has parameter \$foreignKeys with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SchemaDiagram\:\:relationships\(\) has parameter \$tables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SchemaDiagram\:\:relationships\(\) should return list\<string\> but returns array\<int, non\-falsy\-string\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Console/Commands/SchemaDiagram.php
+
+		-
+			message: '#^Method App\\Enums\\AlertSeverity\:\:rank\(\) should return int but returns int\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Enums/AlertSeverity.php
+
+		-
+			message: '#^Instanceof between Laravel\\Sanctum\\PersonalAccessToken and Laravel\\Sanctum\\PersonalAccessToken will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: app/Http/Controllers/Api/DeviceController.php
+
+		-
+			message: '#^Property App\\Http\\Controllers\\Api\\ExpenseController\:\:\$extraSortable type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Api/ExpenseController.php
+
+		-
+			message: '#^Property App\\Http\\Controllers\\Api\\HouseholdDataController\:\:\$extraSortable type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Api/HouseholdDataController.php
+
+		-
+			message: '#^Property App\\Http\\Controllers\\Api\\InventoryItemController\:\:\$extraSortable type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Api/InventoryItemController.php
+
+		-
+			message: '#^Cannot call method isPast\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Api/InviteController.php
+
+		-
+			message: '#^Parameter \#2 \$role of method App\\Models\\Household\:\:addMember\(\) expects App\\Enums\\HouseholdRole, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Api/InviteController.php
+
+		-
+			message: '#^Only iterables can be unpacked, array\|string given\.$#'
+			identifier: arrayUnpacking.nonIterable
+			count: 1
+			path: app/Http/Controllers/Api/PlantAlertController.php
+
+		-
+			message: '#^Property App\\Http\\Controllers\\Api\\PlantController\:\:\$extraSortable type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Api/PlantController.php
+
+		-
+			message: '#^Property App\\Http\\Controllers\\Api\\ShoppingItemController\:\:\$extraSortable type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Api/ShoppingItemController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$membership\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Web/HouseholdController.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Web/HouseholdController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Invite\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/Web/HouseholdController.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Invite\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Http/Controllers/Web/HouseholdController.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Http/Controllers/Web/HouseholdController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Api\\HouseholdDataRequest\:\:household\(\) should return App\\Models\\Household but returns \(object\|string\|null\)\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Requests/Api/HouseholdDataRequest.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: app/Http/Requests/Api/HouseholdDataRequest.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Resources/AdminItemResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/AdminItemResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/AdminItemResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/AdminItemResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/AdminItemResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Resources/BudgetResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Resources/BudgetResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/BudgetResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/ChoreCompletionResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/ChoreCompletionResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/ChoreResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Resources/EventResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Resources/EventResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Resources/ExpenseResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/ExpenseResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Resources/ExpenseResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/ExpenseResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Resources/ExpenseResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Resources/FoodEntryResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/FoodEntryResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/FoodEntryResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 4
+			path: app/Http/Resources/FoodEntryResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Resources/FoodEntryResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Resources/FoodEntryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\HouseholdResource\:\:\$membership\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/HouseholdResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: app/Http/Resources/InventoryItemResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/InventoryItemResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Resources/InventoryItemResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Resources/InviteResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Resources/InviteResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/ItemPriceResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Resources/ItemPriceResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/ItemPriceResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\MemberResource\:\:\$membership\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/MemberResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/Http/Resources/PlantAlertResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/PlantAlertResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/PlantCareLogResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/PlantCareLogResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Resources/PlantResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/Http/Resources/PlantResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/PurchaseResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/PurchaseResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Resources/RecurringBillResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Resources/RecurringBillResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/RecurringBillResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Resources/ShoppingItemResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Resources/ShoppingItemResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Resources/ShoppingTripResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/ShoppingTripResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Resources/ShoppingTripResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/ShoppingTripResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/ShoppingTripResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/SleepEntryResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Resources/SleepEntryResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Resources/SleepEntryResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Resources/SleepEntryResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/StepCountResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/StepCountResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Resources/SupplyResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Resources/SupplyResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/TodoResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/TodoResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Resources/WaterEntryResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/WaterEntryResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/WaterEntryResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Resources/WaterEntryResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/WaterEntryResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/WeightResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Resources/WeightResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/WeightResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: app/Http/Resources/WorkoutResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/WorkoutResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/WorkoutResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Resources/WorkoutResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Jobs/ApplyRecurringBills.php
+
+		-
+			message: '#^Call to function in_array\(\) with arguments string, array\{App\\Enums\\StockLevel\:\:Empty, App\\Enums\\StockLevel\:\:Low\} and true will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Jobs/PrepareShoppingList.php
+
+		-
+			message: '#^Call to function in_array\(\) with arguments string, array\{App\\Enums\\SupplyLevel\:\:Low, App\\Enums\\SupplyLevel\:\:Out\} and true will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Jobs/PrepareShoppingList.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: app/Jobs/PrepareShoppingList.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between \*NEVER\* and App\\Enums\\SupplyLevel\:\:Out will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Jobs/PrepareShoppingList.php
+
+		-
+			message: '#^Parameter \#1 \$last of closure expects Carbon\\CarbonImmutable\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Models/Plant.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Plant\|Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\), App\\Models\\Plant\>\:\:refreshCareDates\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Models/PlantCareLog.php
+
+		-
+			message: '#^Cannot call method toFormattedDayDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Notifications/HouseholdInvite.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Notifications/HouseholdInvite.php
+
+		-
+			message: '#^Cannot call method copy\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Planning/WeekPlanner.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/Planning/WeekPlanner.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Planning/WeekPlanner.php
+
+		-
+			message: '#^Parameter \#1 \$names of static method App\\Planning\\WeekPlanner\:\:andList\(\) expects list\<string\>, array\<mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Planning/WeekPlanner.php
+
+		-
+			message: '#^Unable to resolve the template type TGroupKey in call to method Illuminate\\Support\\Collection\<int,App\\Models\\InventoryItem\>\:\:groupBy\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Planning/WeekPlanner.php
+
+		-
+			message: '#^Unable to resolve the template type TMapValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\InventoryItem\>\:\:map\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Planning/WeekPlanner.php
+
+		-
+			message: '#^Method App\\Plants\\PlantCareService\:\:plan\(\) should return list\<array\<string, mixed\>\> but returns array\<int, array\{plant_id\: string, name\: string, location_type\: ''balcony''\|''greenhouse''\|''indoor''\|''outdoor'', amount_ml\: int\<0, max\>\|null, check_weather\: bool, care\: array\<int, array\{type\: string, on\: string\}\>\}\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Plants/PlantCareService.php
+
+		-
+			message: '#^Parameter \#1 \$at of static method App\\Plants\\PlantCareService\:\:ago\(\) expects Carbon\\CarbonImmutable, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Plants/PlantCareService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$household_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Policies/HouseholdDataPolicy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Policies/PersonalDataPolicy.php
+
+		-
+			message: '#^Parameter \#1 \$messages of method App\\Push\\ExpoPush\:\:post\(\) expects list\<array\<string, mixed\>\>, array\<int, array\{to\: string, title\: string, body\: string, data\: stdClass, sound\: string, priority\: string\}\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Push/ExpoPush.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$average_month\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$bills\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$budget\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$day\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$days_in_month\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$forecast\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$months\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$over_budget\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$projected\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$usual_by_now\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/BudgetForecastQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$chores\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/FairShareQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$minutes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/FairShareQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/FairShareQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/FairShareQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$nights\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/HealthWeeksQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$sleep_hours\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/HealthWeeksQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$sleep_quality\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/HealthWeeksQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$steps\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/HealthWeeksQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$steps_per_day\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/HealthWeeksQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$week_start\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/HealthWeeksQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$workout_minutes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/HealthWeeksQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$workouts\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/HealthWeeksQuery.php
+
+		-
+			message: '#^Method App\\Queries\\InsightQuery\:\:rows\(\) should return list\<object\> but returns array\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Queries/InsightQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$fiber\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Queries/NutritionGapsQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$fiber_target\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Queries/NutritionGapsQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$kcal\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/NutritionGapsQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$logged_days\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Queries/NutritionGapsQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$protein\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Queries/NutritionGapsQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$protein_target\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Queries/NutritionGapsQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$water_days\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Queries/NutritionGapsQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$water_ml\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Queries/NutritionGapsQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$water_target\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Queries/NutritionGapsQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$days_overdue\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/OverdueChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$every_days\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/OverdueChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/OverdueChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$last_done\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/OverdueChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/OverdueChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$room\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/OverdueChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$days_left\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/RunOutQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$every_days\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/RunOutQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/RunOutQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$last_bought\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/RunOutQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$level\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/RunOutQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/RunOutQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$runs_out_on\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/RunOutQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$times_bought\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/RunOutQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Queries/ShoppingDayQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$next_on\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/ShoppingDayQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$share\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Queries/ShoppingDayQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$shops\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/ShoppingDayQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$weekday\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Queries/ShoppingDayQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$every_days\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/SlippingChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$gaps\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/SlippingChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/SlippingChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/SlippingChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$room\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/SlippingChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$suggested_every_days\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/SlippingChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$trend\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/SlippingChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$typical_days\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/SlippingChoresQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$category\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/WeeklySpendingQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$change_pct\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/WeeklySpendingQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$expenses\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/WeeklySpendingQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$previous_total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/WeeklySpendingQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/WeeklySpendingQuery.php
+
+		-
+			message: '#^Access to an undefined property object\:\:\$week_start\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Queries/WeeklySpendingQuery.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$deleted_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$household_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lastCompletion\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:withTrashed\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Method App\\Sync\\SyncService\:\:query\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Method App\\Sync\\SyncService\:\:sync\(\) should return array\{since\: string, changes\: array\<string, list\<array\<string, mixed\>\>\>, remapped\: array\<string, array\<string, string\>\>, rejected\: list\<array\<string, mixed\>\>\} but returns array\{since\: non\-falsy\-string, changes\: array\<string, list\<array\<string, mixed\>\>\>, remapped\: stdClass, rejected\: list\<array\{collection\: string, id\: string, reason\: string, errors\?\: array\<string, list\<string\>\>\}\>\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^PHPDoc tag @var for variable \$model contains unresolvable type\.$#'
+			identifier: varTag.unresolvableType
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Parameter \#4 \$errors of method App\\Sync\\SyncService\:\:reject\(\) expects array\<string, list\<string\>\>, array\<string, array\<string\>\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Property App\\Sync\\SyncService\:\:\$accepted type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Property App\\Sync\\SyncService\:\:\$rejected \(list\<array\{collection\: string, id\: string, reason\: string, errors\?\: array\<string, list\<string\>\>\}\>\) does not accept non\-empty\-list\<array\{collection\?\: string, id\?\: string, reason\?\: string, errors\?\: array\<string, list\<string\>\>\}\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Property App\\Sync\\SyncService\:\:\$remapped type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Property App\\Sync\\SyncService\:\:\$sendBack type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Unable to resolve the template type TMapValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Purchase\>\:\:map\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Sync/SyncService.php
+
+		-
+			message: '#^Parameter \#2 \$string of function explode expects string, bool\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: config/sanctum.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Chore\|Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\), App\\Models\\Chore\>\:\:\$household_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: database/factories/ChoreCompletionFactory.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Room\|Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\), App\\Models\\Room\>\:\:\$household_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: database/factories/ChoreFactory.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type DateTime\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: database/factories/InventoryItemFactory.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Plant\|Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\), App\\Models\\Plant\>\:\:\$household_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: database/factories/PlantCareLogFactory.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\InventoryItem\|Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\), App\\Models\\InventoryItem\>\:\:\$household_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: database/factories/PurchaseFactory.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type DateTime\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: database/factories/TodoFactory.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Console\\Command\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: database/seeders/BenchmarkSeeder.php
+
+		-
+			message: '#^Offset ''Bread''\|''Chicken breast''\|''Coffee''\|''Dish soap''\|''Eggs''\|''Feta''\|''Greek yoghurt''\|''Milk''\|''Olive oil''\|''Pasta''\|''Toilet paper''\|''Tomatoes'' might not exist on non\-empty\-array\{Milk\?\: App\\Models\\InventoryItem, Bread\?\: App\\Models\\InventoryItem, Eggs\?\: App\\Models\\InventoryItem, ''Greek yoghurt''\?\: App\\Models\\InventoryItem, Feta\?\: App\\Models\\InventoryItem, Tomatoes\?\: App\\Models\\InventoryItem, ''Olive oil''\?\: App\\Models\\InventoryItem, Coffee\?\: App\\Models\\InventoryItem, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: database/seeders/DemoSeeder.php
+
+		-
+			message: '#^Offset ''Coffee'' might not exist on non\-empty\-array\{Milk\?\: App\\Models\\InventoryItem, Bread\?\: App\\Models\\InventoryItem, Eggs\?\: App\\Models\\InventoryItem, ''Greek yoghurt''\?\: App\\Models\\InventoryItem, Feta\?\: App\\Models\\InventoryItem, Tomatoes\?\: App\\Models\\InventoryItem, ''Olive oil''\?\: App\\Models\\InventoryItem, Coffee\?\: App\\Models\\InventoryItem, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: database/seeders/DemoSeeder.php
+
+		-
+			message: '#^Offset ''Feta'' might not exist on non\-empty\-array\{Milk\?\: App\\Models\\InventoryItem, Bread\?\: App\\Models\\InventoryItem, Eggs\?\: App\\Models\\InventoryItem, ''Greek yoghurt''\?\: App\\Models\\InventoryItem, Feta\?\: App\\Models\\InventoryItem, Tomatoes\?\: App\\Models\\InventoryItem, ''Olive oil''\?\: App\\Models\\InventoryItem, Coffee\?\: App\\Models\\InventoryItem, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: database/seeders/DemoSeeder.php
+
+		-
+			message: '#^Offset ''Greek yoghurt'' might not exist on non\-empty\-array\{Milk\?\: App\\Models\\InventoryItem, Bread\?\: App\\Models\\InventoryItem, Eggs\?\: App\\Models\\InventoryItem, ''Greek yoghurt''\?\: App\\Models\\InventoryItem, Feta\?\: App\\Models\\InventoryItem, Tomatoes\?\: App\\Models\\InventoryItem, ''Olive oil''\?\: App\\Models\\InventoryItem, Coffee\?\: App\\Models\\InventoryItem, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: database/seeders/DemoSeeder.php
+
+		-
+			message: '#^Offset ''Milk'' might not exist on non\-empty\-array\{Milk\?\: App\\Models\\InventoryItem, Bread\?\: App\\Models\\InventoryItem, Eggs\?\: App\\Models\\InventoryItem, ''Greek yoghurt''\?\: App\\Models\\InventoryItem, Feta\?\: App\\Models\\InventoryItem, Tomatoes\?\: App\\Models\\InventoryItem, ''Olive oil''\?\: App\\Models\\InventoryItem, Coffee\?\: App\\Models\\InventoryItem, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: database/seeders/DemoSeeder.php
+
+		-
+			message: '#^Offset ''Olive oil'' might not exist on non\-empty\-array\{Milk\?\: App\\Models\\InventoryItem, Bread\?\: App\\Models\\InventoryItem, Eggs\?\: App\\Models\\InventoryItem, ''Greek yoghurt''\?\: App\\Models\\InventoryItem, Feta\?\: App\\Models\\InventoryItem, Tomatoes\?\: App\\Models\\InventoryItem, ''Olive oil''\?\: App\\Models\\InventoryItem, Coffee\?\: App\\Models\\InventoryItem, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: database/seeders/DemoSeeder.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: database/seeders/DemoSeeder.php

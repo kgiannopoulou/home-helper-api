@@ -9,9 +9,16 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same branch or pull request cancels the run it replaces
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # The required checks on main (docs/contributing.md): tests, static-analysis, dependency-audit
   tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     # The tests run on real MySQL, like locally: foreign keys, CHECK constraints,
     # generated columns, window functions and the EXPLAIN plans are MySQL 8 features.
@@ -28,6 +35,15 @@ jobs:
           --health-interval=5s
           --health-timeout=5s
           --health-retries=20
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
 
     env:
       DB_CONNECTION: mysql
@@ -36,6 +52,7 @@ jobs:
       DB_DATABASE: testing
       DB_USERNAME: root
       DB_PASSWORD: password
+      REDIS_HOST: 127.0.0.1
 
     steps:
       - name: Checkout code
@@ -78,8 +95,16 @@ jobs:
       - name: Build the dashboard
         run: npm run build
 
+      # tests/Feature/Ops/BackupTest.php uses the runner's real mysqldump and mysql clients
       - name: PHP tests (Pest)
         run: php artisan test
+
+      # The backup and restore drill on the migrated CI database, so its output is in the log
+      - name: Backup and restore drill
+        run: |
+          mysqldump --version
+          php artisan db:backup
+          php artisan db:restore-test
 
       # The OpenAPI document and the ER diagrams are generated from the code
       # and committed; regenerate them and fail if they changed
@@ -97,3 +122,57 @@ jobs:
         env:
           # Vitest starts a Vite dev server; laravel-vite-plugin refuses one in CI (it's meant to stop HMR there)
           LARAVEL_BYPASS_ENV_CHECK: 1
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: 8.4
+          extensions: pdo_mysql, bcmath
+          tools: composer:v2
+          coverage: none
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      # Level 7. phpstan-baseline.neon holds the errors from before this check
+      # existed; anything new fails the build
+      - name: PHPStan (Larastan)
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: 8.4
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      # Known vulnerabilities in what ships: PHP packages from composer.lock,
+      # and the JS that ends up in the built dashboard
+      - name: Composer audit
+        run: composer audit --locked --no-dev
+
+      - name: npm audit (production dependencies, high and critical)
+        run: npm audit --omit=dev --audit-level=high
