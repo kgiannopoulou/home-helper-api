@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * A phone that gets push notifications through Expo.
@@ -30,5 +31,15 @@ class Device extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The login this phone registered with; deleting it (logout) deletes the device.
+     *
+     * @return BelongsTo<PersonalAccessToken, $this>
+     */
+    public function accessToken(): BelongsTo
+    {
+        return $this->belongsTo(PersonalAccessToken::class, 'personal_access_token_id');
     }
 }

@@ -52,6 +52,16 @@ class Household extends Model
             ->withTimestamps();
     }
 
+    /**
+     * The household_user rows themselves, with their role.
+     *
+     * @return HasMany<Membership, $this>
+     */
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(Membership::class);
+    }
+
     public function addMember(User $user, HouseholdRole $role = HouseholdRole::Member): void
     {
         $this->users()->attach($user, ['role' => $role]);

@@ -9,6 +9,7 @@ use App\Models\Expense;
 use App\Models\Household;
 use App\Models\InventoryItem;
 use App\Models\Purchase;
+use App\Models\Room;
 use App\Models\SleepEntry;
 use App\Models\User;
 use Illuminate\Database\QueryException;
@@ -21,7 +22,7 @@ test('deleting a household deletes all of its data', function () {
     $other = Household::factory()->create();
     Expense::factory()->count(3)->for($home)->create();
     Purchase::factory()->for(InventoryItem::factory()->for($home))->for($home)->create();
-    ChoreCompletion::factory()->create(['chore_id' => Chore::factory()->for($home)->create()->id]);
+    ChoreCompletion::factory()->create(['chore_id' => Chore::factory()->for(Room::factory()->for($home))->create()->id]);
     Expense::factory()->for($other)->create();
 
     $home->delete();
@@ -104,7 +105,7 @@ test('latest purchase and last completion come from the child tables', function 
     foreach (['2026-09-05', '2026-09-26', '2026-09-12'] as $day) {
         Purchase::factory()->for($home)->for($milk)->create(['bought_on' => $day]);
     }
-    $oven = Chore::factory()->for($home)->create();
+    $oven = Chore::factory()->for(Room::factory()->for($home))->create();
     foreach (['2026-08-01 10:00', '2026-09-20 18:30'] as $at) {
         ChoreCompletion::factory()->for($home)->for($oven)->create(['done_at' => $at]);
     }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\HouseholdRole;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
@@ -24,5 +25,17 @@ class Membership extends Pivot
         return [
             'role' => HouseholdRole::class,
         ];
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /** @return BelongsTo<Household, $this> */
+    public function household(): BelongsTo
+    {
+        return $this->belongsTo(Household::class);
     }
 }

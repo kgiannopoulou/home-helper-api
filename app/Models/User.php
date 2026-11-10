@@ -72,6 +72,46 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->hasMany(Device::class);
     }
 
+    /**
+     * The household_user rows themselves, with their role.
+     *
+     * @return HasMany<Membership, $this>
+     */
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(Membership::class);
+    }
+
+    /**
+     * Chores this person is the assignee of, in any household.
+     *
+     * @return HasMany<Chore, $this>
+     */
+    public function assignedChores(): HasMany
+    {
+        return $this->hasMany(Chore::class, 'assignee_id');
+    }
+
+    /**
+     * Shopping items this person put on a list.
+     *
+     * @return HasMany<ShoppingItem, $this>
+     */
+    public function addedShoppingItems(): HasMany
+    {
+        return $this->hasMany(ShoppingItem::class, 'added_by');
+    }
+
+    /**
+     * Invites this person sent.
+     *
+     * @return HasMany<Invite, $this>
+     */
+    public function sentInvites(): HasMany
+    {
+        return $this->hasMany(Invite::class, 'invited_by');
+    }
+
     public function isMemberOf(Household|string $household): bool
     {
         return $this->roleIn($household) !== null;
