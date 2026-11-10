@@ -14,6 +14,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * A fixed monthly cost (rent, phone…), added as an expense each month.
+ *
+ * @property string $id
+ * @property string $household_id
+ * @property string $name
+ * @property string $amount
+ * @property ExpenseCategory $category
+ * @property int $day_of_month
+ * @property bool $active
  */
 #[Fillable(['name', 'amount', 'category', 'day_of_month', 'active'])]
 class RecurringBill extends Model

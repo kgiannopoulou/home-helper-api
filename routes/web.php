@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\ChoresController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\HealthController;
@@ -26,6 +27,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('chores', ChoresController::class)->name('chores');
         Route::get('planner', [PlannerController::class, 'show'])->name('planner');
         Route::post('planner/apply', [PlannerController::class, 'apply'])->name('planner.apply');
+
+        // The assistant (docs/assistant.md)
+        Route::controller(AssistantController::class)->prefix('assistant')->group(function () {
+            Route::get('/', 'show')->name('assistant');
+            Route::post('/', 'start')->middleware('throttle:ai')->name('assistant.start');
+            Route::post('actions/{action}/confirm', 'confirm')->name('assistant.actions.confirm');
+            Route::post('actions/{action}/decline', 'decline')->name('assistant.actions.decline');
+            Route::get('{conversation}', 'show')->name('assistant.show');
+            Route::post('{conversation}/messages', 'message')->middleware('throttle:ai')->name('assistant.message');
+            Route::delete('{conversation}', 'destroy')->name('assistant.destroy');
+        });
     });
 
     // Admins (OPS_ADMIN_EMAILS) only; works without a household

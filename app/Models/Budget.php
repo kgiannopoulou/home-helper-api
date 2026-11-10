@@ -14,6 +14,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * A spending limit per week or month, for everything (category null) or one category.
+ *
+ * @property string $id
+ * @property string $household_id
+ * @property BudgetPeriod $period
+ * @property ExpenseCategory|null $category
+ * @property string $amount
  */
 #[Fillable(['period', 'category', 'amount'])]
 class Budget extends Model

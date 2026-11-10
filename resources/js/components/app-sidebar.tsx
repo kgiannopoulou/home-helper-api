@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     Activity,
+    Bot,
     CalendarCheck,
     FolderGit2,
     HeartPulse,
@@ -22,13 +23,21 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { chores, dashboard, health, planner, spending } from '@/routes';
+import {
+    assistant,
+    chores,
+    dashboard,
+    health,
+    planner,
+    spending,
+} from '@/routes';
 import { show as household } from '@/routes/household';
 import { health as systemHealth } from '@/routes/system';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+    { title: 'Assistant', href: assistant(), icon: Bot },
     { title: 'Spending', href: spending(), icon: Wallet },
     { title: 'Health', href: health(), icon: HeartPulse },
     { title: 'Chores', href: chores(), icon: Sparkles },

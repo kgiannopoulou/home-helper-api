@@ -8,6 +8,10 @@ Every household table has a ULID `id`, `household_id`, millisecond `created_at`/
 
 ```mermaid
 erDiagram
+    users ||--o{ ai_conversations : "user_id"
+    ai_conversations ||--o{ ai_messages : "conversation_id"
+    ai_conversations ||--o{ ai_pending_actions : "conversation_id"
+    users ||--o{ ai_pending_actions : "user_id"
     chores ||--o{ chore_completions : "chore_id"
     chores ||--o{ chore_completions : "chore_id"
     users |o--o{ chore_completions : "user_id"
@@ -471,4 +475,45 @@ erDiagram
     users |o--o{ events : "user_id"
     households ||--o{ todos : "household_id"
     users |o--o{ todos : "user_id"
+```
+
+## Assistant
+
+```mermaid
+erDiagram
+    ai_conversations {
+        char id PK
+        char household_id FK
+        bigint user_id FK
+        varchar title "nullable"
+    }
+    ai_messages {
+        bigint id PK
+        char conversation_id FK
+        enum role
+        json content
+        varchar model "nullable"
+        varchar stop_reason "nullable"
+        int input_tokens "nullable"
+        int output_tokens "nullable"
+        int cache_read_tokens "nullable"
+        int cache_write_tokens "nullable"
+    }
+    ai_pending_actions {
+        char id PK
+        char conversation_id FK
+        bigint user_id FK
+        varchar tool
+        json input
+        varchar summary
+        enum status
+        json result "nullable"
+        timestamp expires_at
+        timestamp decided_at "nullable"
+    }
+    households ||--o{ ai_conversations : "household_id"
+    users ||--o{ ai_conversations : "user_id"
+    ai_conversations ||--o{ ai_messages : "conversation_id"
+    ai_conversations ||--o{ ai_pending_actions : "conversation_id"
+    users ||--o{ ai_pending_actions : "user_id"
 ```

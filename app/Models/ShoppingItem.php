@@ -15,6 +15,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * An item on the shared shopping list.
+ *
+ * @property string $id
+ * @property string $household_id
+ * @property int|null $added_by
+ * @property string $name
+ * @property ItemCategory $category
+ * @property string|null $quantity
+ * @property string|null $price
+ * @property bool $checked
+ * @property ShoppingSource $source
  */
 #[Fillable(['added_by', 'name', 'category', 'quantity', 'price', 'checked', 'source'])]
 class ShoppingItem extends Model

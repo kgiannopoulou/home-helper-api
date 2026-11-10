@@ -93,6 +93,17 @@ Money: expenses, recurring bills, budgets · Kitchen and shopping: inventory ite
 | Protected `main`, required checks | ✅ | [contributing.md](contributing.md) |
 | Deployed anywhere | ❌ | Configs are ready (`ops/deploy`), no server yet |
 
+## Assistant (Phase 2)
+
+| Feature | Status | Notes |
+|---|---|---|
+| Chat page and API, conversation history | ✅ | [assistant.md](assistant.md) |
+| 20 tools across household, tasks, shopping, money, plants | ✅ | 14 read, 6 write |
+| Changes only after Confirm, re-checked | ✅ | |
+| Offline mode without a key | ✅ | Keyword routing, common questions only |
+| Answers from Claude itself | 🟡 | Built and tested against the SDK with a fake network; `ai:eval` not yet run with a real key |
+| Streaming answers, phone chat screen | ❌ | |
+
 ## Oracle lab
 
 | Feature | Status |
