@@ -12,7 +12,8 @@
 
 | | |
 |---|---|
-| **PHP, Laravel 13** | REST + sync API with Sanctum, policies and Form Requests. [OpenAPI document](docs/openapi.json) generated from the code. Queued jobs on Redis, the scheduler and Expo push. **407 Pest tests on real MySQL**, including a sweep that proves every route needs a token and refuses non-members |
+| **PHP, Laravel 13** | REST + sync API with Sanctum, policies and Form Requests. [OpenAPI document](docs/openapi.json) generated from the code. Queued jobs on Redis, the scheduler and Expo push. **471 Pest tests on real MySQL**, including a sweep that proves every route needs a token and refuses non-members |
+| **AI assistant** | Ask "What should I do today?" or "How much did I spend this month?" and Claude answers from the household's data through 20 tools behind one permission gate. Anything it wants to change waits for you to press Confirm. Official Anthropic PHP SDK, prompt caching, conversation history, an offline mode without a key ([assistant](docs/assistant.md)) |
 | **Plant care** | Plants, care logs and alerts. An hourly job reads one cached weather forecast per household (behind a `WeatherProvider` interface, Open-Meteo) and pushes watering, frost, heat, rain and wind reminders, without ever sending the same one twice ([plant care](docs/plants.md)) |
 | **MySQL 8.4** | 31 normalized tables with foreign keys, CHECK constraints, generated columns and soft-delete-safe unique keys ([ER diagrams](docs/database.md)). Window functions, CTEs, a view, and `EXPLAIN ANALYZE` before/after: [1,400× faster](docs/insights.md) |
 | **React** | Inertia + React + TypeScript dashboard with Recharts and a week planner ([dashboard](docs/dashboard.md)). Vitest + React Testing Library |
@@ -94,6 +95,7 @@ curl -s localhost:8000/api/households -H "Authorization: Bearer $TOKEN" | jq
 | [Sync between phones](docs/sync.md) | Last write wins, tombstones, natural keys, a server-clock cursor |
 | [Insights in SQL](docs/insights.md) | Window functions and CTEs, with `EXPLAIN ANALYZE` before and after |
 | [Scheduled jobs and push](docs/jobs.md) | Shopping list, bills, budget alerts, weekly summary, plant care |
+| [Assistant](docs/assistant.md) | The AI assistant: model, tools, permissions and confirmation, API, evaluation ([Phase 2](docs/phase-2.md)) |
 | [Plant care](docs/plants.md) | Plants, care logs, weather-aware alerts, the today and away-plan endpoints |
 | [Web dashboard](docs/dashboard.md) | Inertia pages, charts and the week planner |
 | [Oracle lab](docs/oracle.md) | Partitioning, archiving, RMAN, Data Pump and recovery drills |
@@ -109,7 +111,7 @@ curl -s localhost:8000/api/households -H "Authorization: Bearer $TOKEN" | jq
 
 ## Stack
 
-Laravel 13 · PHP 8.4 · Pest · MySQL 8.4 · Redis · Inertia + React 19 + TypeScript · Recharts · Vitest · Scramble (OpenAPI) · Docker · GitHub Actions · Oracle AI Database 26ai Free (lab). Phone app: [personal-home-helper](https://github.com/kgiannopoulou/personal-home-helper) (Expo, React Native).
+Laravel 13 · PHP 8.4 · Claude (Anthropic PHP SDK) · Pest · MySQL 8.4 · Redis · Inertia + React 19 + TypeScript · Recharts · Vitest · Scramble (OpenAPI) · Docker · GitHub Actions · Oracle AI Database 26ai Free (lab). Phone app: [personal-home-helper](https://github.com/kgiannopoulou/personal-home-helper) (Expo, React Native).
 
 ## License
 

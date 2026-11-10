@@ -33,6 +33,10 @@ POST /api/households/{household}/plants/{plant}/{water|fertilize|repot|prune|mis
 GET  /api/households/{household}/plants/{plant}/care-history
 GET  /api/households/{household}/plant-alerts               POST …/plant-alerts/{id}/resolve
 GET  /api/households/{household}/plant-care/{today|plan}    see plants.md
+
+GET|POST /api/households/{household}/assistant/conversations          the assistant, see assistant.md
+POST     /api/households/{household}/assistant/conversations/{id}/messages
+POST     /api/households/{household}/assistant/actions/{id}/{confirm|decline}
 ```
 
 **Modules:** `expenses`, `recurring-bills`, `budgets`, `inventory-items`, `purchases`, `shopping-items`, `shopping-trips`, `item-prices`, `rooms`, `chores`, `chore-completions`, `supplies`, `food-entries`, `water-entries`, `sleep-entries`, `workouts`, `weights`, `events`, `todos`, `admin-items`, `plants`, `plant-care-logs`.
@@ -96,6 +100,10 @@ Every error has the same body, and the same `request_id` comes back in the `X-Re
 | 422 | `constraint_violation` | A CHECK constraint caught what validation missed (the safety net) |
 | 429 | `too_many_requests` | Rate limited; wait for `Retry-After` seconds |
 | 500 | `server_error` | Logged with the request id and the user, and raises an ops alert. With `APP_DEBUG=false` the body is only a fixed message, the code and the id: never the exception's message |
+| 503 | `ai_unavailable` | The assistant's model can't answer (no key, provider down); `retryable` says whether to try again. The question is kept |
+| 409 | `conversation_busy`, `action_closed` | The assistant is still answering; a proposed change was already confirmed or declined |
+| 422 | `conversation_full` | 200 messages: start a new conversation |
+| 429 | `daily_limit_reached` | The person's assistant messages for today are used up |
 | 503 | `unavailable` | Maintenance mode (`php artisan down`), or `GET /api/health` when the database is unreachable |
 
 A server error looks like this in production; quote the `request_id` when reporting it, and the log line is found with it:
@@ -119,6 +127,7 @@ A server error looks like this in production; quote the `request_id` when report
 | `sync`: `POST …/sync` | 60 / minute | user |
 | `invites`: `POST …/invites` | 20 / hour (each one sends an email) | user |
 | `health`: `GET /api/health` | 30 / minute | IP |
+| `ai`: sending to the assistant (API and page) | 10 / minute, plus 200 / day | user |
 | web: `POST household/invites` | 10 / minute | user |
 | web: Fortify login | 5 / minute | email + IP |
 | web: two-factor code | 5 / minute | login attempt |
