@@ -2,6 +2,7 @@
 
 use App\Enums\PlantCareType;
 use App\Http\Controllers\Api\AdminItemController;
+use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\ChoreCompletionController;
@@ -81,6 +82,18 @@ Route::name('api.')->group(function () {
                 'plants' => PlantController::class,
                 'plant-care-logs' => PlantCareLogController::class,
             ]);
+
+            // The assistant (docs/assistant.md): your own conversations in this household
+            Route::prefix('assistant')->name('assistant.')->controller(AssistantController::class)->group(function () {
+                Route::get('tools', 'tools')->name('tools');
+                Route::get('conversations', 'index')->name('conversations.index');
+                Route::post('conversations', 'store')->middleware('throttle:ai')->name('conversations.store');
+                Route::get('conversations/{conversation}', 'show')->name('conversations.show');
+                Route::delete('conversations/{conversation}', 'destroy')->name('conversations.destroy');
+                Route::post('conversations/{conversation}/messages', 'message')->middleware('throttle:ai')->name('conversations.message');
+                Route::post('actions/{action}/confirm', 'confirm')->name('actions.confirm');
+                Route::post('actions/{action}/decline', 'decline')->name('actions.decline');
+            });
 
             // Plant care: one action per kind of care, POST …/plants/{plant}/water {amount_ml, performed_at}
             foreach (PlantCareType::cases() as $care) {

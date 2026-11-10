@@ -105,6 +105,10 @@ class AppServiceProvider extends ServiceProvider
         // Each invite sends an email
         RateLimiter::for('invites', fn (Request $request) => Limit::perHour(20)->by($byUser($request)));
 
+        // Each assistant message is a paid model call (and up to 8 tool rounds).
+        // There is also a daily cap per person (homehelper.ai.daily_messages).
+        RateLimiter::for('ai', fn (Request $request) => Limit::perMinute(10)->by('ai:'.$byUser($request)));
+
         // The health check queries the database, Redis and the disk: enough for
         // a monitor polling every few seconds, not for someone hammering it
         RateLimiter::for('health', fn (Request $request) => Limit::perMinute(30)->by('health:'.$request->ip()));
