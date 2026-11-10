@@ -8,7 +8,8 @@ JSON over HTTPS with a Sanctum bearer token. Every module lives under one househ
 ## Endpoints
 
 ```http
-POST /api/login            {email, password, device_name}  → {token, user}
+POST /api/login            {email, password, device_name}  → {token, user}   token lasts 90 days
+GET  /api/health                                            for uptime monitors, see operations.md
 POST /api/logout                                            revokes this token
 GET  /api/me                                                you + your households
 POST   /api/devices        {token, platform, name}          this phone's Expo push token
@@ -86,12 +87,28 @@ Every error has the same body, and the same `request_id` comes back in the `X-Re
 | 401 | `unauthenticated` | No token, or it was revoked |
 | 403 | `forbidden` | Not a member of that household, or not allowed (e.g. a member inviting) |
 | 404 | `not_found` | No such row *in this household*. The message never names models or ids |
+| 404 | `not_found` | Also for an API path that doesn't exist |
 | 405 | `method_not_allowed` | The route doesn't take that method |
 | 409 | `conflict` | A unique key clashed (the same item name twice) |
+| 413 | `payload_too_large` | The body is bigger than PHP's `post_max_size` |
+| 415 | `unsupported_media_type` | Not JSON or form data |
 | 422 | `validation_failed` | Form Request rules; `errors` has the fields |
 | 422 | `constraint_violation` | A CHECK constraint caught what validation missed (the safety net) |
 | 429 | `too_many_requests` | Rate limited; wait for `Retry-After` seconds |
-| 5xx | `server_error` | Logged with the request id; no internals in the body |
+| 500 | `server_error` | Logged with the request id and the user, and raises an ops alert. With `APP_DEBUG=false` the body is only a fixed message, the code and the id: never the exception's message |
+| 503 | `unavailable` | Maintenance mode (`php artisan down`), or `GET /api/health` when the database is unreachable |
+
+A server error looks like this in production; quote the `request_id` when reporting it, and the log line is found with it:
+
+```json
+{
+  "message": "Something went wrong on our side. It has been logged; quote the request_id if you report it.",
+  "code": "server_error",
+  "request_id": "3f0c2a4e-8d4b-4b5e-9a57-1d2f6c1b9e10"
+}
+```
+
+`tests/Feature/Api/ErrorsTest.php` and `tests/Feature/Ops/AlertsTest.php` pin these bodies.
 
 ## Rate limits
 
@@ -101,8 +118,13 @@ Every error has the same body, and the same `request_id` comes back in the `X-Re
 | `api-login`: `POST /api/login` | 6 / minute, and 30 / minute per address | email + IP, and IP |
 | `sync`: `POST …/sync` | 60 / minute | user |
 | `invites`: `POST …/invites` | 20 / hour (each one sends an email) | user |
+| `health`: `GET /api/health` | 30 / minute | IP |
+| web: `POST household/invites` | 10 / minute | user |
+| web: Fortify login | 5 / minute | email + IP |
+| web: two-factor code | 5 / minute | login attempt |
+| web: passkeys | 10 / minute | passkey (or session) + IP |
 
-They are defined in `AppServiceProvider::configureRateLimits()`.
+They are defined in `AppServiceProvider::configureRateLimits()`. Behind a proxy, set `TRUSTED_PROXIES` or every user shares the proxy's address ([security.md](security.md)).
 
 ## How access is enforced
 
@@ -111,6 +133,7 @@ They are defined in `AppServiceProvider::configureRateLimits()`.
 - **Policies:** one per model (`app/Policies`), sharing `HouseholdDataPolicy`. Food, water, sleep, workouts and weight use `PersonalDataPolicy`: other members of your household can't see them either.
 - **Validation:** ids in a body (`recurring_bill_id`, `room_id`, `assignee_id`…) must belong to the same household, so nobody can link to another household's rows.
 - **Ownership:** `household_id` and `user_id` are never taken from the body. They come from the URL and the token.
+- **Database:** composite foreign keys make MySQL itself refuse a purchase, chore, completion, care log or plant alert that points at another household's row ([architecture-review.md](architecture-review.md)).
 - **Roles:** only the owner can invite. Members can read and write shared data, and only their own personal logs.
 
 ## Conventions

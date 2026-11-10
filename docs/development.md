@@ -40,7 +40,7 @@ php artisan test                       # or ./vendor/bin/sail test
 npm test                               # Vitest + React Testing Library
 ```
 
-[GitHub Actions](../.github/workflows/tests.yml) runs them on every push, against a MySQL 8.4 service: `composer install`, `php artisan migrate`, Pint, the production build, Pest, `tsc` and Vitest.
+[GitHub Actions](../.github/workflows/tests.yml) runs them on every push and pull request, against MySQL 8.4 and Redis services: `composer install`, `php artisan migrate`, Pint, the production build, Pest, a backup and restore drill, `tsc` and Vitest; plus PHPStan and dependency audits as separate jobs. All three are required to merge into `main` ([contributing.md](contributing.md)). Current counts and timings: [testing.md](testing.md).
 
 On Windows with Docker Desktop, PHP talking to MySQL through the forwarded port sometimes stalls during `migrate:fresh`: MySQL has answered, but PHP never gets the reply. Running PHP in a container on the same Docker network avoids that:
 
@@ -58,6 +58,8 @@ Cross-cutting API tests:
 - `ErrorsTest` checks the error body (`message`, `code`, `errors`, `request_id`) for 401/403/404/405/409/422, and the `X-Request-Id` round trip.
 - `RateLimitTest` covers the per-user API limit with `Retry-After`, sync, invites, and login per account and per address.
 - `ListConventionsTest` covers `sort` (allowlisted columns only), `updated_since`, stable paging on ties and the envelope.
+- `Ops/*`: the health endpoint and page, alerts and their cooldown, backups and the restore test (with the real `mysqldump`/`mysql`, skipped when they aren't installed), `app:production-check`, security headers, CORS and token expiry.
+- `Database/SameHouseholdKeysTest`: a child row can't point at another household's parent, even with a raw `INSERT`.
 - `OpenApiTest` and `Database/SchemaDiagramTest` fail when `docs/openapi.json` or `docs/database.md` no longer match the code.
 
 ## Docs generated from the code

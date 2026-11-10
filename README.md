@@ -12,13 +12,14 @@
 
 | | |
 |---|---|
-| **PHP, Laravel 13** | REST + sync API with Sanctum, policies and Form Requests. [OpenAPI document](docs/openapi.json) generated from the code. Queued jobs on Redis, the scheduler and Expo push. **359 Pest tests on real MySQL**, including a sweep that proves every route needs a token and refuses non-members |
+| **PHP, Laravel 13** | REST + sync API with Sanctum, policies and Form Requests. [OpenAPI document](docs/openapi.json) generated from the code. Queued jobs on Redis, the scheduler and Expo push. **407 Pest tests on real MySQL**, including a sweep that proves every route needs a token and refuses non-members |
 | **Plant care** | Plants, care logs and alerts. An hourly job reads one cached weather forecast per household (behind a `WeatherProvider` interface, Open-Meteo) and pushes watering, frost, heat, rain and wind reminders, without ever sending the same one twice ([plant care](docs/plants.md)) |
 | **MySQL 8.4** | 31 normalized tables with foreign keys, CHECK constraints, generated columns and soft-delete-safe unique keys ([ER diagrams](docs/database.md)). Window functions, CTEs, a view, and `EXPLAIN ANALYZE` before/after: [1,400× faster](docs/insights.md) |
 | **React** | Inertia + React + TypeScript dashboard with Recharts and a week planner ([dashboard](docs/dashboard.md)). Vitest + React Testing Library |
 | **Oracle basics** | Interval partitions, ARCHIVELOG, `EXCHANGE PARTITION` archiving, RMAN level 0/1, Data Pump and four timed recovery drills ([runbook](ops/oracle/RUNBOOK.md)) |
 | **API hygiene** | One error format with codes and request ids, per-user rate limits, consistent paging/sorting/filtering ([API reference](docs/api.md)) |
-| **CI** | GitHub Actions: MySQL service, migrate, Pint, Pest, build, `tsc`, Vitest, and a check that the generated docs are current |
+| **Production-ready** | Nightly `mysqldump` backups with a weekly restore test, JSON logs traced by request id, ops alerts by email, a [system health page](docs/operations.md#health), security headers, expiring tokens, and a pre-deploy `app:production-check` ([Phase 1](docs/phase-1.md)) |
+| **CI** | GitHub Actions on a protected `main`: three required checks. Tests (MySQL + Redis services, Pint, Pest, a backup/restore drill, build, `tsc`, Vitest, generated docs current), PHPStan level 7, and dependency audits |
 
 ## Architecture
 
@@ -74,6 +75,8 @@ Sail, Windows notes, queue workers and tests: [docs/development.md](docs/develop
 | `demo@homehelper.test` | `password` | Owner: can invite, sees the owner's personal logs |
 | `alex@homehelper.test` | `password` | Member: shares the household data, but not the owner's personal logs |
 
+Local only: the demo seeder refuses to run in production, and `php artisan app:production-check` fails while these accounts exist ([deployment](docs/deployment.md)). The demo owner is also the local admin for `/system/health`.
+
 ```bash
 TOKEN=$(curl -s -X POST localhost:8000/api/login -H 'Accept: application/json' \
   -d email=demo@homehelper.test -d password=password | jq -r .token)
@@ -94,6 +97,14 @@ curl -s localhost:8000/api/households -H "Authorization: Bearer $TOKEN" | jq
 | [Plant care](docs/plants.md) | Plants, care logs, weather-aware alerts, the today and away-plan endpoints |
 | [Web dashboard](docs/dashboard.md) | Inertia pages, charts and the week planner |
 | [Oracle lab](docs/oracle.md) | Partitioning, archiving, RMAN, Data Pump and recovery drills |
+| [Architecture](docs/architecture.md) | Layers, request flows, running processes; [review](docs/architecture-review.md) of what was fixed |
+| [Feature checklist](docs/feature-checklist.md) | Every feature: works, partial or missing |
+| [Security](docs/security.md) | Authentication, permissions, rate limits, headers, known gaps |
+| [Operations](docs/operations.md) | Logs, queues, alerts and the health page |
+| [Backups](docs/backups.md) | Nightly backups, the restore test, how to restore |
+| [Deployment](docs/deployment.md) | Production settings and the pre-deploy check |
+| [Contributing](docs/contributing.md) | Protected `main`, pull requests, required checks |
+| [Test baseline](docs/testing.md) | Test counts and timings before and after Phase 1 |
 | [Development](docs/development.md) | Running it, the test suite, generated docs |
 
 ## Stack
