@@ -163,12 +163,6 @@ parameters:
 			path: app/Http/Controllers/Api/ShoppingItemController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\User\:\:\$membership\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/Web/HouseholdController.php
-
-		-
 			message: '#^Cannot call method toDateString\(\) on string\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -211,49 +205,19 @@ parameters:
 			path: app/Http/Requests/Api/HouseholdDataRequest.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Resources/AdminItemResource.php
-
-		-
-			message: '#^Cannot call method toDateString\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Resources/AdminItemResource.php
-
-		-
-			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Resources/AdminItemResource.php
-
-		-
-			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe property access on non\-nullable type App\\Enums\\AdminKind\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/AdminItemResource.php
 
 		-
-			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Resources/AdminItemResource.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Http/Resources/BudgetResource.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Http/Resources/BudgetResource.php
 
 		-
-			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe property access on non\-nullable type App\\Enums\\BudgetPeriod\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/BudgetResource.php
@@ -277,45 +241,33 @@ parameters:
 			path: app/Http/Resources/ChoreResource.php
 
 		-
-			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Http/Resources/EventResource.php
-
-		-
-			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe method call on non\-nullable type Carbon\\CarbonImmutable\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 2
+			count: 1
 			path: app/Http/Resources/EventResource.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Http/Resources/ExpenseResource.php
-
-		-
-			message: '#^Cannot call method toDateString\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Resources/ExpenseResource.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Http/Resources/ExpenseResource.php
 
 		-
-			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe method call on non\-nullable type Carbon\\CarbonImmutable\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/ExpenseResource.php
 
 		-
-			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe property access on non\-nullable type App\\Enums\\ExpenseCategory\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 2
+			count: 1
+			path: app/Http/Resources/ExpenseResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type App\\Enums\\ExpenseSource\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
 			path: app/Http/Resources/ExpenseResource.php
 
 		-
@@ -361,21 +313,9 @@ parameters:
 			path: app/Http/Resources/HouseholdResource.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: app/Http/Resources/InventoryItemResource.php
-
-		-
-			message: '#^Cannot call method toDateString\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Resources/InventoryItemResource.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe property access on non\-nullable type App\\Enums\\ItemCategory\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 3
+			count: 1
 			path: app/Http/Resources/InventoryItemResource.php
 
 		-
@@ -409,19 +349,13 @@ parameters:
 			path: app/Http/Resources/ItemPriceResource.php
 
 		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\MemberResource\:\:\$membership\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Resources/MemberResource.php
-
-		-
 			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 1
 			path: app/Http/Resources/PlantAlertResource.php
 
 		-
-			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe method call on non\-nullable type Carbon\\CarbonImmutable\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/PlantAlertResource.php
@@ -463,33 +397,27 @@ parameters:
 			path: app/Http/Resources/PurchaseResource.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Resources/RecurringBillResource.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between float and null will always evaluate to false\.$#'
+			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Http/Resources/RecurringBillResource.php
 
 		-
-			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe property access on non\-nullable type App\\Enums\\ExpenseCategory\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Resources/RecurringBillResource.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 2
+			message: '#^Using nullsafe property access on non\-nullable type App\\Enums\\ItemCategory\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
 			path: app/Http/Resources/ShoppingItemResource.php
 
 		-
-			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe property access on non\-nullable type App\\Enums\\ShoppingSource\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 2
+			count: 1
 			path: app/Http/Resources/ShoppingItemResource.php
 
 		-
@@ -559,28 +487,16 @@ parameters:
 			path: app/Http/Resources/StepCountResource.php
 
 		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Http/Resources/SupplyResource.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe property access on non\-nullable type App\\Enums\\ItemCategory\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 2
+			count: 1
 			path: app/Http/Resources/SupplyResource.php
 
 		-
-			message: '#^Cannot call method toDateString\(\) on string\.$#'
-			identifier: method.nonObject
+			message: '#^Using nullsafe property access on non\-nullable type App\\Enums\\SupplyLevel\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
-			path: app/Http/Resources/TodoResource.php
-
-		-
-			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Resources/TodoResource.php
+			path: app/Http/Resources/SupplyResource.php
 
 		-
 			message: '#^Cannot access property \$value on string\.$#'
@@ -653,36 +569,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 3
 			path: app/Http/Resources/WorkoutResource.php
-
-		-
-			message: '#^Cannot call method toDateString\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Jobs/ApplyRecurringBills.php
-
-		-
-			message: '#^Call to function in_array\(\) with arguments string, array\{App\\Enums\\StockLevel\:\:Empty, App\\Enums\\StockLevel\:\:Low\} and true will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: app/Jobs/PrepareShoppingList.php
-
-		-
-			message: '#^Call to function in_array\(\) with arguments string, array\{App\\Enums\\SupplyLevel\:\:Low, App\\Enums\\SupplyLevel\:\:Out\} and true will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: app/Jobs/PrepareShoppingList.php
-
-		-
-			message: '#^Cannot access property \$value on string\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: app/Jobs/PrepareShoppingList.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between \*NEVER\* and App\\Enums\\SupplyLevel\:\:Out will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Jobs/PrepareShoppingList.php
 
 		-
 			message: '#^Parameter \#1 \$last of closure expects Carbon\\CarbonImmutable\|null, string\|null given\.$#'
@@ -709,38 +595,8 @@ parameters:
 			path: app/Notifications/HouseholdInvite.php
 
 		-
-			message: '#^Cannot call method copy\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Planning/WeekPlanner.php
-
-		-
-			message: '#^Cannot call method format\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: app/Planning/WeekPlanner.php
-
-		-
-			message: '#^Cannot call method toDateString\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Planning/WeekPlanner.php
-
-		-
 			message: '#^Parameter \#1 \$names of static method App\\Planning\\WeekPlanner\:\:andList\(\) expects list\<string\>, array\<mixed\> given\.$#'
 			identifier: argument.type
-			count: 1
-			path: app/Planning/WeekPlanner.php
-
-		-
-			message: '#^Unable to resolve the template type TGroupKey in call to method Illuminate\\Support\\Collection\<int,App\\Models\\InventoryItem\>\:\:groupBy\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: app/Planning/WeekPlanner.php
-
-		-
-			message: '#^Unable to resolve the template type TMapValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\InventoryItem\>\:\:map\(\)$#'
-			identifier: argument.templateType
 			count: 1
 			path: app/Planning/WeekPlanner.php
 

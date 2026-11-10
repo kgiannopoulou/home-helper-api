@@ -6,6 +6,7 @@ use App\Enums\ItemCategory;
 use App\Enums\StockLevel;
 use App\Enums\StorageLocation;
 use App\Models\Concerns\BelongsToHousehold;
+use Carbon\CarbonImmutable;
 use Database\Factories\InventoryItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -17,6 +18,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Something in the fridge, freezer or cupboards.
+ *
+ * @property string $id
+ * @property string $household_id
+ * @property string $name
+ * @property ItemCategory $category
+ * @property StorageLocation|null $location
+ * @property StockLevel|null $level
+ * @property string|null $quantity
+ * @property CarbonImmutable|null $expires_on
  */
 #[Fillable(['name', 'category', 'location', 'level', 'quantity', 'expires_on'])]
 class InventoryItem extends Model
