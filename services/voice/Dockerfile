@@ -7,7 +7,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
 
 WORKDIR /srv
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+ && pip install --no-cache-dir --no-deps openwakeword==0.6.0
 
 COPY download-models.sh .
 # Models go in the image (about 1 GB with Whisper small): the service never
@@ -16,8 +17,8 @@ ARG VOICE_STT_MODEL=small
 RUN VOICE_STT_MODEL=$VOICE_STT_MODEL sh download-models.sh
 
 COPY app ./app
-RUN useradd --system --uid 1001 voice && chown -R voice /models
-USER voice
+RUN useradd --system --uid 1001 helper && chown -R helper /models
+USER helper
 
 EXPOSE 8090
 HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health')"
