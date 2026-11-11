@@ -37,7 +37,7 @@ class VoiceTurns
 
     /**
      * @param  array{audio?: string, filename?: string, text?: string}  $input  a recording, or what the browser already heard
-     * @return array{turn_id: string, heard: string, language: string|null, conversation: AiConversation|null, messages: list<AiMessage>, actions: list<AiPendingAction>, reply: string, spoken: string, audio_url: string|null, cancelled: bool}
+     * @return array<string, mixed> turn_id, heard, language, conversation, messages, actions, reply, spoken, audio_url, cancelled
      *
      * @throws VoiceUnavailable speech to text failed (text to speech failing only loses the audio)
      */
@@ -185,6 +185,7 @@ class VoiceTurns
         return URL::temporarySignedRoute('voice.audio', now()->addMinutes($minutes), ['id' => $id]);
     }
 
+    /** @phpstan-impure */
     private function cancelled(User $user, string $turnId): bool
     {
         return Cache::has(self::cancelKey($user, $turnId));

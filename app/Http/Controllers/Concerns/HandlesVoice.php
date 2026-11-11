@@ -31,7 +31,7 @@ trait HandlesVoice
             'turn_id' => ['required', 'string', 'max:64', 'regex:/^[A-Za-z0-9-]+$/'],
         ]);
         $conversation = isset($data['conversation_id'])
-            ? AiConversation::query()->where('household_id', $household->id)->where('user_id', $request->user()->id)->findOrFail($data['conversation_id'])
+            ? AiConversation::query()->where('household_id', $household->id)->where('user_id', $request->user()->id)->whereKey($data['conversation_id'])->firstOrFail()
             : null;
 
         $input = isset($data['audio'])

@@ -19,6 +19,7 @@ final readonly class TurnOptions
         public ?Closure $cancelled = null,
     ) {}
 
+    /** @phpstan-impure the person may cancel between two calls */
     public function isCancelled(): bool
     {
         return $this->cancelled !== null && ($this->cancelled)();
