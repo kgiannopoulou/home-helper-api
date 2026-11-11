@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
+use App\Http\Controllers\Web\VoiceController;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('user-password.update');
 
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
+
+    // Voice: voice, style, wake word and privacy (docs/voice.md#settings)
+    Route::get('settings/voice', [VoiceController::class, 'settings'])->name('voice.edit');
+    Route::patch('settings/voice', [VoiceController::class, 'update'])->name('voice.update');
+    Route::delete('settings/voice/history', [VoiceController::class, 'forget'])->name('voice.forget');
 });
 
 Route::get('.well-known/passkey-endpoints', function () {

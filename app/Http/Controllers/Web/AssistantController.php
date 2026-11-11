@@ -8,6 +8,7 @@ use App\Ai\AssistantRefused;
 use App\Ai\Presenter;
 use App\Models\AiConversation;
 use App\Models\AiPendingAction;
+use App\Voice\VoicePresenter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,6 +39,7 @@ class AssistantController extends WebController
             'messages' => $current ? $this->present->messages($current->messages) : [],
             'actions' => $current ? $this->present->actions($current->pendingActions()->orderBy('created_at')->get()) : [],
             'provider' => config('homehelper.ai.provider'),
+            'voice' => app(VoicePresenter::class)->config($request->user()),
             'suggestions' => [
                 'What should I do today?',
                 'What do I need to buy?',

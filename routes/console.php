@@ -8,6 +8,7 @@ use App\Jobs\HouseholdJob;
 use App\Jobs\LearnChoreFrequencies;
 use App\Jobs\MonthlyDigest;
 use App\Jobs\PrepareShoppingList;
+use App\Jobs\PruneVoiceConversations;
 use App\Jobs\RememberConversations;
 use App\Jobs\WeeklyDigest;
 use App\Jobs\WeeklySummary;
@@ -45,6 +46,8 @@ Schedule::job(new DailyBriefing)->dailyAt(config('homehelper.briefing.time'))->t
 // Last week and last month, written into long-term memory
 Schedule::job(new WeeklyDigest)->mondays()->at('05:00')->timezone($home)->onOneServer();
 Schedule::job(new MonthlyDigest)->monthlyOn(1, '05:30')->timezone($home)->onOneServer();
+// Voice conversations past each person's chosen retention (docs/voice.md#privacy)
+Schedule::job(new PruneVoiceConversations)->dailyAt('03:45')->timezone($home)->onOneServer();
 // Conversations that went quiet, summarised into long-term memory
 Schedule::job(new RememberConversations)->hourlyAt(15)->onOneServer();
 

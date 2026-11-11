@@ -109,6 +109,9 @@ class AppServiceProvider extends ServiceProvider
         // There is also a daily cap per person (homehelper.ai.daily_messages).
         RateLimiter::for('ai', fn (Request $request) => Limit::perMinute(10)->by('ai:'.$byUser($request)));
 
+        // Speaking a text costs the voice service a second or two of CPU
+        RateLimiter::for('voice', fn (Request $request) => Limit::perMinute(30)->by('voice:'.$byUser($request)));
+
         // Documents are parsed (PDF text) and embedded on upload
         RateLimiter::for('uploads', fn (Request $request) => Limit::perMinute(10)->by('uploads:'.$byUser($request)));
 

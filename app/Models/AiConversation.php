@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $household_id
  * @property int $user_id
  * @property string|null $title
+ * @property string $channel text | voice (docs/voice.md#privacy)
  * @property string|null $summary the messages up to summary_through_id, summarised (docs/memory.md#conversation-summaries)
  * @property int|null $summary_through_id
  * @property CarbonImmutable|null $summarized_at

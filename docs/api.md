@@ -44,6 +44,9 @@ GET      /api/households/{household}/timeline                         what happe
 GET      /api/households/{household}/summaries                        weekly and monthly summaries
 GET      /api/households/{household}/briefing                         today's briefing, see briefings.md
 GET|POST /api/households/{household}/recommendations[/feedback]
+POST     /api/households/{household}/voice/turns                      talk: audio or text in, answer and speech out, see voice.md
+POST     /api/households/{household}/voice/turns/{turn}/cancel
+GET|PATCH /api/voice                                                  your voice settings; POST /api/voice/speak, DELETE /api/voice/history
 ```
 
 **Modules:** `expenses`, `recurring-bills`, `budgets`, `inventory-items`, `purchases`, `shopping-items`, `shopping-trips`, `item-prices`, `rooms`, `chores`, `chore-completions`, `supplies`, `food-entries`, `water-entries`, `sleep-entries`, `workouts`, `weights`, `events`, `todos`, `admin-items`, `plants`, `plant-care-logs`.
@@ -136,6 +139,7 @@ A server error looks like this in production; quote the `request_id` when report
 | `health`: `GET /api/health` | 30 / minute | IP |
 | `ai`: sending to the assistant (API and page) | 10 / minute, plus 200 / day | user |
 | `uploads`: adding a note or document (API and page) | 10 / minute | user |
+| `voice`: reading a text out (`…/voice/speak`) | 30 / minute | user |
 | web: `POST household/invites` | 10 / minute | user |
 | web: Fortify login | 5 / minute | email + IP |
 | web: two-factor code | 5 / minute | login attempt |

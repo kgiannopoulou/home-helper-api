@@ -481,6 +481,9 @@
                                                         "title": {
                                                             "type": "string"
                                                         },
+                                                        "channel": {
+                                                            "type": "string"
+                                                        },
                                                         "updated_at": {
                                                             "type": "string"
                                                         }
@@ -488,6 +491,7 @@
                                                     "required": [
                                                         "id",
                                                         "title",
+                                                        "channel",
                                                         "updated_at"
                                                     ]
                                                 },
@@ -547,6 +551,9 @@
                                                         "title": {
                                                             "type": "string"
                                                         },
+                                                        "channel": {
+                                                            "type": "string"
+                                                        },
                                                         "updated_at": {
                                                             "type": "string"
                                                         }
@@ -554,6 +561,7 @@
                                                     "required": [
                                                         "id",
                                                         "title",
+                                                        "channel",
                                                         "updated_at"
                                                     ]
                                                 },
@@ -664,6 +672,9 @@
                                                 "title": {
                                                     "type": "string"
                                                 },
+                                                "channel": {
+                                                    "type": "string"
+                                                },
                                                 "updated_at": {
                                                     "type": "string"
                                                 }
@@ -671,6 +682,7 @@
                                             "required": [
                                                 "id",
                                                 "title",
+                                                "channel",
                                                 "updated_at"
                                             ]
                                         },
@@ -837,6 +849,9 @@
                                                         "title": {
                                                             "type": "string"
                                                         },
+                                                        "channel": {
+                                                            "type": "string"
+                                                        },
                                                         "updated_at": {
                                                             "type": "string"
                                                         }
@@ -844,6 +859,7 @@
                                                     "required": [
                                                         "id",
                                                         "title",
+                                                        "channel",
                                                         "updated_at"
                                                     ]
                                                 },
@@ -10902,6 +10918,341 @@
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/voice": {
+            "get": {
+                "operationId": "voice.show",
+                "summary": "Your voice settings, the voices and styles, and a wake-word ticket when it is on",
+                "tags": [
+                    "Voice"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "driver": {
+                                            "type": "string"
+                                        },
+                                        "settings": {
+                                            "type": "object",
+                                            "properties": {
+                                                "voice": {
+                                                    "type": "string"
+                                                },
+                                                "style": {
+                                                    "type": "string"
+                                                },
+                                                "rate": {
+                                                    "type": "number"
+                                                },
+                                                "language": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "wake_word": {
+                                                    "type": "boolean"
+                                                },
+                                                "continuous": {
+                                                    "type": "boolean"
+                                                },
+                                                "keep_days": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "remember": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "voice",
+                                                "style",
+                                                "rate",
+                                                "language",
+                                                "wake_word",
+                                                "continuous",
+                                                "keep_days",
+                                                "remember"
+                                            ]
+                                        },
+                                        "voices": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "styles": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "keep_days_options": {
+                                            "type": "string"
+                                        },
+                                        "wake": {
+                                            "type": "object",
+                                            "properties": {
+                                                "available": {
+                                                    "type": "boolean"
+                                                },
+                                                "phrase": {
+                                                    "type": "string"
+                                                },
+                                                "url": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "available",
+                                                "phrase",
+                                                "url"
+                                            ]
+                                        },
+                                        "max_seconds": {
+                                            "type": "integer",
+                                            "const": 60
+                                        }
+                                    },
+                                    "required": [
+                                        "driver",
+                                        "settings",
+                                        "voices",
+                                        "styles",
+                                        "keep_days_options",
+                                        "wake",
+                                        "max_seconds"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "voice.update",
+                "tags": [
+                    "Voice"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/voice/speak": {
+            "post": {
+                "operationId": "voice.speak",
+                "summary": "Read a text out in your voice (or try another one)",
+                "tags": [
+                    "Voice"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "audio_url": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "audio_url"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/voice/history": {
+            "delete": {
+                "operationId": "voice.forget",
+                "summary": "Delete all your voice conversations",
+                "tags": [
+                    "Voice"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "deleted_conversations": {
+                                            "type": "integer",
+                                            "const": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "deleted_conversations"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/voice/turns": {
+            "post": {
+                "operationId": "voice.turns.store",
+                "summary": "One spoken turn: multipart `audio` (or `text` the device already\nrecognised), `turn_id` (yours, to cancel it), optional `conversation_id`",
+                "tags": [
+                    "Voice"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "code": {
+                                            "type": "string",
+                                            "const": "ai_unavailable"
+                                        },
+                                        "request_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "code",
+                                        "request_id"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/voice/turns/{turn}/cancel": {
+            "post": {
+                "operationId": "voice.turns.cancel",
+                "summary": "Stop a turn that is still running: it ends at its next step",
+                "tags": [
+                    "Voice"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "turn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "turn_id": {
+                                            "type": "string"
+                                        },
+                                        "cancelling": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "required": [
+                                        "turn_id",
+                                        "cancelling"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"

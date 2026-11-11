@@ -9,6 +9,7 @@ use App\Models\HouseholdFact;
 use App\Models\HouseholdSummary;
 use App\Models\MemoryChunk;
 use App\Models\Note;
+use App\Models\VoiceSettings;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -58,6 +59,12 @@ class MemoryIndexer
         return count($texts);
     }
 
+    private static function remembered(AiConversation $conversation): bool
+    {
+        return $conversation->channel !== 'voice'
+            || ! VoiceSettings::query()->where('user_id', $conversation->user_id)->where('remember', false)->exists();
+    }
+
     public function forget(MemorySource $type, string $id): void
     {
         MemoryChunk::query()->where('source_type', $type)->where('source_id', $id)->delete();
@@ -90,7 +97,8 @@ class MemoryIndexer
             $source instanceof AiConversation => [
                 MemorySource::Conversation,
                 ['household_id' => $source->household_id, 'user_id' => $source->user_id, 'occurred_on' => $source->updated_at->toDateString()],
-                $source->summary
+                // A voice conversation stays out of memory if its person said so (docs/voice.md#privacy)
+                $source->summary && self::remembered($source)
                     ? array_map(fn (string $text) => ['title' => 'Conversation: '.($source->title ?? 'untitled').' ('.$source->updated_at->format('j M Y').')', 'text' => $text], self::chunks($source->summary, (int) config('homehelper.memory.chunk_chars')))
                     : [],
             ],

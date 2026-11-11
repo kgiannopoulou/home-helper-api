@@ -137,6 +137,31 @@ return [
     ],
 
     /*
+    | Voice (docs/voice.md). `driver`:
+    |   service  the voice service (services/voice): Whisper, Piper, openWakeWord, all local
+    |   browser  no service: the browser's own speech recognition and voices
+    |            (Chrome sends that audio to Google); no wake word
+    |   fake     tests: audio "TEXT:…" says the rest, speech is a short tone
+    */
+    'voice' => [
+        'driver' => env('VOICE_DRIVER', 'browser'),
+        'url' => env('VOICE_SERVICE_URL', 'http://voice:8090'),
+        'token' => env('VOICE_SERVICE_TOKEN'),
+        // Where browsers reach the wake-word socket (the service's public address)
+        'wake_url' => env('VOICE_WAKE_URL', 'ws://localhost:8090/v1/wake'),
+        'wake_phrase' => env('VOICE_WAKE_PHRASE', 'Hey Jarvis'),
+        'timeout' => (int) env('VOICE_TIMEOUT', 60),
+        'max_upload_kb' => 10240,
+        // A spoken answer can be fetched (and replayed) for this long, then it is gone
+        'audio_minutes' => 10,
+        'voices' => ['en_GB-alan-medium', 'en_US-lessac-medium', 'en_GB-jenny_dioco-medium', 'en_US-ryan-high', 'el_GR-rapunzelina-low'],
+        // How the assistant answers out loud (App\Voice\ResponseStyle)
+        'styles' => ['brief', 'conversational', 'detailed', 'butler'],
+        // Voice conversations may be deleted after this many days (a member's choice; null keeps them)
+        'keep_days_options' => [1, 7, 30],
+    ],
+
+    /*
     | System health (/api/health, /system/health). The scheduler writes a
     | heartbeat every minute; older than this and it counts as stopped.
     */
