@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\SleepEntryController;
 use App\Http\Controllers\Api\SupplyController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\TodoController;
+use App\Http\Controllers\Api\VoiceController;
 use App\Http\Controllers\Api\WaterEntryController;
 use App\Http\Controllers\Api\WeightController;
 use App\Http\Controllers\Api\WorkoutController;
@@ -48,6 +49,11 @@ Route::name('api.')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('me', [AuthController::class, 'me'])->name('me');
         Route::post('devices', [DeviceController::class, 'store'])->name('devices.store');
+        // Voice settings and speech (docs/voice.md#api)
+        Route::get('voice', [VoiceController::class, 'show'])->name('voice.show');
+        Route::patch('voice', [VoiceController::class, 'update'])->name('voice.update');
+        Route::post('voice/speak', [VoiceController::class, 'speak'])->middleware('throttle:voice')->name('voice.speak');
+        Route::delete('voice/history', [VoiceController::class, 'forget'])->name('voice.forget');
         Route::delete('devices', [DeviceController::class, 'destroy'])->name('devices.destroy');
 
         Route::get('households', [HouseholdController::class, 'index'])->name('households.index');
@@ -134,6 +140,10 @@ Route::name('api.')->group(function () {
                 Route::get('timeline', 'timeline')->name('timeline');
                 Route::get('summaries', 'summaries')->name('summaries.index');
             });
+
+            // Talking to the assistant (docs/voice.md#api)
+            Route::post('voice/turns', [VoiceController::class, 'turn'])->middleware('throttle:ai')->name('voice.turns.store');
+            Route::post('voice/turns/{turn}/cancel', [VoiceController::class, 'cancel'])->name('voice.turns.cancel');
 
             Route::post('sync', SyncController::class)->middleware('throttle:sync')->name('sync');
 

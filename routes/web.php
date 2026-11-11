@@ -10,10 +10,14 @@ use App\Http\Controllers\Web\MemoryController;
 use App\Http\Controllers\Web\PlannerController;
 use App\Http\Controllers\Web\SpendingController;
 use App\Http\Controllers\Web\SystemHealthController;
+use App\Http\Controllers\Web\VoiceController;
 use App\Http\Middleware\EnsureHousehold;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+
+// A spoken answer: a signed URL that lasts a few minutes (App\Voice\VoiceTurns), so the phone can play it too
+Route::get('voice/audio/{id}', [VoiceController::class, 'audio'])->middleware('signed')->name('voice.audio');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Works without a household: that's where you start or join one
@@ -41,6 +45,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('facts/{fact}', 'destroyFact')->name('memory.facts.destroy');
             Route::post('notes', 'storeNote')->middleware('throttle:uploads')->name('memory.notes.store');
             Route::delete('notes/{note}', 'destroyNote')->name('memory.notes.destroy');
+        });
+
+        // Talking to the assistant (docs/voice.md): JSON for the page's recorder and player
+        Route::controller(VoiceController::class)->prefix('voice')->name('voice.')->group(function () {
+            Route::get('config', 'config')->name('config');
+            Route::post('turns', 'turn')->middleware('throttle:ai')->name('turns.store');
+            Route::post('turns/{turn}/cancel', 'cancel')->name('turns.cancel');
+            Route::post('speak', 'speak')->middleware('throttle:voice')->name('speak');
         });
 
         // The assistant (docs/assistant.md)

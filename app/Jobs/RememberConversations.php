@@ -3,7 +3,9 @@
 namespace App\Jobs;
 
 use App\Models\AiConversation;
+use App\Models\VoiceSettings;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -23,6 +25,9 @@ class RememberConversations implements ShouldQueue
         AiConversation::query()
             ->where('updated_at', '<', $quietSince)
             ->where('updated_at', '>', now()->subDays(7))
+            // Voice conversations of people who keep them out of memory (docs/voice.md#privacy)
+            ->where(fn (EloquentBuilder $q) => $q->where('channel', 'text')
+                ->orWhereNotIn('user_id', VoiceSettings::query()->where('remember', false)->select('user_id')))
             ->whereExists(fn (Builder $q) => $q->from('ai_messages')
                 ->whereColumn('ai_messages.conversation_id', 'ai_conversations.id')
                 ->where('ai_messages.role', 'user')
