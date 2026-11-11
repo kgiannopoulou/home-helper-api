@@ -12,12 +12,13 @@
 
 | | |
 |---|---|
-| **PHP, Laravel 13** | REST + sync API with Sanctum, policies and Form Requests. [OpenAPI document](docs/openapi.json) generated from the code. Queued jobs on Redis, the scheduler and Expo push. **516 Pest tests on real MySQL**, including a sweep that proves every route needs a token and refuses non-members |
+| **PHP, Laravel 13** | REST + sync API with Sanctum, policies and Form Requests. [OpenAPI document](docs/openapi.json) generated from the code. Queued jobs on Redis, the scheduler and Expo push. **536 Pest tests on real MySQL**, including a sweep that proves every route needs a token and refuses non-members |
 | **AI assistant** | Ask "What should I do today?" or "How much did I spend this month?" and Claude answers from the household's data through 28 tools behind one permission gate. Anything it wants to change waits for you to press Confirm. Official Anthropic PHP SDK, prompt caching, conversation history, an offline mode without a key ([assistant](docs/assistant.md)) |
 | **Memory** | Home Helper remembers preferences and routines ("Alex doesn't eat meat"), keeps notes and uploaded documents, and answers from history: "when did we last descale the kettle?", "what did we decide about the holiday?". Hybrid search (embeddings + MySQL FULLTEXT, reciprocal rank fusion), long conversations summarised, an activity timeline in one `UNION ALL`, weekly and monthly summaries ([memory](docs/memory.md)) |
+| **Voice** | Say "Hey Jarvis", ask, hear the answer, keep talking, interrupt it. A separate Python service runs Whisper (speech to text), Piper (five voices) and openWakeWord **on your own machine**: recordings are never stored. Response styles from brief to butler, privacy controls ([voice](docs/voice.md)) |
 | **Daily briefing** | Every morning each member gets weather, calendar, tasks, shopping, money, bills, plants and upkeep, with personalised recommendations that learn from "not now" ([briefings](docs/briefings.md)) |
 | **Plant care** | Plants, care logs and alerts. An hourly job reads one cached weather forecast per household (behind a `WeatherProvider` interface, Open-Meteo) and pushes watering, frost, heat, rain and wind reminders, without ever sending the same one twice ([plant care](docs/plants.md)) |
-| **MySQL 8.4** | 40 normalized tables with foreign keys, CHECK constraints, generated columns and soft-delete-safe unique keys ([ER diagrams](docs/database.md)). Window functions, CTEs, a view, and `EXPLAIN ANALYZE` before/after: [1,400× faster](docs/insights.md) |
+| **MySQL 8.4** | 41 normalized tables with foreign keys, CHECK constraints, generated columns and soft-delete-safe unique keys ([ER diagrams](docs/database.md)). Window functions, CTEs, a view, and `EXPLAIN ANALYZE` before/after: [1,400× faster](docs/insights.md) |
 | **React** | Inertia + React + TypeScript dashboard with Recharts and a week planner ([dashboard](docs/dashboard.md)). Vitest + React Testing Library |
 | **Oracle basics** | Interval partitions, ARCHIVELOG, `EXCHANGE PARTITION` archiving, RMAN level 0/1, Data Pump and four timed recovery drills ([runbook](ops/oracle/RUNBOOK.md)) |
 | **API hygiene** | One error format with codes and request ids, per-user rate limits, consistent paging/sorting/filtering ([API reference](docs/api.md)) |
@@ -100,6 +101,7 @@ curl -s localhost:8000/api/households -H "Authorization: Bearer $TOKEN" | jq
 | [Assistant](docs/assistant.md) | The AI assistant: model, tools, permissions and confirmation, API, evaluation ([Phase 2](docs/phase-2.md)) |
 | [Memory](docs/memory.md) | Short- and long-term memory, facts, notes and documents, embeddings and hybrid search, the activity timeline, household summaries ([Phase 3](docs/phase-3.md)) |
 | [Briefings](docs/briefings.md) | The daily briefing and personalised recommendations |
+| [Voice](docs/voice.md) | Choosing the speech technology, the voice service, talking in the browser, wake word, styles, privacy ([Phase 4](docs/phase-4.md)) |
 | [Plant care](docs/plants.md) | Plants, care logs, weather-aware alerts, the today and away-plan endpoints |
 | [Web dashboard](docs/dashboard.md) | Inertia pages, charts and the week planner |
 | [Oracle lab](docs/oracle.md) | Partitioning, archiving, RMAN, Data Pump and recovery drills |
@@ -115,7 +117,7 @@ curl -s localhost:8000/api/households -H "Authorization: Bearer $TOKEN" | jq
 
 ## Stack
 
-Laravel 13 · PHP 8.4 · Claude (Anthropic PHP SDK) · Voyage AI embeddings · Pest · MySQL 8.4 · Redis · Inertia + React 19 + TypeScript · Recharts · Vitest · Scramble (OpenAPI) · Docker · GitHub Actions · Oracle AI Database 26ai Free (lab). Phone app: [personal-home-helper](https://github.com/kgiannopoulou/personal-home-helper) (Expo, React Native).
+Laravel 13 · PHP 8.4 · Claude (Anthropic PHP SDK) · Voyage AI embeddings · Python (FastAPI) · faster-whisper · Piper · openWakeWord · Pest · MySQL 8.4 · Redis · Inertia + React 19 + TypeScript · Recharts · Vitest · Scramble (OpenAPI) · Docker · GitHub Actions · Oracle AI Database 26ai Free (lab). Phone app: [personal-home-helper](https://github.com/kgiannopoulou/personal-home-helper) (Expo, React Native).
 
 ## License
 

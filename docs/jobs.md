@@ -13,6 +13,7 @@ On the phone, the list filled itself only if someone opened the app the day befo
 | `WeeklyDigest` | Monday 05:00 | Last week (Monday to Sunday) in numbers and a paragraph, into `household_summaries` and long-term memory ([memory.md](memory.md#household-summaries)). |
 | `MonthlyDigest` | the 1st, 05:30 | The same for last month. |
 | `RememberConversations` | hourly at :15 | Not per household: assistant conversations quiet for an hour are summarised into their person's private long-term memory, one `SummarizeConversation` job each ([memory.md](memory.md#conversation-summaries)). |
+| `PruneVoiceConversations` | daily 03:45 | Not per household: deletes voice conversations older than each person's chosen retention (1, 7 or 30 days), with their summaries ([voice.md](voice.md#privacy-day-55)). |
 | `WeeklySummary` | Sunday 19:00 | An email (a Markdown `Mailable`) and a push to each member: spending this week, the month's pace, overdue chores and chores that changed frequency, and **their own** protein, fibre and water gaps (`NutritionGapsQuery`). Nobody sees another member's food. |
 
 ```php

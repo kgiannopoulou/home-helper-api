@@ -50,6 +50,7 @@ erDiagram
     users ||--o{ sleep_entries : "user_id"
     users ||--o{ step_counts : "user_id"
     users |o--o{ todos : "user_id"
+    users ||--o{ voice_settings : "user_id"
     users ||--o{ water_entries : "user_id"
     users ||--o{ weights : "user_id"
     users ||--o{ workouts : "user_id"
@@ -347,8 +348,8 @@ erDiagram
         timestamp pushed_at "nullable"
         timestamp resolved_at "nullable"
     }
-    households ||--o{ plant_alerts : "household_id"
     plants ||--o{ plant_alerts : "household_id"
+    households ||--o{ plant_alerts : "household_id"
     plants ||--o{ plant_alerts : "plant_id"
     plants ||--o{ plant_alerts : "plant_id"
     households ||--o{ plant_care_logs : "household_id"
@@ -492,6 +493,7 @@ erDiagram
         char household_id FK
         bigint user_id FK
         varchar title "nullable"
+        enum channel
         text summary "nullable"
         bigint summary_through_id "nullable"
         timestamp summarized_at "nullable"
@@ -606,4 +608,23 @@ erDiagram
     users |o--o{ notes : "user_id"
     households ||--o{ recommendation_feedback : "household_id"
     users ||--o{ recommendation_feedback : "user_id"
+```
+
+## Voice
+
+```mermaid
+erDiagram
+    voice_settings {
+        bigint id PK
+        bigint user_id FK, UK
+        varchar voice "nullable"
+        enum style
+        decimal rate
+        varchar language "nullable"
+        tinyint wake_word
+        tinyint continuous
+        smallint keep_days "nullable"
+        tinyint remember
+    }
+    users ||--o{ voice_settings : "user_id"
 ```
