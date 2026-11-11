@@ -2,6 +2,8 @@
 export type ConversationSummary = {
     id: string;
     title: string;
+    /** Typed or spoken (docs/voice.md#privacy) */
+    channel?: 'text' | 'voice';
     updated_at: string | null;
 };
 

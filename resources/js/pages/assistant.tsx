@@ -3,10 +3,12 @@ import { Bot, Check, MessageSquarePlus, Send, Trash2, X } from 'lucide-react';
 import type { FormEvent, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { RichText } from '@/components/assistant/rich-text';
+import { VoiceControls } from '@/components/assistant/voice-controls';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
+import { useVoice } from '@/hooks/use-voice';
 import { cn } from '@/lib/utils';
 import { assistant as assistantRoute } from '@/routes';
 import { destroy, message, show, start } from '@/routes/assistant';
@@ -16,6 +18,7 @@ import type {
     ConversationSummary,
     PendingAction,
 } from '@/types/assistant';
+import type { VoiceConfig, VoiceTurn } from '@/types/voice';
 
 type Props = {
     conversations: ConversationSummary[];
@@ -24,6 +27,8 @@ type Props = {
     actions: PendingAction[];
     provider: string;
     suggestions: string[];
+    /** Talking instead of typing (docs/voice.md); absent: voice is off */
+    voice?: VoiceConfig | null;
 };
 
 export default function Assistant({
@@ -33,6 +38,7 @@ export default function Assistant({
     actions,
     provider,
     suggestions,
+    voice = null,
 }: Props) {
     const [draft, setDraft] = useState('');
     /** The message on its way, shown until the answer arrives */
@@ -193,10 +199,43 @@ export default function Assistant({
                             <Send />
                         </Button>
                     </form>
+                    {voice && (
+                        <div className="pt-2">
+                            <VoicePanel config={voice} conversationId={conversation?.id ?? null} />
+                        </div>
+                    )}
                 </section>
             </div>
         </>
     );
+}
+
+/**
+ * The voice bar. Each answer is shown like a typed one: a new conversation is
+ * opened, an existing one reloaded, without losing the voice state.
+ */
+function VoicePanel({
+    config,
+    conversationId,
+}: {
+    config: VoiceConfig;
+    conversationId: string | null;
+}) {
+    const voice = useVoice(config, conversationId, (turn: VoiceTurn) => {
+        if (!turn.conversation) {
+            return;
+        }
+        if (turn.conversation.id !== conversationId) {
+            router.visit(show.url(turn.conversation.id), {
+                preserveState: true,
+                preserveScroll: true,
+            });
+        } else {
+            router.reload({ only: ['messages', 'actions', 'conversations'] });
+        }
+    });
+
+    return <VoiceControls voice={voice} config={config} />;
 }
 
 function EmptyState({
