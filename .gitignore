@@ -42,3 +42,6 @@ yarn-error.log
 /boost.json
 /opencode.json
 /opencode.jsonc
+services/voice/.venv/
+__pycache__/
+.pytest_cache/

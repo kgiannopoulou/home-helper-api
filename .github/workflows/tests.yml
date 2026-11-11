@@ -176,3 +176,25 @@ jobs:
 
       - name: npm audit (production dependencies, high and critical)
         run: npm audit --omit=dev --audit-level=high
+
+  # The Python voice service (services/voice) with its fake engines: the API,
+  # authentication and the wake-word socket, without downloading any model
+  voice-service:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: services/voice
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet -r requirements-test.txt
+
+      - name: pytest
+        run: .venv/bin/python -m pytest -q

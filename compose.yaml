@@ -64,6 +64,20 @@ services:
                 - ping
             retries: 3
             timeout: 5s
+    # Speech to text, text to speech and the wake word, all local (docs/voice.md).
+    # Optional: docker compose --profile voice up -d voice
+    voice:
+        build:
+            context: ./services/voice
+        profiles: ['voice']
+        ports:
+            - '${FORWARD_VOICE_PORT:-8090}:8090'
+        environment:
+            VOICE_SERVICE_TOKEN: '${VOICE_SERVICE_TOKEN}'
+            VOICE_ALLOWED_ORIGINS: '${APP_URL:-http://localhost:8000}'
+            VOICE_STT_MODEL: '${VOICE_STT_MODEL:-small}'
+        networks:
+            - sail
 networks:
     sail:
         driver: bridge
