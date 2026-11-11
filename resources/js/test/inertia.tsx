@@ -25,7 +25,41 @@ export const inertiaMock = {
         </a>
     ),
     usePage: () => page,
-    router: { post: vi.fn(), on: vi.fn(() => () => {}) },
+    /** <Form>: a plain form whose submit is recorded in `posts` with its fields */
+    Form: ({
+        action,
+        children,
+        className,
+    }: {
+        action: string;
+        className?: string;
+        children: (s: {
+            errors: Record<string, string>;
+            processing: boolean;
+        }) => ReactNode;
+    }) => (
+        <form
+            action={action}
+            className={className}
+            onSubmit={(e) => {
+                e.preventDefault();
+                posts.push({
+                    url: action,
+                    data: Object.fromEntries(
+                        new FormData(e.currentTarget).entries(),
+                    ),
+                });
+            }}
+        >
+            {children({ errors: {}, processing: false })}
+        </form>
+    ),
+    router: {
+        post: vi.fn(),
+        get: vi.fn(),
+        delete: vi.fn(),
+        on: vi.fn(() => () => {}),
+    },
     useForm: <T extends Record<string, unknown>>(initial: T) => {
         const [data, setAll] = useState<T>(initial);
 

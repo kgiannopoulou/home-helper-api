@@ -19,6 +19,7 @@ class OfflineChatModel implements ChatModel
 {
     /** keyword pattern → tools to call */
     private const ROUTES = [
+        '/\b(brief me|briefing|good morning|focus on|suggestions?|recommend\w*)\b/i' => ['get_daily_briefing'],
         '/\b(today|day|plan|should i do)\b/i' => ['get_today_plan'],
         '/\b(buy|shopping|groceries|shop)\b/i' => ['get_shopping_list'],
         '/\b(spend|spent|spending|money|budget|cost)\b/i' => ['get_spending_summary'],
@@ -56,11 +57,45 @@ class OfflineChatModel implements ChatModel
                 array_push($tools, ...$routeTools);
             }
         }
+        // Memory (Phase 3): the past, written-down things, remembered facts
+        if (preg_match('/^\s*(?:please\s+)?remember\s+(?:that\s+)?(.+?)[.!]?\s*$/is', $text, $m)) {
+            $kind = preg_match('/\b(prefers?|likes?|loves?|hates?|don\'t|doesn\'t|never|always|vegetarian|vegan|allergic)\b/i', $m[1]) ? 'preference'
+                : (preg_match('/\b(every|each|on (mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays))\b/i', $m[1]) ? 'routine' : 'fact');
+
+            return $this->call([['remember_fact', ['kind' => $kind, 'content' => Str::ucfirst(trim($m[1]))]]]);
+        }
+        $memory = [];
+        if (preg_match('/\b(when did|last time|how long ago|who (watered|cleaned|did|paid|bought)|history|happened)\b/i', $text)) {
+            $memory[] = ['get_activity_timeline', array_filter(['from' => now()->subYear()->toDateString(), 'search' => self::keyword($text)])];
+        }
+        if (preg_match('/\b(last month|last week|compare\w*|how did .+ go|summary|summaries)\b/i', $text)) {
+            $memory[] = ['get_household_summaries', ['period' => preg_match('/\bweek/i', $text) ? 'week' : 'month']];
+        }
+        if (preg_match('/\b(decide\w*|notes?|manual|instructions?|how do (i|we)|told you|documents?|warranty|remember\w*)\b/i', $text)) {
+            $memory[] = ['search_household_memory', ['query' => $text]];
+        }
+        if ($memory !== []) {
+            return $this->call($memory);
+        }
+
         if ($tools !== []) {
             return $this->call(array_map(fn (string $t) => [$t, []], array_slice(array_values(array_unique($tools)), 0, 4)));
         }
 
         return ChatReply::text("I'm running without a language model, so I only understand the common questions: what to buy, what you spent this month, overdue chores and to-dos, which plants need attention, bills, the weather, and what to do today. You can also say \"add milk to the list\".");
+    }
+
+    /** The word a timeline search should match: a Name in the sentence, else its longest word */
+    private static function keyword(string $text): ?string
+    {
+        if (preg_match_all('/(?<!^)(?<![.?!]\s)\b([A-Z][\p{L}-]{2,})/u', $text, $m)) {
+            return end($m[1]);
+        }
+        $words = array_filter(preg_split('/[^\p{L}]+/u', $text) ?: [], fn (string $w) => mb_strlen($w) > 3
+            && ! in_array(mb_strtolower($w), ['when', 'last', 'time', 'what', 'who', 'did', 'have', 'were', 'this', 'that', 'with', 'from', 'happened', 'history', 'long', 'ago'], true));
+        usort($words, fn ($a, $b) => mb_strlen($b) <=> mb_strlen($a));
+
+        return $words[0] ?? null;
     }
 
     /** @param list<array{0: string, 1: array<string, mixed>}> $calls */
@@ -100,7 +135,15 @@ class OfflineChatModel implements ChatModel
                 'get_kitchen_inventory' => $this->list('Low or empty', array_column($c['low_or_empty'], 'name'), 'Nothing in the kitchen is low.'),
                 'list_upcoming_events' => $this->list('Coming up', array_map(fn ($x) => "{$x['starts']}: {$x['title']}", $c['events']), 'Nothing on the calendar this week.'),
                 'list_home_maintenance' => $this->list('Coming up', array_map(fn ($x) => "{$x['title']} ({$x['due_on']})", $c['admin']), 'No renewals or appointments coming up.'),
-                'add_shopping_item' => 'I can add that: '.$c['proposed'].'. Confirm it below.',
+                'add_shopping_item', 'remember_fact', 'save_note', 'forget_fact' => 'I can do that: '.$c['proposed'].'. Confirm it below.',
+                'get_daily_briefing' => $c['briefing'],
+                'search_household_memory' => $c['hits']
+                    ? $this->list('From your notes and memory', array_map(fn ($h) => $h['title'].($h['about_date'] ? " ({$h['about_date']})" : '').': '.Str::limit(preg_replace('/\s+/', ' ', $h['passage']) ?? '', 400), array_slice($c['hits'], 0, 3)))
+                    : 'I found nothing about that in your notes or memory.',
+                'get_activity_timeline' => $this->list('Most recent first', array_map(fn ($e) => "{$e['date']}".($e['time'] ? " {$e['time']}" : '').": {$e['title']}".($e['who'] ? " ({$e['who']})" : ''), array_slice($c['entries'], 0, 6)), 'Nothing like that in the household\'s history.'),
+                'get_household_summaries' => $c['summaries'] ? implode('
+
+', array_map(fn ($x) => $x['text'], array_slice($c['summaries'], 0, 2))) : $c['note'],
                 default => 'Done.',
             };
         }

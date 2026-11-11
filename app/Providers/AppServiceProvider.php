@@ -109,6 +109,9 @@ class AppServiceProvider extends ServiceProvider
         // There is also a daily cap per person (homehelper.ai.daily_messages).
         RateLimiter::for('ai', fn (Request $request) => Limit::perMinute(10)->by('ai:'.$byUser($request)));
 
+        // Documents are parsed (PDF text) and embedded on upload
+        RateLimiter::for('uploads', fn (Request $request) => Limit::perMinute(10)->by('uploads:'.$byUser($request)));
+
         // The health check queries the database, Redis and the disk: enough for
         // a monitor polling every few seconds, not for someone hammering it
         RateLimiter::for('health', fn (Request $request) => Limit::perMinute(30)->by('health:'.$request->ip()));

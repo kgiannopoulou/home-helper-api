@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -16,11 +17,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $household_id
  * @property int $user_id
  * @property string|null $title
+ * @property string|null $summary the messages up to summary_through_id, summarised (docs/memory.md#conversation-summaries)
+ * @property int|null $summary_through_id
+ * @property CarbonImmutable|null $summarized_at
+ * @property CarbonImmutable $updated_at
+ * @property-read Household $household
  */
-#[Fillable(['title'])]
+#[Fillable(['title', 'summary', 'summary_through_id', 'summarized_at'])]
 class AiConversation extends Model
 {
     use HasUlids;
+
+    protected function casts(): array
+    {
+        return ['summarized_at' => 'datetime'];
+    }
 
     public function getDateFormat(): string
     {

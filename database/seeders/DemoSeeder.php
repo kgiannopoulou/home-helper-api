@@ -7,12 +7,14 @@ use App\Enums\BudgetPeriod;
 use App\Enums\Drink;
 use App\Enums\ExpenseCategory;
 use App\Enums\ExpenseSource;
+use App\Enums\FactKind;
 use App\Enums\FoodSource;
 use App\Enums\HouseholdRole;
 use App\Enums\Intensity;
 use App\Enums\ItemCategory;
 use App\Enums\LightRequirement;
 use App\Enums\Meal;
+use App\Enums\NoteKind;
 use App\Enums\PlantCareType;
 use App\Enums\PlantLocation;
 use App\Enums\ShoppingSource;
@@ -28,6 +30,7 @@ use App\Support\HomeTime;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -39,6 +42,8 @@ use RuntimeException;
  * - "Clean the oven" set to every 14 days but done every 3–5 weeks
  * - food, water, sleep, workouts and a slowly falling weight for the owner
  * - six plants with their waterings, one due today and one late
+ * - remembered facts and notes (a vegetarian, the bins, the boiler, the holiday plan), and
+ *   weekly and monthly summaries of the past five months, all indexed for search
  *
  * The same random seed every time, so the numbers in the README stay true.
  */
@@ -80,7 +85,83 @@ class DemoSeeder extends Seeder
             $this->health();
             $this->planner();
             $this->plants();
+            $this->memory();
         });
+
+        // Model events are off while seeding, so memory is indexed here, after the commit
+        $this->rememberPast();
+    }
+
+    /**
+     * Phase 3: what the household has told Home Helper, and notes it wrote down.
+     */
+    private function memory(): void
+    {
+        $at = fn (int $daysAgo) => $this->today->copy()->subDays($daysAgo)->setTime(19, 30);
+        $facts = [
+            [$this->owner, $this->partner, FactKind::Preference, 'Doesn\'t eat meat; fish is fine.', false, 120],
+            [$this->owner, null, FactKind::Preference, 'The big weekly shop is on Saturday morning at the street market, with a top-up at the supermarket.', false, 110],
+            [$this->partner, null, FactKind::Routine, 'The bins go out on Tuesday and Friday nights.', false, 95],
+            [$this->owner, null, FactKind::Routine, 'Konstantina waters the balcony plants; Alex does the indoor ones.', false, 60],
+            [$this->owner, null, FactKind::Fact, 'The boiler was last serviced in March by the building\'s technician; the next service is due in March.', false, 40],
+            [$this->partner, null, FactKind::Fact, 'The rent goes up to €650 from January.', false, 12],
+            [$this->owner, $this->partner, FactKind::Fact, 'Alex\'s birthday present (the ceramics workshop voucher) is hidden in the hall cupboard.', true, 6],
+        ];
+        foreach ($facts as [$by, $about, $kind, $content, $private, $ago]) {
+            $fact = $this->home->facts()->make([
+                'user_id' => $by->id, 'about_user_id' => $about?->id, 'kind' => $kind, 'content' => $content,
+                'source' => 'person', 'private' => $private,
+            ]);
+            $fact->forceFill(['created_at' => $at($ago), 'updated_at' => $at($ago)])->save();
+        }
+
+        $notes = [
+            [$this->owner, NoteKind::Note, 'Boiler: low pressure reset', 75, <<<'TXT'
+                When the boiler shows low pressure (the gauge under 1 bar, or error F22), it stops heating.
+
+                1. Turn the boiler off at the switch and let it cool for 10 minutes.
+                2. Under the boiler there are two taps joined by the silver filling loop. Open both slowly until the gauge reads 1.5 bar, then close them.
+                3. Turn the boiler back on and hold the reset button for 5 seconds.
+
+                If it drops below 1 bar again within a week, there is a leak: call the building's technician, don't keep refilling.
+                TXT],
+            [$this->partner, NoteKind::Document, 'Washing machine: error codes', 140, <<<'TXT'
+                From the manual of the new washing machine (bought after the old one broke).
+
+                E13: no water coming in. Check the tap behind the machine is open and the inlet hose isn't kinked.
+                E21: it can't drain. Clean the pump filter behind the small door bottom right; put a tray under it first.
+                E32: the load is unbalanced. Redistribute the laundry and run a spin.
+                Door won't open: wait two minutes after the end; if it still won't, run a drain cycle.
+
+                Descale every three months with a hot empty wash and a cup of white vinegar.
+                TXT],
+            [$this->owner, NoteKind::Note, 'Summer holiday: what we decided', 21, <<<'TXT'
+                Decided on Sunday evening: ten days on Naxos at the end of June, ferry from Piraeus.
+
+                Budget: €1,400 for both of us, everything included. We put €120 a month aside from December.
+                Book the ferry by the end of March (the early prices go then) and the room once the dates are fixed.
+                Alex asks for his days off at work in January.
+                TXT],
+            [$this->partner, NoteKind::Note, 'Wi-Fi and the router', 50, <<<'TXT'
+                The router is on the shelf in the hall cupboard. If the internet drops, unplug it for 30 seconds; it takes two minutes to come back.
+                The guest network is "Patission-Guest". The provider's support line is on the back of the router.
+                TXT],
+        ];
+        foreach ($notes as [$by, $kind, $title, $ago, $body]) {
+            $this->home->notes()->make(['user_id' => $by->id, 'kind' => $kind, 'title' => $title, 'body' => $body])
+                ->forceFill(['created_at' => $at($ago), 'updated_at' => $at($ago)])->save();
+        }
+
+        // A few finished jobs to ask about: "when did we last descale the kettle?"
+        foreach ([['Descale the kettle', 47], ['Replace the shower head filter', 33], ['Clean the extractor fan filter', 16]] as [$title, $ago]) {
+            $this->home->todos()->create(['user_id' => $this->partner->id, 'title' => $title, 'minutes' => 20, 'done_at' => $at($ago)]);
+        }
+    }
+
+    /** Summaries of the past five months and their weeks, and everything indexed for search */
+    private function rememberPast(): void
+    {
+        Artisan::call('memory:reindex', ['--household' => $this->home->id, '--digests' => 5]);
     }
 
     private function people(): void
@@ -316,6 +397,14 @@ class DemoSeeder extends Seeder
                     // Most chores happen around their schedule; the oven keeps getting put off
                     $gap = $slips ? mt_rand(22, 36) : max(1, $every + mt_rand(-1, (int) ceil($every / 4)));
                     $at->addDays($gap);
+                }
+
+                // The oven is the demo's overdue chore on every date: if its last
+                // clean is too recent, it didn't happen (no random draws, so the
+                // rest of the data stays the same)
+                while ($slips && ($last = $chore->completions()->latest('done_at')->first())
+                    && Carbon::parse($last->done_at)->gt($this->today->copy()->subDays($every + 3))) {
+                    $last->forceDelete();
                 }
             }
         }

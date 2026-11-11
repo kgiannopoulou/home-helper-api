@@ -41,6 +41,13 @@ class AiEval extends Command
         ['Are any bills due before the end of the month, and will we stay within budget?', [['get_upcoming_bills'], ['get_spending_summary']]],
         ['Is anything in the kitchen running low that isn\'t on the list yet?', [['get_kitchen_inventory', 'get_shopping_list']]],
         ['Add oat milk to the shopping list.', [['add_shopping_item']]],
+        // Phase 3: memory and history (day 42)
+        ['When did we last descale the kettle?', [['get_activity_timeline', 'search_household_memory']]],
+        ['What did we decide about the summer holiday?', [['search_household_memory']]],
+        ['How do I fix low pressure on the boiler?', [['search_household_memory', 'read_note']]],
+        ['How did last month go compared with the month before?', [['get_household_summaries', 'get_spending_summary']]],
+        ['Remember that the plumber comes on Thursdays.', [['remember_fact']]],
+        ['Brief me for today.', [['get_daily_briefing', 'get_today_plan']]],
     ];
 
     public function handle(Assistant $assistant): int

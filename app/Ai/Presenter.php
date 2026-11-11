@@ -23,7 +23,7 @@ class Presenter
         return [
             'id' => $conversation->id,
             'title' => $conversation->title ?? 'New conversation',
-            'updated_at' => $conversation->updated_at?->toIso8601String(),
+            'updated_at' => $conversation->updated_at->toIso8601String(),
         ];
     }
 

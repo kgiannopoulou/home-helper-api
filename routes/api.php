@@ -4,6 +4,7 @@ use App\Enums\PlantCareType;
 use App\Http\Controllers\Api\AdminItemController;
 use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BriefingController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\ChoreCompletionController;
 use App\Http\Controllers\Api\ChoreController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Api\InsightController;
 use App\Http\Controllers\Api\InventoryItemController;
 use App\Http\Controllers\Api\InviteController;
 use App\Http\Controllers\Api\ItemPriceController;
+use App\Http\Controllers\Api\MemoryController;
 use App\Http\Controllers\Api\PlantAlertController;
 use App\Http\Controllers\Api\PlantCareController;
 use App\Http\Controllers\Api\PlantCareLogController;
@@ -107,6 +109,30 @@ Route::name('api.')->group(function () {
             Route::prefix('plant-care')->name('plant-care.')->controller(PlantCareController::class)->group(function () {
                 Route::get('today', 'today')->name('today');
                 Route::get('plan', 'plan')->name('plan');
+            });
+
+            // Memory (docs/memory.md#api): facts, notes and documents, search
+            Route::prefix('memory')->name('memory.')->controller(MemoryController::class)->group(function () {
+                Route::get('facts', 'facts')->name('facts.index');
+                Route::post('facts', 'storeFact')->name('facts.store');
+                Route::patch('facts/{fact}', 'updateFact')->name('facts.update');
+                Route::delete('facts/{fact}', 'destroyFact')->name('facts.destroy');
+                Route::get('notes', 'notes')->name('notes.index');
+                Route::post('notes', 'storeNote')->middleware('throttle:uploads')->name('notes.store');
+                Route::get('notes/{note}', 'showNote')->name('notes.show');
+                Route::patch('notes/{note}', 'updateNote')->name('notes.update');
+                Route::delete('notes/{note}', 'destroyNote')->name('notes.destroy');
+                Route::get('notes/{note}/file', 'download')->name('notes.file');
+                Route::get('search', 'search')->name('search');
+            });
+
+            // Household intelligence (docs/briefings.md#api)
+            Route::controller(BriefingController::class)->group(function () {
+                Route::get('briefing', 'briefing')->name('briefing');
+                Route::get('recommendations', 'recommendations')->name('recommendations.index');
+                Route::post('recommendations/feedback', 'feedback')->name('recommendations.feedback');
+                Route::get('timeline', 'timeline')->name('timeline');
+                Route::get('summaries', 'summaries')->name('summaries.index');
             });
 
             Route::post('sync', SyncController::class)->middleware('throttle:sync')->name('sync');
