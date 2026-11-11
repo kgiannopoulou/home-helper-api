@@ -217,6 +217,24 @@ class Household extends Model
         return $this->hasMany(PlantAlert::class);
     }
 
+    /** @return HasMany<HouseholdFact, $this> */
+    public function facts(): HasMany
+    {
+        return $this->hasMany(HouseholdFact::class);
+    }
+
+    /** @return HasMany<Note, $this> */
+    public function notes(): HasMany
+    {
+        return $this->hasMany(Note::class);
+    }
+
+    /** @return HasMany<HouseholdSummary, $this> */
+    public function summaries(): HasMany
+    {
+        return $this->hasMany(HouseholdSummary::class);
+    }
+
     /** @return HasMany<JobRun, $this> */
     public function jobRuns(): HasMany
     {

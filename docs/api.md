@@ -37,6 +37,13 @@ GET  /api/households/{household}/plant-care/{today|plan}    see plants.md
 GET|POST /api/households/{household}/assistant/conversations          the assistant, see assistant.md
 POST     /api/households/{household}/assistant/conversations/{id}/messages
 POST     /api/households/{household}/assistant/actions/{id}/{confirm|decline}
+GET|POST /api/households/{household}/memory/facts                     facts and preferences, see memory.md
+GET|POST /api/households/{household}/memory/notes                     notes; multipart `file` for a document
+GET      /api/households/{household}/memory/search?q=                 hybrid search over notes, facts, summaries
+GET      /api/households/{household}/timeline                         what happened, from every module
+GET      /api/households/{household}/summaries                        weekly and monthly summaries
+GET      /api/households/{household}/briefing                         today's briefing, see briefings.md
+GET|POST /api/households/{household}/recommendations[/feedback]
 ```
 
 **Modules:** `expenses`, `recurring-bills`, `budgets`, `inventory-items`, `purchases`, `shopping-items`, `shopping-trips`, `item-prices`, `rooms`, `chores`, `chore-completions`, `supplies`, `food-entries`, `water-entries`, `sleep-entries`, `workouts`, `weights`, `events`, `todos`, `admin-items`, `plants`, `plant-care-logs`.
@@ -128,6 +135,7 @@ A server error looks like this in production; quote the `request_id` when report
 | `invites`: `POST …/invites` | 20 / hour (each one sends an email) | user |
 | `health`: `GET /api/health` | 30 / minute | IP |
 | `ai`: sending to the assistant (API and page) | 10 / minute, plus 200 / day | user |
+| `uploads`: adding a note or document (API and page) | 10 / minute | user |
 | web: `POST household/invites` | 10 / minute | user |
 | web: Fortify login | 5 / minute | email + IP |
 | web: two-factor code | 5 / minute | login attempt |

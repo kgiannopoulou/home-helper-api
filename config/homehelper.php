@@ -91,13 +91,49 @@ return [
         'max_tokens' => (int) env('AI_MAX_TOKENS', 16000),
         // Model → tools → model rounds in one reply, before it stops
         'max_tool_rounds' => 8,
-        // A conversation longer than this has to start over (whole history is sent each turn)
-        'max_messages' => 200,
+        // A conversation longer than this has to start over. Older messages are
+        // summarised (homehelper.memory), so this is a safety stop, not the context size
+        'max_messages' => 1000,
         'confirmation_minutes' => 30,
         // Messages a person may send per day, across all their conversations
         'daily_messages' => (int) env('AI_DAILY_MESSAGES', 200),
         // false: the assistant only reads, even with confirmation
         'allow_writes' => (bool) env('AI_ALLOW_WRITES', true),
+    ],
+
+    /*
+    | Memory (docs/memory.md). `embedder`:
+    |   local   feature hashing in PHP: no key, no network, matches words and
+    |           their forms (descale ≈ descaling), not meaning
+    |   voyage  Voyage AI embeddings (needs VOYAGE_API_KEY): real semantic search
+    | After changing it, re-embed everything: php artisan memory:reindex
+    */
+    'memory' => [
+        'embedder' => env('MEMORY_EMBEDDER', 'local'),
+        'voyage_model' => env('VOYAGE_MODEL', 'voyage-4'),
+        'dimensions' => (int) env('MEMORY_DIMENSIONS', 512),
+        // Passages are cut at paragraph breaks to about this many characters
+        'chunk_chars' => 900,
+        // A conversation with more unsummarised messages than this is compacted:
+        // the older part becomes a summary, the newest keep_recent stay verbatim
+        'summarize_after' => (int) env('AI_SUMMARIZE_AFTER', 40),
+        'keep_recent' => 16,
+        // An idle conversation is summarised into long-term memory after this long
+        'remember_after_minutes' => 60,
+        // Household facts written into every assistant context (newest first)
+        'context_facts' => 60,
+        // Upload limit for documents, in kilobytes
+        'max_upload_kb' => 5120,
+    ],
+
+    /*
+    | The morning briefing (docs/briefings.md), at home time, for every member.
+    */
+    'briefing' => [
+        'time' => env('BRIEFING_TIME', '07:00'),
+        'max_recommendations' => 5,
+        // "Not now" hides a recommendation for this many days
+        'dismiss_days' => 7,
     ],
 
     /*

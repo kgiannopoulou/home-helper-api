@@ -3,9 +3,13 @@
 use App\Jobs\ApplyRecurringBills;
 use App\Jobs\BudgetAlert;
 use App\Jobs\CheckPlantCare;
+use App\Jobs\DailyBriefing;
 use App\Jobs\HouseholdJob;
 use App\Jobs\LearnChoreFrequencies;
+use App\Jobs\MonthlyDigest;
 use App\Jobs\PrepareShoppingList;
+use App\Jobs\RememberConversations;
+use App\Jobs\WeeklyDigest;
 use App\Jobs\WeeklySummary;
 use App\Ops\SystemHealth;
 use Illuminate\Foundation\Inspiring;
@@ -32,6 +36,17 @@ Schedule::job(new BudgetAlert)->dailyAt('18:00')->timezone($home)->onOneServer()
 Schedule::job(new WeeklySummary)->sundays()->at('19:00')->timezone($home)->onOneServer();
 // One evaluator for every plant, not one schedule per plant (app/Jobs/CheckPlantCare.php)
 Schedule::job(new CheckPlantCare)->hourly()->timezone($home)->onOneServer();
+
+/*
+| Memory and household intelligence (Phase 3, docs/memory.md, docs/briefings.md).
+*/
+// Each member's morning briefing, pushed to their phones
+Schedule::job(new DailyBriefing)->dailyAt(config('homehelper.briefing.time'))->timezone($home)->onOneServer();
+// Last week and last month, written into long-term memory
+Schedule::job(new WeeklyDigest)->mondays()->at('05:00')->timezone($home)->onOneServer();
+Schedule::job(new MonthlyDigest)->monthlyOn(1, '05:30')->timezone($home)->onOneServer();
+// Conversations that went quiet, summarised into long-term memory
+Schedule::job(new RememberConversations)->hourlyAt(15)->onOneServer();
 
 /*
 | Keeping it running (docs/operations.md). Times are at home too.

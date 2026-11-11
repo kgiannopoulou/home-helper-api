@@ -122,8 +122,8 @@ test('a member asking gets the household\'s shared answers, and nobody\'s health
         ->and(implode(' ', array_column($model->requests[0]->tools, 'name')))->not->toMatch('/sleep|weight|food|water_entr|workout/');
 });
 
-test('ai:eval with the offline model: every deliverable question answered from the right tools', function () {
+test('ai:eval with the offline model: every deliverable question, and the memory ones, answered from the right tools', function () {
     $this->artisan('ai:eval', ['--provider' => 'offline'])
-        ->expectsOutputToContain('9/9 passed')
+        ->expectsOutputToContain('15/15 passed')
         ->assertSuccessful();
 });

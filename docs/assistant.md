@@ -1,6 +1,6 @@
 # The assistant
 
-Phase 2 ([phase-2.md](phase-2.md)): Home Helper answers questions about the household in plain language, using the household's own data, and proposes changes that only happen once you confirm them.
+Phase 2 ([phase-2.md](phase-2.md)), with memory added in Phase 3 ([memory.md](memory.md)): Home Helper answers questions about the household in plain language, using the household's own data, and proposes changes that only happen once you confirm them.
 
 > **What do I need to buy?** · **How much did I spend this month?** · **What tasks are overdue?** · **Which plants need attention?** · **What should I do today?**
 
@@ -38,7 +38,7 @@ sequenceDiagram
     P->>A: "What should I do today?"
     A->>DB: store the message
     loop until the model answers (max 8 rounds)
-        A->>M: instructions + household context + whole conversation + tools
+        A->>M: instructions + household context + conversation + tools
         M-->>A: tool calls: get_today_plan, get_weather_forecast
         A->>DB: store the assistant turn (with Claude's own blocks)
         A->>R: run each call: member? allowed? valid input?
@@ -57,7 +57,7 @@ sequenceDiagram
 
 ### Conversation history and context
 
-Everything is stored as it happens in `ai_messages` (user, assistant, tool_results, event), and **every turn sends the whole conversation**, so follow-ups work ("and how much of it?"). The request is built so it stays cacheable:
+Everything is stored as it happens in `ai_messages` (user, assistant, tool_results, event), and every turn sends the conversation, so follow-ups work ("and how much of it?"). Since Phase 3 a long conversation is sent as a summary of its older part plus its newest messages, and the household's remembered facts are in the context ([memory.md](memory.md#conversation-summaries)). The request is built so it stays cacheable:
 
 1. **Tools**, in a fixed order (sorted by name).
 2. **Instructions** (`Assistant::INSTRUCTIONS`): the same for everyone. Prompt-cache breakpoint here.

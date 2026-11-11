@@ -12,6 +12,7 @@ erDiagram
     ai_conversations ||--o{ ai_messages : "conversation_id"
     ai_conversations ||--o{ ai_pending_actions : "conversation_id"
     users ||--o{ ai_pending_actions : "user_id"
+    users ||--o{ briefings : "user_id"
     chores ||--o{ chore_completions : "chore_id"
     chores ||--o{ chore_completions : "chore_id"
     users |o--o{ chore_completions : "user_id"
@@ -24,12 +25,16 @@ erDiagram
     recurring_bills |o--o{ expenses : "recurring_bill_id"
     users |o--o{ expenses : "user_id"
     users ||--o{ food_entries : "user_id"
+    users |o--o{ household_facts : "about_user_id"
+    users |o--o{ household_facts : "user_id"
     households ||--o{ household_user : "household_id"
     users ||--o{ household_user : "user_id"
     households ||--o{ invites : "household_id"
     users |o--o{ invites : "invited_by"
     shopping_trips |o--o{ item_prices : "shopping_trip_id"
     households ||--o{ job_runs : "household_id"
+    users |o--o{ memory_chunks : "user_id"
+    users |o--o{ notes : "user_id"
     plants ||--o{ plant_alerts : "plant_id"
     plants ||--o{ plant_alerts : "plant_id"
     plants ||--o{ plant_care_logs : "plant_id"
@@ -39,6 +44,7 @@ erDiagram
     inventory_items ||--o{ purchases : "inventory_item_id"
     inventory_items ||--o{ purchases : "inventory_item_id"
     shopping_trips |o--o{ purchases : "shopping_trip_id"
+    users ||--o{ recommendation_feedback : "user_id"
     users |o--o{ shopping_items : "added_by"
     users |o--o{ shopping_trips : "user_id"
     users ||--o{ sleep_entries : "user_id"
@@ -486,6 +492,9 @@ erDiagram
         char household_id FK
         bigint user_id FK
         varchar title "nullable"
+        text summary "nullable"
+        bigint summary_through_id "nullable"
+        timestamp summarized_at "nullable"
     }
     ai_messages {
         bigint id PK
@@ -516,4 +525,85 @@ erDiagram
     ai_conversations ||--o{ ai_messages : "conversation_id"
     ai_conversations ||--o{ ai_pending_actions : "conversation_id"
     users ||--o{ ai_pending_actions : "user_id"
+```
+
+## Memory and briefings
+
+```mermaid
+erDiagram
+    household_facts {
+        char id PK
+        char household_id FK
+        bigint user_id FK "nullable"
+        bigint about_user_id FK "nullable"
+        enum kind
+        varchar content
+        enum source
+        tinyint private
+    }
+    notes {
+        char id PK
+        char household_id FK
+        bigint user_id FK "nullable"
+        enum kind
+        varchar title
+        mediumtext body
+        varchar file_path "nullable"
+        varchar file_name "nullable"
+        varchar mime "nullable"
+        int size "nullable"
+        tinyint private
+    }
+    household_summaries {
+        char id PK
+        char household_id FK
+        enum period
+        date starts_on
+        date ends_on
+        json stats
+        text text
+    }
+    memory_chunks {
+        bigint id PK
+        char household_id FK
+        bigint user_id FK "nullable"
+        enum source_type
+        varchar source_id
+        smallint chunk
+        varchar title
+        text text
+        date occurred_on "nullable"
+        blob embedding
+        varchar embedder
+    }
+    briefings {
+        char id PK
+        char household_id FK
+        bigint user_id FK
+        date date
+        json content
+        text text
+        tinyint pushed
+    }
+    recommendation_feedback {
+        bigint id PK
+        char household_id FK
+        bigint user_id FK
+        varchar key
+        varchar rule
+        enum verdict
+        date hidden_until "nullable"
+    }
+    households ||--o{ briefings : "household_id"
+    users ||--o{ briefings : "user_id"
+    users |o--o{ household_facts : "about_user_id"
+    households ||--o{ household_facts : "household_id"
+    users |o--o{ household_facts : "user_id"
+    households ||--o{ household_summaries : "household_id"
+    households ||--o{ memory_chunks : "household_id"
+    users |o--o{ memory_chunks : "user_id"
+    households ||--o{ notes : "household_id"
+    users |o--o{ notes : "user_id"
+    households ||--o{ recommendation_feedback : "household_id"
+    users ||--o{ recommendation_feedback : "user_id"
 ```

@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Web\AssistantController;
+use App\Http\Controllers\Web\BriefingController;
 use App\Http\Controllers\Web\ChoresController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\HealthController;
 use App\Http\Controllers\Web\HouseholdController;
+use App\Http\Controllers\Web\MemoryController;
 use App\Http\Controllers\Web\PlannerController;
 use App\Http\Controllers\Web\SpendingController;
 use App\Http\Controllers\Web\SystemHealthController;
@@ -27,6 +29,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('chores', ChoresController::class)->name('chores');
         Route::get('planner', [PlannerController::class, 'show'])->name('planner');
         Route::post('planner/apply', [PlannerController::class, 'apply'])->name('planner.apply');
+
+        // Today: the briefing, recommendations, timeline, summaries (docs/briefings.md)
+        Route::get('briefing', [BriefingController::class, 'show'])->name('briefing');
+        Route::post('briefing/feedback', [BriefingController::class, 'feedback'])->name('briefing.feedback');
+
+        // What Home Helper remembers (docs/memory.md)
+        Route::controller(MemoryController::class)->prefix('memory')->group(function () {
+            Route::get('/', 'show')->name('memory');
+            Route::post('facts', 'storeFact')->name('memory.facts.store');
+            Route::delete('facts/{fact}', 'destroyFact')->name('memory.facts.destroy');
+            Route::post('notes', 'storeNote')->middleware('throttle:uploads')->name('memory.notes.store');
+            Route::delete('notes/{note}', 'destroyNote')->name('memory.notes.destroy');
+        });
 
         // The assistant (docs/assistant.md)
         Route::controller(AssistantController::class)->prefix('assistant')->group(function () {

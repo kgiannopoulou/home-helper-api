@@ -28,6 +28,7 @@ class SchemaDiagram extends Command
         'Health logs' => ['food_entries', 'water_entries', 'sleep_entries', 'workouts', 'weights', 'step_counts'],
         'Planner and life admin' => ['events', 'todos', 'admin_items'],
         'Assistant' => ['ai_conversations', 'ai_messages', 'ai_pending_actions'],
+        'Memory and briefings' => ['household_facts', 'notes', 'household_summaries', 'memory_chunks', 'briefings', 'recommendation_feedback'],
     ];
 
     /** Columns every synced table has; described once in the intro instead */

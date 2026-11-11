@@ -46,6 +46,12 @@ return [
         'timeout' => (int) env('ANTHROPIC_TIMEOUT', 120),
     ],
 
+    // Embeddings for semantic search when MEMORY_EMBEDDER=voyage (docs/memory.md#embeddings)
+    'voyage' => [
+        'api_key' => env('VOYAGE_API_KEY'),
+        'timeout' => (int) env('VOYAGE_TIMEOUT', 30),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

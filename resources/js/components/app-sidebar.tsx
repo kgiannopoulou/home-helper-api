@@ -2,12 +2,14 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     Activity,
     Bot,
+    Brain,
     CalendarCheck,
     FolderGit2,
     HeartPulse,
     House,
     LayoutGrid,
     Sparkles,
+    Sun,
     Wallet,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -25,9 +27,11 @@ import {
 } from '@/components/ui/sidebar';
 import {
     assistant,
+    briefing,
     chores,
     dashboard,
     health,
+    memory,
     planner,
     spending,
 } from '@/routes';
@@ -37,7 +41,9 @@ import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+    { title: 'Today', href: briefing(), icon: Sun },
     { title: 'Assistant', href: assistant(), icon: Bot },
+    { title: 'Memory', href: memory(), icon: Brain },
     { title: 'Spending', href: spending(), icon: Wallet },
     { title: 'Health', href: health(), icon: HeartPulse },
     { title: 'Chores', href: chores(), icon: Sparkles },
