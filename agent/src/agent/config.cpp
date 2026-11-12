@@ -183,6 +183,7 @@ json Config::example(const std::string& serverUrl) {
                         {"sensitive", true}});
 #endif
     return {
+        {"$schema", "https://raw.githubusercontent.com/kgiannopoulou/home-helper-api/main/agent/docs/agent.schema.json"},
         {"server_url", serverUrl},
         {"name", ""},
         {"log", {{"level", "info"}, {"file", true}}},

@@ -16,6 +16,7 @@
 #include "core/version.hpp"
 #include "monitor/system_monitor.hpp"
 #include "net/api_client.hpp"
+#include "service/service.hpp"
 #include "shutdown.hpp"
 
 #include <spdlog/spdlog.h>
@@ -47,7 +48,11 @@ Setting up:
 
 Running:
   run                      Connect and keep reporting, until Ctrl+C (the service does this)
-      [--once]               One heartbeat, then exit
+      [--once]               One heartbeat (and any commands it brings), then exit
+      [--service]            How the Windows service starts it (not for typing)
+  service install          Install and start the Windows service (elevated prompt)
+  service uninstall|start|stop|status
+                           On Linux: see packaging/linux (systemd)
 
 Checking:
   monitor                  Print this computer's readings, as the heartbeat sends them
@@ -282,7 +287,7 @@ Runtime prepare(const Args& args) {
     Runtime rt{loadConfig(args), {}, nullptr, nullptr, nullptr, nullptr, {}, nullptr};
     logging::install({.level = args.flag("verbose") ? "debug" : rt.config.logLevel,
                       .file = rt.config.logToFile ? std::optional(rt.config.logFile()) : std::nullopt,
-                      .console = true});
+                      .console = !args.flag("service")});
     const auto credentials = agent::CredentialStore(rt.config.credentialsFile()).load();
     if (!credentials) {
         throw std::invalid_argument("not enrolled yet: home-helper-agent enroll --code <code from the Computers page>");
@@ -315,13 +320,71 @@ int runCommand(const Args& args) {
         return 0;
     }
 
+    const auto body = [&agent](std::stop_token stop) {
+        agent.run(stop);
+        return stop.stop_requested() ? 0 : service::kExitRevoked;  // run() only returns by itself when revoked
+    };
+
+#ifdef _WIN32
+    if (args.flag("service")) {
+        if (!service::runAsWindowsService(body)) {
+            throw std::invalid_argument("--service is for the Windows service; to run in this window, leave it out");
+        }
+        return 0;
+    }
+#endif
     std::stop_source stop;
     onShutdownRequest([&stop] {
         spdlog::info("Stopping…");
         stop.request_stop();
     });
-    agent.run(stop.get_token());
-    return stop.stop_requested() ? 0 : 3;  // 3: revoked, the service should not restart it
+    return body(stop.get_token());
+}
+
+int serviceCommand(const Args& args) {
+    const auto action = args.positional.empty() ? std::string("status") : args.positional[0];
+#ifdef _WIN32
+    if (action == "install") {
+        const auto config = loadConfig(args);
+        if (!std::filesystem::exists(config.file)) {
+            throw std::invalid_argument("no config at " + config.file.string() + ": run `home-helper-agent init --server URL` first");
+        }
+        if (!agent::CredentialStore(config.credentialsFile()).exists()) {
+            throw std::invalid_argument("not enrolled yet: run `home-helper-agent enroll --code …` first");
+        }
+        const bool defaults = std::filesystem::absolute(config.file) == std::filesystem::absolute(paths::defaultConfigFile());
+        service::install({.executable = paths::currentExecutable(),
+                          .configFile = std::filesystem::absolute(config.file),
+                          .dataDir = std::filesystem::absolute(config.dataDir),
+                          .restrictDirectories = defaults});
+        service::start();
+        std::cout << "Installed and started \"" << service::kDisplayName << "\" (" << service::status() << ").\n"
+                  << "Logs: " << config.logFile().string() << "\n";
+        if (!defaults) std::cout << "Note: a custom config location; its folder's permissions were left as they are.\n";
+        return 0;
+    }
+    if (action == "uninstall") {
+        service::uninstall();
+        std::cout << "Service removed. The config, credentials and logs are still there.\n";
+        return 0;
+    }
+    if (action == "start") {
+        service::start();
+    } else if (action == "stop") {
+        service::stop();
+    } else if (action != "status") {
+        throw std::invalid_argument("service install, uninstall, start, stop or status");
+    }
+    std::cout << service::kDisplayName << ": " << service::status() << "\n";
+    return 0;
+#else
+    (void)action;
+    std::cout << "On Linux the agent runs under systemd:\n"
+              << "  sudo packaging/linux/install.sh           (user, directories, unit)\n"
+              << "  sudo systemctl enable --now home-helper-agent\n"
+              << "  systemctl status home-helper-agent; journalctl -u home-helper-agent\n";
+    return 0;
+#endif
 }
 
 }  // namespace
@@ -334,7 +397,7 @@ int run(const std::vector<std::string>& argv) {
             {"version", version}, {"init", init},         {"check-config", checkConfig},
             {"enroll", enroll},   {"unenroll", unenroll}, {"status", status},
             {"monitor", monitorCommand}, {"audio", audioCommand}, {"run", runCommand},
-            {"commands", commandsCommand}, {"run-command", runCommandLocally},
+            {"commands", commandsCommand}, {"run-command", runCommandLocally}, {"service", serviceCommand},
         };
 
         if (args.command.empty() || args.command == "help" || args.flag("help")) {
