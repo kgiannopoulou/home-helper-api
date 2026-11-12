@@ -52,3 +52,30 @@ nlohmann::json Metrics::toJson() const {
 }
 
 }  // namespace hha::monitor
+
+#include "monitor/system_monitor.hpp"
+
+#include "core/strings.hpp"
+
+namespace hha::monitor {
+
+std::vector<DiskUsage> filterDisks(std::vector<DiskUsage> disks, const std::vector<std::string>& only) {
+    if (only.empty()) return disks;
+    const auto key = [](std::string_view mount) {
+        auto k = strings::toLower(mount);
+        while (k.size() > 1 && (k.back() == '\\' || k.back() == '/')) k.pop_back();
+        return k;
+    };
+    std::vector<DiskUsage> out;
+    for (auto& d : disks) {
+        for (const auto& wanted : only) {
+            if (key(d.mount) == key(wanted)) {
+                out.push_back(std::move(d));
+                break;
+            }
+        }
+    }
+    return out;
+}
+
+}  // namespace hha::monitor

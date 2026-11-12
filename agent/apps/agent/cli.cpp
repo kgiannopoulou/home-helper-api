@@ -1,5 +1,6 @@
 #include "cli.hpp"
 
+#include "agent/agent.hpp"
 #include "agent/config.hpp"
 #include "agent/credentials.hpp"
 #include "agent/enrollment.hpp"
@@ -8,7 +9,9 @@
 #include "core/logging.hpp"
 #include "core/paths.hpp"
 #include "core/version.hpp"
+#include "monitor/system_monitor.hpp"
 #include "net/api_client.hpp"
+#include "shutdown.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -17,6 +20,8 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <stop_token>
+#include <thread>
 
 namespace hha::cli {
 
@@ -35,7 +40,12 @@ Setting up:
          [--force]           Replace existing credentials
   unenroll                 Forget the credentials (remove the computer on the dashboard too)
 
+Running:
+  run                      Connect and keep reporting, until Ctrl+C (the service does this)
+      [--once]               One heartbeat, then exit
+
 Checking:
+  monitor                  Print this computer's readings, as the heartbeat sends them
   status                   Config, credentials, and whether the server accepts them
   version                  Version, git commit and platform
   help                     This text
@@ -169,8 +179,76 @@ int status(const Args& args) {
     return 1;
 }
 
-}  // namespace
+int monitorCommand(const Args& args) {
+    const auto config = loadConfig(args);
+    auto monitor = monitor::makeSystemMonitor(config.disks);
+    monitor->sample();
+    std::this_thread::sleep_for(std::chrono::seconds(1));  // CPU usage is measured between two readings
+    const auto info = monitor->info();
+    nlohmann::json out = {
+        {"metrics", monitor->sample().toJson()},
+        {"system",
+         {{"hostname", info.hostname},
+          {"os", info.osName + " " + info.osVersion},
+          {"cpu", info.cpuModel},
+          {"cores", info.cpuCores},
+          {"memory_bytes", info.memoryBytes}}},
+    };
+    std::cout << out.dump(2) << "\n";
+    return 0;
+}
 
+/// Everything `run` needs, built from the config and credentials
+struct Runtime {
+    agent::Config config;
+    net::Credentials credentials;
+    std::unique_ptr<net::HttpTransport> transport;
+    std::unique_ptr<net::ApiClient> api;
+    std::unique_ptr<monitor::SystemMonitor> monitor;
+};
+
+Runtime prepare(const Args& args) {
+    Runtime rt{loadConfig(args), {}, nullptr, nullptr, nullptr};
+    logging::install({.level = args.flag("verbose") ? "debug" : rt.config.logLevel,
+                      .file = rt.config.logToFile ? std::optional(rt.config.logFile()) : std::nullopt,
+                      .console = true});
+    const auto credentials = agent::CredentialStore(rt.config.credentialsFile()).load();
+    if (!credentials) {
+        throw std::invalid_argument("not enrolled yet: home-helper-agent enroll --code <code from the Computers page>");
+    }
+    rt.credentials = *credentials;
+    rt.transport = transportFor(rt.config);
+    rt.api = std::make_unique<net::ApiClient>(
+        net::ApiClient::Options{.serverUrl = rt.credentials.serverUrl, .allowInsecureHttp = rt.config.allowInsecureHttp},
+        *rt.transport);
+    rt.api->setCredentials(rt.credentials);
+    rt.monitor = monitor::makeSystemMonitor(rt.config.disks);
+    return rt;
+}
+
+int runCommand(const Args& args) {
+    auto rt = prepare(args);
+    agent::Agent agent(rt.config, {*rt.api, *rt.monitor});
+    spdlog::info("home-helper-agent {} ({}) for \"{}\" at {}", version::kVersion, version::kGitSha,
+                 rt.credentials.household, rt.credentials.serverUrl);
+
+    if (args.flag("once")) {
+        const auto reply = agent.beat();
+        std::cout << "Heartbeat OK: next in " << reply.heartbeat.count() << " s, " << reply.commands.size()
+                  << " command(s) waiting\n";
+        return 0;
+    }
+
+    std::stop_source stop;
+    onShutdownRequest([&stop] {
+        spdlog::info("Stopping…");
+        stop.request_stop();
+    });
+    agent.run(stop.get_token());
+    return stop.stop_requested() ? 0 : 3;  // 3: revoked, the service should not restart it
+}
+
+}  // namespace
 int run(const std::vector<std::string>& argv) {
     try {
         const auto args = Args::parse(argv, {"config", "server", "code", "name"});
@@ -179,6 +257,7 @@ int run(const std::vector<std::string>& argv) {
         const std::map<std::string, std::function<int(const Args&)>> commands = {
             {"version", version}, {"init", init},         {"check-config", checkConfig},
             {"enroll", enroll},   {"unenroll", unenroll}, {"status", status},
+            {"monitor", monitorCommand}, {"run", runCommand},
         };
 
         if (args.command.empty() || args.command == "help" || args.flag("help")) {

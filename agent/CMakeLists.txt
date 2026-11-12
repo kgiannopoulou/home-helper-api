@@ -77,6 +77,8 @@ add_library(hha_core STATIC
     src/monitor/metrics.cpp
     src/agent/heartbeat.cpp
     src/agent/agent.cpp
+    # Local system monitoring (day 62); one file per platform below
+    src/monitor/linux_parsers.cpp
 )
 target_include_directories(hha_core PUBLIC src ${CMAKE_BINARY_DIR}/generated)
 target_link_libraries(hha_core
@@ -85,15 +87,17 @@ target_link_libraries(hha_core
 if(WIN32)
     # One file per platform where the operating system does the work
     target_sources(hha_core PRIVATE src/net/winhttp_transport.cpp)
+    target_sources(hha_core PRIVATE src/monitor/windows_monitor.cpp)
     target_compile_definitions(hha_core PUBLIC WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE _WIN32_WINNT=0x0A00)
-    target_link_libraries(hha_core PUBLIC shell32 ole32 winhttp bcrypt crypt32 advapi32)
+    target_link_libraries(hha_core PUBLIC shell32 ole32 oleaut32 wbemuuid winhttp bcrypt crypt32 advapi32)
 else()
     target_sources(hha_core PRIVATE src/net/curl_transport.cpp)
+    target_sources(hha_core PRIVATE src/monitor/linux_monitor.cpp)
     find_package(CURL REQUIRED)
     target_link_libraries(hha_core PRIVATE CURL::libcurl)
 endif()
 
-add_executable(home-helper-agent apps/agent/main.cpp apps/agent/cli.cpp)
+add_executable(home-helper-agent apps/agent/main.cpp apps/agent/cli.cpp apps/agent/shutdown.cpp)
 target_link_libraries(home-helper-agent PRIVATE hha_core hha_warnings)
 
 if(HHA_BUILD_TESTS)
