@@ -67,6 +67,11 @@ add_library(hha_core STATIC
     src/net/url.cpp
     src/net/signing.cpp
     src/net/api_client.cpp
+    # Registration and authentication (day 60)
+    src/core/host.cpp
+    src/agent/config.cpp
+    src/agent/credentials.cpp
+    src/agent/enrollment.cpp
 )
 target_include_directories(hha_core PUBLIC src ${CMAKE_BINARY_DIR}/generated)
 target_link_libraries(hha_core

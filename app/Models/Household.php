@@ -223,6 +223,18 @@ class Household extends Model
         return $this->hasMany(HouseholdFact::class);
     }
 
+    /** @return HasMany<Agent, $this> */
+    public function agents(): HasMany
+    {
+        return $this->hasMany(Agent::class);
+    }
+
+    /** @return HasMany<AgentEnrollmentCode, $this> */
+    public function agentEnrollmentCodes(): HasMany
+    {
+        return $this->hasMany(AgentEnrollmentCode::class);
+    }
+
     /** @return HasMany<Note, $this> */
     public function notes(): HasMany
     {

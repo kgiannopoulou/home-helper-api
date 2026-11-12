@@ -41,6 +41,15 @@ void install(const Options& options) {
     spdlog::flush_every(std::chrono::seconds(5));
 }
 
+bool isLevel(std::string_view level) {
+    try {
+        parseLevel(level);
+        return true;
+    } catch (const std::invalid_argument&) {
+        return false;
+    }
+}
+
 void setLevel(std::string_view level) {
     spdlog::set_level(parseLevel(level));
 }

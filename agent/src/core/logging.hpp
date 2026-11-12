@@ -20,6 +20,9 @@ struct Options {
 /// Safe to call again (e.g. once the config file has been read).
 void install(const Options& options);
 
+/// trace, debug, info, warn, error, critical or off
+bool isLevel(std::string_view level);
+
 /// Throws std::invalid_argument for an unknown level name.
 void setLevel(std::string_view level);
 
