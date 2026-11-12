@@ -102,3 +102,77 @@ jobs:
           ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: ctest --test-dir build --output-on-failure -j 4
+
+  # Day 70: the real agent, built here, against the real Laravel app on MySQL
+  # (agent/scripts/e2e.sh): pairing, signed requests and responses, the inventory,
+  # commands both ways, the owner's confirmation, the agent refusing what its
+  # allowlist doesn't hold, and removal stopping it
+  end-to-end:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: e2e
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -ppassword"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: e2e
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: sync
+      AI_PROVIDER: offline
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, bcmath, sodium
+          tools: composer:v2
+          coverage: none
+
+      - name: Install libcurl
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+
+      - name: Build the agent
+        working-directory: agent
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DHHA_BUILD_TESTS=OFF
+          cmake --build build --parallel 4
+
+      - name: Prepare the app (demo household)
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --force
+          php artisan db:seed --class=DemoSeeder --force
+
+      - name: Serve it
+        run: |
+          PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8077 -t public vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php > /tmp/server.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8077/api/health > /dev/null && break; sleep 1; done
+
+      - name: End to end
+        run: AGENT_BIN=agent/build/home-helper-agent SERVER=http://127.0.0.1:8077 agent/scripts/e2e.sh
+
+      - name: Server log (on failure)
+        if: failure()
+        run: tail -n 100 /tmp/server.log; tail -n 100 storage/logs/laravel.log || true
