@@ -86,6 +86,10 @@ HeartbeatReply Agent::beat() {
     }
     if (reply.inventoryWanted) syncInventory(true);
     dispatch(reply.commands);
+    if (reply.update && deps_.updater &&
+        deps_.updater->handle(*reply.update) == update::Updater::Outcome::Staged) {
+        restartForUpdate_ = true;
+    }
     sendResults();
     sendEvents();
     return reply;
@@ -256,7 +260,7 @@ void Agent::backOnline() {
     backoff_.reset();
 }
 
-void Agent::run(std::stop_token stop) {
+Agent::StopReason Agent::run(std::stop_token stop) {
     spdlog::info("Agent running; heartbeat every {} s", interval_.count());
     while (!stop.stop_requested()) {
         std::chrono::milliseconds wait = interval_;
@@ -267,7 +271,7 @@ void Agent::run(std::stop_token stop) {
             switch (e.kind()) {
                 case net::ApiError::Kind::Revoked:
                     spdlog::error("This computer was removed from the household on the dashboard. Stopping.");
-                    return;
+                    return StopReason::Revoked;
                 case net::ApiError::Kind::RateLimited:
                 case net::ApiError::Kind::Server:
                     wait = wentOffline(e.what());
@@ -290,17 +294,20 @@ void Agent::run(std::stop_token stop) {
             // A bug or a surprise from the server: log it and keep the agent alive
             spdlog::error("Heartbeat failed unexpectedly: {}", e.what());
         }
+        if (restartForUpdate_) break;
         if (!sleepFor(stop, wait)) break;
     }
 
     // Say goodbye if the server is there; the outbox keeps it otherwise
-    outbox_->add(Event::make("agent.stopping", Severity::Info, "Agent stopping"));
+    outbox_->add(Event::make("agent.stopping", Severity::Info,
+                             restartForUpdate_ ? "Agent restarting to install an update" : "Agent stopping"));
     try {
         finishCommands(std::chrono::seconds(10));
     } catch (const std::exception& e) {
         spdlog::info("Not sent before stopping (kept for next time): {}", e.what());
     }
     spdlog::info("Agent stopped");
+    return restartForUpdate_ ? StopReason::RestartForUpdate : StopReason::Requested;
 }
 
 void Agent::wake() {

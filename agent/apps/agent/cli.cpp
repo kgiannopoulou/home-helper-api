@@ -17,6 +17,7 @@
 #include "monitor/system_monitor.hpp"
 #include "net/api_client.hpp"
 #include "service/service.hpp"
+#include "update/updater.hpp"
 #include "shutdown.hpp"
 
 #include <spdlog/spdlog.h>
@@ -51,6 +52,9 @@ Running:
       [--once]               One heartbeat (and any commands it brings), then exit
       [--service]            How the Windows service starts it (not for typing)
   service install          Install and start the Windows service (elevated prompt)
+  update status            The version running and any verified update waiting
+  update apply-staged      Install a staged, verified update (the Linux unit runs this)
+  update rollback          Put back the version before the last update
   service uninstall|start|stop|status
                            On Linux: see packaging/linux (systemd)
 
@@ -281,10 +285,11 @@ struct Runtime {
     std::unique_ptr<audio::AudioDiscovery> audio;
     commands::Allowlist allowlist;
     std::unique_ptr<events::Outbox> outbox;
+    std::unique_ptr<update::Updater> updater;
 };
 
 Runtime prepare(const Args& args) {
-    Runtime rt{loadConfig(args), {}, nullptr, nullptr, nullptr, nullptr, {}, nullptr};
+    Runtime rt{loadConfig(args), {}, nullptr, nullptr, nullptr, nullptr, {}, nullptr, nullptr};
     logging::install({.level = args.flag("verbose") ? "debug" : rt.config.logLevel,
                       .file = rt.config.logToFile ? std::optional(rt.config.logFile()) : std::nullopt,
                       .console = !args.flag("service")});
@@ -302,13 +307,15 @@ Runtime prepare(const Args& args) {
     if (rt.config.audioDiscovery) rt.audio = audio::makeAudioDiscovery();
     rt.allowlist = loadAllowlist(rt.config);
     rt.outbox = std::make_unique<events::Outbox>(rt.config.outboxFile(), rt.config.outboxMaxEvents);
+    rt.updater = std::make_unique<update::Updater>(rt.config.updatesDir(), rt.config.updatePublicKey, *rt.api,
+                                                   *rt.transport, *rt.outbox);
     spdlog::info("{} command(s) on the allowlist", rt.allowlist.entries().size());
     return rt;
 }
 
 int runCommand(const Args& args) {
     auto rt = prepare(args);
-    agent::Agent agent(rt.config, {*rt.api, *rt.monitor, rt.audio.get(), &rt.allowlist, commands::runProcess, rt.outbox.get()});
+    agent::Agent agent(rt.config, {*rt.api, *rt.monitor, rt.audio.get(), &rt.allowlist, commands::runProcess, rt.outbox.get(), rt.updater.get()});
     spdlog::info("home-helper-agent {} ({}) for \"{}\" at {}", version::kVersion, version::kGitSha,
                  rt.credentials.household, rt.credentials.serverUrl);
 
@@ -320,9 +327,23 @@ int runCommand(const Args& args) {
         return 0;
     }
 
-    const auto body = [&agent](std::stop_token stop) {
-        agent.run(stop);
-        return stop.stop_requested() ? 0 : service::kExitRevoked;  // run() only returns by itself when revoked
+    const auto body = [&agent, &rt](std::stop_token stop) {
+        switch (agent.run(stop)) {
+            case agent::Agent::StopReason::Revoked:
+                return service::kExitRevoked;
+            case agent::Agent::StopReason::RestartForUpdate:
+                try {
+                    if (const auto installed = rt.updater->applyStaged(paths::currentExecutable())) {
+                        spdlog::info("Version {} is in place; restarting", *installed);
+                    }
+                } catch (const std::exception& e) {
+                    // Linux: /usr/local/bin is read-only to the service; the unit's ExecStartPre installs it
+                    spdlog::info("The update will be installed at the next start ({})", e.what());
+                }
+                return service::kExitRestartForUpdate;
+            default:
+                return 0;
+        }
     };
 
 #ifdef _WIN32
@@ -341,8 +362,47 @@ int runCommand(const Args& args) {
     return body(stop.get_token());
 }
 
-int serviceCommand(const Args& args) {
+int updateCommand(const Args& args) {
     const auto action = args.positional.empty() ? std::string("status") : args.positional[0];
+    const auto config = loadConfig(args);
+    const auto exe = paths::currentExecutable();
+    if (action == "rollback") {
+        if (!update::Updater::rollback(exe)) {
+            std::cout << "Nothing to roll back to.\n";
+            return 1;
+        }
+        std::cout << "The previous version is back in place. Restart the agent.\n";
+        return 0;
+    }
+
+    auto transport = transportFor(config);
+    net::ApiClient api({.serverUrl = config.serverUrl.empty() ? "https://localhost" : config.serverUrl,
+                        .allowInsecureHttp = true},
+                       *transport);
+    events::Outbox outbox(config.outboxFile(), config.outboxMaxEvents);
+    update::Updater updater(config.updatesDir(), config.updatePublicKey, api, *transport, outbox);
+
+    if (action == "apply-staged") {
+        // Run as the unit's privileged ExecStartPre: quiet and successful when there is nothing to do
+        if (const auto installed = updater.applyStaged(exe)) std::cout << "Installed " << *installed << "\n";
+        return 0;
+    }
+    if (action != "status") throw std::invalid_argument("update status, apply-staged or rollback");
+
+    std::cout << "Running   " << version::kVersion << " (" << version::kGitSha << ", " << version::platform() << ")\n"
+              << "Updates   " << (config.updatePublicKey ? "on, releases signed by " + config.updatePublicKey->substr(0, 16) + "…"
+                                                         : std::string("off (no updates.public_key in the config)"))
+              << "\n";
+    if (const auto staged = updater.staged()) {
+        std::cout << "Staged    " << staged->offer.version << ", verified; installed at the next restart\n";
+    }
+    auto old = exe;
+    old += ".old";
+    if (std::filesystem::exists(old)) std::cout << "Previous  kept for `update rollback`\n";
+    return 0;
+}
+
+int serviceCommand(const Args& args) {    const auto action = args.positional.empty() ? std::string("status") : args.positional[0];
 #ifdef _WIN32
     if (action == "install") {
         const auto config = loadConfig(args);
@@ -398,6 +458,7 @@ int run(const std::vector<std::string>& argv) {
             {"enroll", enroll},   {"unenroll", unenroll}, {"status", status},
             {"monitor", monitorCommand}, {"audio", audioCommand}, {"run", runCommand},
             {"commands", commandsCommand}, {"run-command", runCommandLocally}, {"service", serviceCommand},
+            {"update", updateCommand},
         };
 
         if (args.command.empty() || args.command == "help" || args.flag("help")) {

@@ -30,7 +30,7 @@ class SchemaDiagram extends Command
         'Assistant' => ['ai_conversations', 'ai_messages', 'ai_pending_actions'],
         'Memory and briefings' => ['household_facts', 'notes', 'household_summaries', 'memory_chunks', 'briefings', 'recommendation_feedback'],
         'Voice' => ['voice_settings'],
-        'Computers (local agent)' => ['agents', 'agent_enrollment_codes', 'agent_metrics', 'agent_commands', 'agent_events'],
+        'Computers (local agent)' => ['agents', 'agent_enrollment_codes', 'agent_metrics', 'agent_commands', 'agent_events', 'agent_releases'],
     ];
 
     /** Columns every synced table has; described once in the intro instead */

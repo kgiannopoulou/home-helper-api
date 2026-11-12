@@ -16,8 +16,12 @@ After=network-online.target
 Type=simple
 User=home-helper-agent
 Group=home-helper-agent
+# A verified update staged by the last run is installed here, with root rights ("+")
+# for this one step only; it checks size, SHA-512 and the Ed25519 signature again
+ExecStartPre=+/usr/local/bin/home-helper-agent --config /etc/home-helper-agent/agent.json update apply-staged
 ExecStart=/usr/local/bin/home-helper-agent --config /etc/home-helper-agent/agent.json run
 # 3 = removed from the household on the dashboard: stay stopped
+# 75 = restart to install an update: restarted like a failure
 Restart=on-failure
 RestartSec=10
 RestartPreventExitStatus=3

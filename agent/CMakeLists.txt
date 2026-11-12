@@ -87,6 +87,8 @@ add_library(hha_core STATIC
     src/events/thresholds.cpp
     # Reconnect and offline handling (day 68)
     src/agent/backoff.cpp
+    # Signed updates and version reporting (day 69)
+    src/update/updater.cpp
 )
 target_include_directories(hha_core PUBLIC src ${CMAKE_BINARY_DIR}/generated)
 add_dependencies(hha_core hha_version)

@@ -5,6 +5,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <chrono>
 
 namespace hha::net {
@@ -79,8 +80,20 @@ json ApiClient::get(std::string_view endpoint) {
     return send("GET", endpoint, "", true, false);
 }
 
+std::string ApiClient::download(std::string_view endpoint, std::size_t maxBytes) {
+    return exchange("GET", endpoint, "", true, false, maxBytes);
+}
+
 json ApiClient::send(const std::string& method, std::string_view endpoint, const std::string& body, bool sign,
                      bool retried) {
+    const auto raw = exchange(method, endpoint, body, sign, retried, 4 * 1024 * 1024);
+    if (raw.empty()) return nullptr;
+    auto reply = json::parse(raw, nullptr, false);
+    return reply.is_discarded() ? json(nullptr) : reply;
+}
+
+std::string ApiClient::exchange(const std::string& method, std::string_view endpoint, const std::string& body,
+                                bool sign, bool retried, std::size_t maxBytes) {
     if (sign && !credentials_) {
         throw std::logic_error("this computer is not enrolled yet");
     }
@@ -90,6 +103,8 @@ json ApiClient::send(const std::string& method, std::string_view endpoint, const
     request.url = urlFor(endpoint);
     request.body = body;
     request.timeout = options_.timeout;
+    request.maxResponseBytes = maxBytes;
+    if (maxBytes > 4 * 1024 * 1024) request.timeout = std::max<std::chrono::milliseconds>(options_.timeout, std::chrono::minutes(5));
     request.headers = {{"Accept", "application/json"}, {"User-Agent", userAgent()}};
     if (method != "GET") {
         request.headers.emplace_back("Content-Type", "application/json");
@@ -124,7 +139,7 @@ json ApiClient::send(const std::string& method, std::string_view endpoint, const
         }
     }
     if (success) {
-        return reply;
+        return response.body;
     }
 
     const auto code = errorCode(reply);
@@ -133,7 +148,7 @@ json ApiClient::send(const std::string& method, std::string_view endpoint, const
         const auto offset = reply["server_time"].get<std::int64_t>() - clock_();
         spdlog::warn("Clock is {} s off from the server; correcting and retrying", offset);
         clockOffset_ = offset;
-        return send(method, endpoint, body, sign, true);
+        return exchange(method, endpoint, body, sign, true, maxBytes);
     }
 
     auto kind = ApiError::Kind::Rejected;

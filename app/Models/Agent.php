@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $platform
  * @property string $version
  * @property string|null $git_sha
+ * @property string|null $update_requested_version the owner pressed Install for this release
+ * @property int|null $update_requested_by
  * @property string $secret 64 hex characters (256 bits), encrypted at rest
  * @property CarbonImmutable|null $last_seen_at
  * @property CarbonImmutable|null $offline_reported_at

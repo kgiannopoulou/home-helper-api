@@ -16,6 +16,7 @@ erDiagram
     agents ||--o{ agent_events : "agent_id"
     agents ||--o{ agent_metrics : "agent_id"
     users |o--o{ agents : "enrolled_by"
+    users |o--o{ agents : "update_requested_by"
     users ||--o{ ai_conversations : "user_id"
     ai_conversations ||--o{ ai_messages : "conversation_id"
     ai_conversations ||--o{ ai_pending_actions : "conversation_id"
@@ -291,8 +292,8 @@ erDiagram
     }
     chores ||--o{ chore_completions : "chore_id"
     chores ||--o{ chore_completions : "chore_id"
-    households ||--o{ chore_completions : "household_id"
     chores ||--o{ chore_completions : "household_id"
+    households ||--o{ chore_completions : "household_id"
     users |o--o{ chore_completions : "user_id"
     users |o--o{ chores : "assignee_id"
     households ||--o{ chores : "household_id"
@@ -356,8 +357,8 @@ erDiagram
         timestamp pushed_at "nullable"
         timestamp resolved_at "nullable"
     }
-    households ||--o{ plant_alerts : "household_id"
     plants ||--o{ plant_alerts : "household_id"
+    households ||--o{ plant_alerts : "household_id"
     plants ||--o{ plant_alerts : "plant_id"
     plants ||--o{ plant_alerts : "plant_id"
     households ||--o{ plant_care_logs : "household_id"
@@ -650,6 +651,8 @@ erDiagram
         varchar platform
         varchar version
         varchar git_sha "nullable"
+        varchar update_requested_version "nullable"
+        bigint update_requested_by FK "nullable"
         text secret
         timestamp last_seen_at "nullable"
         timestamp offline_reported_at "nullable"
@@ -717,6 +720,18 @@ erDiagram
         timestamp occurred_at
         timestamp received_at
     }
+    agent_releases {
+        char id PK
+        varchar version
+        varchar platform
+        varchar path "nullable"
+        varchar url "nullable"
+        char sha512
+        bigint size
+        char signature
+        text notes "nullable"
+        timestamp published_at
+    }
     agents ||--o{ agent_commands : "agent_id"
     users |o--o{ agent_commands : "confirmed_by"
     households ||--o{ agent_commands : "household_id"
@@ -729,4 +744,5 @@ erDiagram
     agents ||--o{ agent_metrics : "agent_id"
     users |o--o{ agents : "enrolled_by"
     households ||--o{ agents : "household_id"
+    users |o--o{ agents : "update_requested_by"
 ```

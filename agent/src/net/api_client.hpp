@@ -80,6 +80,8 @@ public:
     json post(std::string_view endpoint, const json& body);
     /// Signed GET; returns the JSON reply (null for 204).
     json get(std::string_view endpoint);
+    /// Signed GET of a file (an update): the raw bytes, response signature checked like any other
+    std::string download(std::string_view endpoint, std::size_t maxBytes);
 
     /// Seconds to add to the local clock, learned from the server after a
     /// clock_skew rejection (a laptop that slept, an RTC without a battery).
@@ -92,6 +94,9 @@ public:
 
 private:
     json send(const std::string& method, std::string_view endpoint, const std::string& body, bool sign, bool retried);
+    /// The request, checks and error mapping; returns the successful response's body
+    std::string exchange(const std::string& method, std::string_view endpoint, const std::string& body, bool sign,
+                         bool retried, std::size_t maxBytes);
 
     Options options_;
     Url base_;

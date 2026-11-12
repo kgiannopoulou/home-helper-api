@@ -9,6 +9,7 @@
 #include "events/thresholds.hpp"
 #include "monitor/metrics.hpp"
 #include "net/api_client.hpp"
+#include "update/updater.hpp"
 
 #include <chrono>
 #include <condition_variable>
@@ -39,7 +40,12 @@ public:
         commands::ProcessRunner runner = {};
         /// Events and results waiting to be sent; an in-memory one when null
         events::Outbox* outbox = nullptr;
+        /// Signed updates; offers are ignored when null
+        update::Updater* updater = nullptr;
     };
+
+    /// Why run() returned
+    enum class StopReason { Requested, Revoked, RestartForUpdate };
 
     Agent(Config config, Dependencies deps);
     ~Agent();
@@ -51,9 +57,9 @@ public:
     /// Network and server errors propagate (run() decides what to do).
     HeartbeatReply beat();
 
-    /// Until stop is requested. Returns early only when the computer was
-    /// removed from the household (ApiError Revoked).
-    void run(std::stop_token stop);
+    /// Until stop is requested, the computer is removed from the household
+    /// (ApiError Revoked), or a verified update is staged and needs a restart.
+    StopReason run(std::stop_token stop);
 
     /// Wakes run() for an immediate heartbeat (a new event, a command finished).
     void wake();
@@ -116,6 +122,7 @@ private:
     std::mutex mutex_;
     std::condition_variable_any wakeup_;
     bool woken_ = false;
+    bool restartForUpdate_ = false;
 
     /// Last: its thread calls back into the members above, so it stops first
     std::unique_ptr<commands::CommandWorker> worker_;

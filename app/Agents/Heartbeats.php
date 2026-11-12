@@ -15,7 +15,7 @@ use Carbon\CarbonImmutable;
  */
 class Heartbeats
 {
-    public function __construct(private Commands $commands, private AgentEvents $events) {}
+    public function __construct(private Commands $commands, private AgentEvents $events, private Releases $releases) {}
 
     /**
      * @param  array<string, mixed>  $data  validated by HeartbeatController
@@ -26,6 +26,7 @@ class Heartbeats
         $now = CarbonImmutable::now();
         $metrics = $data['metrics'] ?? null;
         $wasOffline = $agent->offline_reported_at;
+        $previousVersion = $agent->version;
 
         $agent->forceFill([
             'version' => $data['version'],
@@ -41,6 +42,9 @@ class Heartbeats
             'offline_reported_at' => null,
         ])->save();
 
+        if ($previousVersion !== $agent->version) {
+            $this->versionChanged($agent, $previousVersion);
+        }
         if ($wasOffline) {
             $this->events->record($agent, 'agent.online', 'info', $agent->name.' is back online', [
                 'offline_since' => $wasOffline->toIso8601ZuluString(),
@@ -56,8 +60,21 @@ class Heartbeats
             'heartbeat_seconds' => (int) config('homehelper.agents.heartbeat_seconds'),
             'inventory_wanted' => ! isset($data['inventory_hash']) || $data['inventory_hash'] !== $agent->inventory_hash,
             'commands' => $this->commands->forHeartbeat($agent),
-            'update' => null,
+            'update' => $this->releases->offerFor($agent),
         ];
+    }
+
+    /** Version reporting: every change is an event, and a finished install clears the request */
+    private function versionChanged(Agent $agent, string $from): void
+    {
+        $to = $agent->version;
+        $upgrade = version_compare($to, $from, '>');
+        $this->events->record($agent, 'agent.updated', $upgrade ? 'info' : 'warning',
+            $agent->name.' now runs '.$to.' (was '.$from.($upgrade ? ')' : '; an older version: rolled back?)'),
+            ['from' => $from, 'to' => $to, 'git_sha' => $agent->git_sha]);
+        if ($agent->update_requested_version !== null && version_compare($to, $agent->update_requested_version, '>=')) {
+            $agent->forceFill(['update_requested_version' => null, 'update_requested_by' => null])->save();
+        }
     }
 
     /**

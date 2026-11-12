@@ -20,6 +20,10 @@ inline constexpr const char* kDisplayName = "Home Helper Agent";
 /// systemd: RestartPreventExitStatus=3. Windows: reported as a clean stop.
 inline constexpr int kExitRevoked = 3;
 
+/// Exit code meaning "a verified update is in place (or staged): start me again".
+/// Counts as a failure for the SCM and systemd, so both restart it.
+inline constexpr int kExitRestartForUpdate = 75;
+
 /// The agent's work: runs until the token is stopped, returns an exit code.
 using Body = std::function<int(std::stop_token)>;
 

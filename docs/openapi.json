@@ -4467,7 +4467,43 @@
                                             }
                                         },
                                         "update": {
-                                            "type": "null"
+                                            "type": [
+                                                "object",
+                                                "null"
+                                            ],
+                                            "properties": {
+                                                "version": {
+                                                    "type": "string"
+                                                },
+                                                "platform": {
+                                                    "type": "string"
+                                                },
+                                                "url": {
+                                                    "type": "string",
+                                                    "description": "A path is downloaded with a signed request (GET releases/{id}/download)"
+                                                },
+                                                "sha512": {
+                                                    "type": "string"
+                                                },
+                                                "size": {
+                                                    "type": "integer"
+                                                },
+                                                "signature": {
+                                                    "type": "string"
+                                                },
+                                                "install": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "version",
+                                                "platform",
+                                                "url",
+                                                "sha512",
+                                                "size",
+                                                "signature",
+                                                "install"
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -9667,6 +9703,49 @@
                 }
             }
         },
+        "/agent/v1/releases/{release}/download": {
+            "get": {
+                "operationId": "agent.releases.download",
+                "tags": [
+                    "ReleaseDownload"
+                ],
+                "parameters": [
+                    {
+                        "name": "release",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                }
+                            }
+                        },
+                        "headers": {
+                            "Content-Disposition": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    }
+                }
+            }
+        },
         "/households/{household}/rooms": {
             "get": {
                 "operationId": "rooms.index",
@@ -13532,6 +13611,25 @@
                     }
                 }
             },
+            "ModelNotFoundException": {
+                "description": "Not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
             "AuthenticationException": {
                 "description": "Unauthenticated",
                 "content": {
@@ -13553,25 +13651,6 @@
             },
             "AuthorizationException": {
                 "description": "Authorization error",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "message": {
-                                    "type": "string",
-                                    "description": "Error overview."
-                                }
-                            },
-                            "required": [
-                                "message"
-                            ]
-                        }
-                    }
-                }
-            },
-            "ModelNotFoundException": {
-                "description": "Not found",
                 "content": {
                     "application/json": {
                         "schema": {
