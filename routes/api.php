@@ -53,6 +53,7 @@ Route::name('api.')->group(function () {
 
         Route::middleware([AuthenticateAgent::class, 'throttle:agent'])->group(function () {
             Route::get('me', AgentApi\WhoAmIController::class)->name('me');
+            Route::post('heartbeat', AgentApi\HeartbeatController::class)->name('heartbeat');
         });
     });
 

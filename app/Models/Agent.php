@@ -25,6 +25,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $secret 64 hex characters (256 bits), encrypted at rest
  * @property CarbonImmutable|null $last_seen_at
  * @property string|null $last_ip
+ * @property CarbonImmutable|null $started_at
+ * @property int|null $uptime_seconds
+ * @property array<string, mixed>|null $metrics the latest heartbeat's readings
+ * @property int $outbox_pending
+ * @property int $outbox_dropped
+ * @property array<string, mixed>|null $inventory
+ * @property string|null $inventory_hash
+ * @property CarbonImmutable|null $inventory_at
  * @property CarbonImmutable|null $revoked_at
  * @property CarbonImmutable $created_at
  * @property CarbonImmutable $updated_at
@@ -48,6 +56,10 @@ class Agent extends Model
         return [
             'secret' => 'encrypted',
             'last_seen_at' => 'immutable_datetime',
+            'started_at' => 'immutable_datetime',
+            'metrics' => 'array',
+            'inventory' => 'array',
+            'inventory_at' => 'immutable_datetime',
             'revoked_at' => 'immutable_datetime',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
@@ -64,6 +76,12 @@ class Agent extends Model
     public function enrolledBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'enrolled_by');
+    }
+
+    /** @return HasMany<AgentMetric, $this> */
+    public function metricHistory(): HasMany
+    {
+        return $this->hasMany(AgentMetric::class);
     }
 
     /** @return HasMany<AgentEnrollmentCode, $this> */

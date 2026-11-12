@@ -72,6 +72,11 @@ add_library(hha_core STATIC
     src/agent/config.cpp
     src/agent/credentials.cpp
     src/agent/enrollment.cpp
+    # Heartbeat and status reporting (day 61)
+    src/core/time.cpp
+    src/monitor/metrics.cpp
+    src/agent/heartbeat.cpp
+    src/agent/agent.cpp
 )
 target_include_directories(hha_core PUBLIC src ${CMAKE_BINARY_DIR}/generated)
 target_link_libraries(hha_core

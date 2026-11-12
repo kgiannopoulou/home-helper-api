@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AgentMetric;
 use App\Jobs\ApplyRecurringBills;
 use App\Jobs\BudgetAlert;
 use App\Jobs\CheckPlantCare;
@@ -72,6 +73,7 @@ Schedule::command('db:restore-test')->sundays()->at('03:30')->timezone($home)->o
 // Housekeeping
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily()->onOneServer();
 Schedule::command('queue:prune-failed', ['--hours' => 24 * 14])->daily()->onOneServer();
+Schedule::command('model:prune', ['--model' => [AgentMetric::class]])->dailyAt('04:30')->timezone($home)->onOneServer();
 
 // Run one now, for every household: php artisan household:run PrepareShoppingList --date=2026-10-09
 Artisan::command('household:run {job} {--date= : "today" at home, YYYY-MM-DD}', function (string $job) {
