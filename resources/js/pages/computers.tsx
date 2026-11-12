@@ -392,6 +392,7 @@ function ComputerCard({ computer }: { computer: Computer }) {
 }
 
 function History({ computer }: { computer: Computer }) {
+    const sparse = computer.history.length < 30;
     if (computer.history.length < 2) {
         return null;
     }
@@ -445,7 +446,7 @@ function History({ computer }: { computer: Computer }) {
                             dataKey="cpu"
                             name="CPU %"
                             stroke="var(--series-1)"
-                            dot={false}
+                            dot={sparse}
                             strokeWidth={2}
                             isAnimationActive={false}
                         />
@@ -453,7 +454,7 @@ function History({ computer }: { computer: Computer }) {
                             dataKey="memory"
                             name="Memory %"
                             stroke="var(--series-2)"
-                            dot={false}
+                            dot={sparse}
                             strokeWidth={2}
                             isAnimationActive={false}
                         />
@@ -461,7 +462,7 @@ function History({ computer }: { computer: Computer }) {
                             dataKey="disk"
                             name="Disk %"
                             stroke="var(--series-3)"
-                            dot={false}
+                            dot={sparse}
                             strokeWidth={2}
                             isAnimationActive={false}
                         />
@@ -469,7 +470,7 @@ function History({ computer }: { computer: Computer }) {
                             dataKey="temperature"
                             name="°C"
                             stroke="var(--series-4)"
-                            dot={false}
+                            dot={sparse}
                             strokeWidth={2}
                             isAnimationActive={false}
                         />
