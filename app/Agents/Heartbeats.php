@@ -15,7 +15,7 @@ use Carbon\CarbonImmutable;
  */
 class Heartbeats
 {
-    public function __construct(private Commands $commands) {}
+    public function __construct(private Commands $commands, private AgentEvents $events) {}
 
     /**
      * @param  array<string, mixed>  $data  validated by HeartbeatController
@@ -25,6 +25,7 @@ class Heartbeats
     {
         $now = CarbonImmutable::now();
         $metrics = $data['metrics'] ?? null;
+        $wasOffline = $agent->offline_reported_at;
 
         $agent->forceFill([
             'version' => $data['version'],
@@ -37,7 +38,14 @@ class Heartbeats
             'outbox_dropped' => (int) ($data['outbox']['dropped'] ?? 0),
             'last_seen_at' => $now,
             'last_ip' => $ip,
+            'offline_reported_at' => null,
         ])->save();
+
+        if ($wasOffline) {
+            $this->events->record($agent, 'agent.online', 'info', $agent->name.' is back online', [
+                'offline_since' => $wasOffline->toIso8601ZuluString(),
+            ]);
+        }
 
         if (is_array($metrics)) {
             $this->sample($agent, $metrics, $now);

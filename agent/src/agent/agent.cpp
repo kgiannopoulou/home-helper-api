@@ -6,6 +6,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <thread>
 
 namespace hha::agent {
@@ -25,7 +26,8 @@ Agent::Agent(Config config, Dependencies deps)
       interval_(config_.heartbeat),
       startedAt_(time::nowIso8601()),
       startedSteady_(SteadyClock::now()),
-      thresholds_(config_.thresholds) {
+      thresholds_(config_.thresholds),
+      backoff_(config_.retryBase, config_.retryCap) {
     if (deps_.outbox) {
         outbox_ = deps_.outbox;
     } else {
@@ -230,21 +232,65 @@ void Agent::sendEvents() {
     }
 }
 
+std::chrono::milliseconds Agent::wentOffline(const std::string& why) {
+    if (!offlineSince_) {
+        offlineSince_ = SteadyClock::now();
+        offlineReason_ = why;
+        // Once, not on every retry: a night without Wi-Fi shouldn't fill the log
+        spdlog::warn("Server unreachable ({}); retrying with backoff. Events and results are kept until it's back.", why);
+    } else {
+        spdlog::debug("Still unreachable ({}), attempt {}", why, backoff_.attempts() + 1);
+    }
+    return backoff_.next();
+}
+
+void Agent::backOnline() {
+    if (!offlineSince_) return;
+    const auto offline = std::chrono::duration_cast<std::chrono::seconds>(SteadyClock::now() - *offlineSince_);
+    const auto attempts = backoff_.attempts();
+    spdlog::info("Back online after {} ({} attempt(s))", time::humanDuration(offline), attempts);
+    emit(Event::make("agent.reconnected", Severity::Info, "Back online after " + time::humanDuration(offline),
+                     {{"offline_seconds", offline.count()}, {"attempts", attempts}, {"reason", offlineReason_}}));
+    offlineSince_.reset();
+    offlineReason_.clear();
+    backoff_.reset();
+}
+
 void Agent::run(std::stop_token stop) {
     spdlog::info("Agent running; heartbeat every {} s", interval_.count());
     while (!stop.stop_requested()) {
+        std::chrono::milliseconds wait = interval_;
         try {
             beat();
+            backOnline();
         } catch (const net::ApiError& e) {
-            if (e.kind() == net::ApiError::Kind::Revoked) {
-                spdlog::error("This computer was removed from the household on the dashboard. Stopping.");
-                return;
+            switch (e.kind()) {
+                case net::ApiError::Kind::Revoked:
+                    spdlog::error("This computer was removed from the household on the dashboard. Stopping.");
+                    return;
+                case net::ApiError::Kind::RateLimited:
+                case net::ApiError::Kind::Server:
+                    wait = wentOffline(e.what());
+                    break;
+                case net::ApiError::Kind::Unauthorized:
+                    // Wrong secret, unknown agent: retrying fast won't fix it; someone has to look
+                    spdlog::error("The server rejects this computer's credentials ({}). Re-enroll it if this lasts: "
+                                  "home-helper-agent enroll --force --code …",
+                                  e.code());
+                    wait = std::max<std::chrono::milliseconds>(config_.retryCap, interval_);
+                    break;
+                default:
+                    // The server answered but refused something: not offline; try again at the usual pace
+                    spdlog::warn("Heartbeat refused: {}", e.what());
+                    break;
             }
-            spdlog::warn("Heartbeat failed: {}", e.what());
         } catch (const net::TransportError& e) {
-            spdlog::warn("Server unreachable: {}", e.what());
+            wait = wentOffline(e.what());
+        } catch (const std::exception& e) {
+            // A bug or a surprise from the server: log it and keep the agent alive
+            spdlog::error("Heartbeat failed unexpectedly: {}", e.what());
         }
-        if (!sleepFor(stop, interval_)) break;
+        if (!sleepFor(stop, wait)) break;
     }
 
     // Say goodbye if the server is there; the outbox keeps it otherwise

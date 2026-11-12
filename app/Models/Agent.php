@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $git_sha
  * @property string $secret 64 hex characters (256 bits), encrypted at rest
  * @property CarbonImmutable|null $last_seen_at
+ * @property CarbonImmutable|null $offline_reported_at
  * @property string|null $last_ip
  * @property CarbonImmutable|null $started_at
  * @property int|null $uptime_seconds
@@ -56,6 +57,7 @@ class Agent extends Model
         return [
             'secret' => 'encrypted',
             'last_seen_at' => 'immutable_datetime',
+            'offline_reported_at' => 'immutable_datetime',
             'started_at' => 'immutable_datetime',
             'metrics' => 'array',
             'inventory' => 'array',

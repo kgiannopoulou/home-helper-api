@@ -85,6 +85,8 @@ add_library(hha_core STATIC
     # Local events and the outbox (day 66)
     src/events/outbox.cpp
     src/events/thresholds.cpp
+    # Reconnect and offline handling (day 68)
+    src/agent/backoff.cpp
 )
 target_include_directories(hha_core PUBLIC src ${CMAKE_BINARY_DIR}/generated)
 add_dependencies(hha_core hha_version)

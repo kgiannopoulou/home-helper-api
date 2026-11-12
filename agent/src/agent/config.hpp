@@ -48,6 +48,9 @@ struct Config {
     bool logToFile = true;
 
     std::chrono::seconds heartbeat{30};
+    /// While the server is unreachable: 5 s, 10 s, 20 s… up to 2 min, with jitter (not in the file)
+    std::chrono::milliseconds retryBase{5'000};
+    std::chrono::milliseconds retryCap{120'000};
     std::chrono::seconds inventoryEvery{std::chrono::hours(6)};
     Thresholds thresholds;
     /// Only these mount points / drive letters; all fixed disks when empty

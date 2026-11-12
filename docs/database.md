@@ -652,6 +652,7 @@ erDiagram
         varchar git_sha "nullable"
         text secret
         timestamp last_seen_at "nullable"
+        timestamp offline_reported_at "nullable"
         varchar last_ip "nullable"
         timestamp started_at "nullable"
         bigint uptime_seconds "nullable"

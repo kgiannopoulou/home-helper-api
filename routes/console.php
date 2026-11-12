@@ -71,6 +71,9 @@ Schedule::command('queue:monitor', [
 Schedule::command('db:backup')->dailyAt('03:00')->timezone($home)->onOneServer();
 Schedule::command('db:restore-test')->sundays()->at('03:30')->timezone($home)->onOneServer();
 
+// Computers that stopped checking in (agent.offline, pushed to the phones)
+Schedule::command('agents:check-offline')->everyMinute()->onOneServer()->withoutOverlapping();
+
 // Housekeeping
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily()->onOneServer();
 Schedule::command('queue:prune-failed', ['--hours' => 24 * 14])->daily()->onOneServer();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "agent/backoff.hpp"
 #include "agent/config.hpp"
 #include "agent/heartbeat.hpp"
 #include "audio/audio_devices.hpp"
@@ -65,6 +66,8 @@ public:
     void finishCommands(std::chrono::milliseconds limit);
 
     std::chrono::seconds interval() const { return interval_; }
+    /// False from the first failed attempt until the next success
+    bool online() const { return !offlineSince_.has_value(); }
     const std::optional<std::string>& sentInventoryHash() const { return sentInventoryHash_; }
     /// Results waiting to be sent (finished commands whose result the server doesn't have yet)
     std::size_t pendingResults() const;
@@ -85,6 +88,10 @@ private:
     void sendResults();
     /// Posts waiting events in batches of up to 100
     void sendEvents();
+    /// The server didn't answer (or answered 429/5xx): how long until the next try
+    std::chrono::milliseconds wentOffline(const std::string& why);
+    /// A heartbeat got through: if it had been offline, say so with an event
+    void backOnline();
 
     Config config_;
     Dependencies deps_;
@@ -95,6 +102,10 @@ private:
     std::unique_ptr<events::Outbox> ownedOutbox_;
     events::Outbox* outbox_;
     events::ThresholdWatcher thresholds_;
+
+    Backoff backoff_;
+    std::optional<SteadyClock::time_point> offlineSince_;
+    std::string offlineReason_;
 
     nlohmann::json commandSummary_ = nlohmann::json::array();
     std::optional<std::string> sentInventoryHash_;
