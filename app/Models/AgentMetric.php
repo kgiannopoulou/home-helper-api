@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $disk_used_percent
  * @property float|null $temperature_c
  */
-class AgentMetric extends Model
+final class AgentMetric extends Model
 {
     use MassPrunable;
 
@@ -43,10 +43,14 @@ class AgentMetric extends Model
         ];
     }
 
-    /** Older than homehelper.agents.metrics_keep_days (php artisan model:prune, daily) */
+    /**
+     * Older than homehelper.agents.metrics_keep_days (php artisan model:prune, daily)
+     *
+     * @return Builder<AgentMetric>
+     */
     public function prunable(): Builder
     {
-        return static::query()->where('recorded_at', '<', now()->subDays((int) config('homehelper.agents.metrics_keep_days')));
+        return self::query()->where('recorded_at', '<', now()->subDays((int) config('homehelper.agents.metrics_keep_days')));
     }
 
     /** @return BelongsTo<Agent, $this> */

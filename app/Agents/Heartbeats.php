@@ -82,19 +82,27 @@ class Heartbeats
     /** @param array<string, mixed> $metrics */
     public static function fullestDisk(array $metrics): ?float
     {
-        $used = collect($metrics['disks'] ?? [])
-            ->filter(fn ($d) => ($d['total_bytes'] ?? 0) > 0)
-            ->map(fn ($d) => 100 * (1 - $d['free_bytes'] / $d['total_bytes']));
+        $used = [];
+        foreach ((array) ($metrics['disks'] ?? []) as $disk) {
+            if (is_array($disk) && ($disk['total_bytes'] ?? 0) > 0) {
+                $used[] = 100 * (1 - (float) ($disk['free_bytes'] ?? 0) / (float) $disk['total_bytes']);
+            }
+        }
 
-        return $used->isEmpty() ? null : self::clampPercent($used->max());
+        return $used === [] ? null : self::clampPercent(max($used));
     }
 
     /** @param array<string, mixed> $metrics */
     public static function hottest(array $metrics): ?float
     {
-        $max = collect($metrics['temperatures'] ?? [])->pluck('celsius')->filter(fn ($c) => is_numeric($c))->max();
+        $readings = [];
+        foreach ((array) ($metrics['temperatures'] ?? []) as $sensor) {
+            if (is_array($sensor) && is_numeric($sensor['celsius'] ?? null)) {
+                $readings[] = (float) $sensor['celsius'];
+            }
+        }
 
-        return $max === null ? null : round(max(-50, min(150, (float) $max)), 1);
+        return $readings === [] ? null : round(max(-50, min(150, max($readings))), 1);
     }
 
     private static function clampPercent(mixed $value): ?float

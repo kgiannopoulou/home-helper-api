@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\AgentMetric;
 use App\Jobs\ApplyRecurringBills;
 use App\Jobs\BudgetAlert;
 use App\Jobs\CheckPlantCare;
@@ -13,6 +12,7 @@ use App\Jobs\PruneVoiceConversations;
 use App\Jobs\RememberConversations;
 use App\Jobs\WeeklyDigest;
 use App\Jobs\WeeklySummary;
+use App\Models\AgentMetric;
 use App\Ops\SystemHealth;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;

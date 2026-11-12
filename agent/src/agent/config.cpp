@@ -84,7 +84,7 @@ Config Config::fromJson(const json& j, const std::filesystem::path& file) {
 
     std::string dataDir;
     r.read(j, "", "data_dir", dataDir);
-    c.dataDir = dataDir.empty() ? paths::defaultDataDir() : std::filesystem::path(dataDir);
+    c.dataDir = dataDir.empty() ? paths::defaultDataDir() : std::filesystem::path(dataDir).make_preferred();
 
     if (j.contains("log")) {
         const auto& log = j["log"];

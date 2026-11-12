@@ -8,6 +8,10 @@ Every household table has a ULID `id`, `household_id`, millisecond `created_at`/
 
 ```mermaid
 erDiagram
+    agents |o--o{ agent_enrollment_codes : "agent_id"
+    users ||--o{ agent_enrollment_codes : "user_id"
+    agents ||--o{ agent_metrics : "agent_id"
+    users |o--o{ agents : "enrolled_by"
     users ||--o{ ai_conversations : "user_id"
     ai_conversations ||--o{ ai_messages : "conversation_id"
     ai_conversations ||--o{ ai_pending_actions : "conversation_id"
@@ -287,8 +291,8 @@ erDiagram
     chores ||--o{ chore_completions : "household_id"
     users |o--o{ chore_completions : "user_id"
     users |o--o{ chores : "assignee_id"
-    households ||--o{ chores : "household_id"
     rooms ||--o{ chores : "household_id"
+    households ||--o{ chores : "household_id"
     rooms ||--o{ chores : "room_id"
     rooms ||--o{ chores : "room_id"
     households ||--o{ rooms : "household_id"
@@ -348,8 +352,8 @@ erDiagram
         timestamp pushed_at "nullable"
         timestamp resolved_at "nullable"
     }
-    plants ||--o{ plant_alerts : "household_id"
     households ||--o{ plant_alerts : "household_id"
+    plants ||--o{ plant_alerts : "household_id"
     plants ||--o{ plant_alerts : "plant_id"
     plants ||--o{ plant_alerts : "plant_id"
     households ||--o{ plant_care_logs : "household_id"
@@ -627,4 +631,57 @@ erDiagram
         tinyint remember
     }
     users ||--o{ voice_settings : "user_id"
+```
+
+## Computers (local agent)
+
+```mermaid
+erDiagram
+    agents {
+        char id PK
+        char household_id FK
+        bigint enrolled_by FK "nullable"
+        varchar name
+        varchar hostname "nullable"
+        varchar platform
+        varchar version
+        varchar git_sha "nullable"
+        text secret
+        timestamp last_seen_at "nullable"
+        varchar last_ip "nullable"
+        timestamp started_at "nullable"
+        bigint uptime_seconds "nullable"
+        json metrics "nullable"
+        int outbox_pending
+        int outbox_dropped
+        json inventory "nullable"
+        char inventory_hash "nullable"
+        timestamp inventory_at "nullable"
+        timestamp revoked_at "nullable"
+    }
+    agent_enrollment_codes {
+        char id PK
+        char household_id FK
+        bigint user_id FK
+        varchar name "nullable"
+        char code_hash UK
+        timestamp expires_at
+        timestamp used_at "nullable"
+        char agent_id FK "nullable"
+    }
+    agent_metrics {
+        bigint id PK
+        char agent_id FK
+        timestamp recorded_at
+        decimal cpu_percent "nullable"
+        decimal memory_percent "nullable"
+        decimal disk_used_percent "nullable"
+        decimal temperature_c "nullable"
+    }
+    agents |o--o{ agent_enrollment_codes : "agent_id"
+    households ||--o{ agent_enrollment_codes : "household_id"
+    users ||--o{ agent_enrollment_codes : "user_id"
+    agents ||--o{ agent_metrics : "agent_id"
+    users |o--o{ agents : "enrolled_by"
+    households ||--o{ agents : "household_id"
 ```

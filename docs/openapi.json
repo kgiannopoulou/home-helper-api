@@ -2979,6 +2979,114 @@
                 }
             }
         },
+        "/agent/v1/enroll": {
+            "post": {
+                "operationId": "agent.enroll",
+                "tags": [
+                    "Enroll"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "maxLength": 20
+                                    },
+                                    "name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 80
+                                    },
+                                    "hostname": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 255
+                                    },
+                                    "platform": {
+                                        "type": "string",
+                                        "pattern": "^[a-z0-9]+-[a-z0-9]+$",
+                                        "maxLength": 30
+                                    },
+                                    "version": {
+                                        "type": "string",
+                                        "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$",
+                                        "maxLength": 40
+                                    },
+                                    "git_sha": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "pattern": "^[0-9a-f]+$|^unknown$",
+                                        "maxLength": 40
+                                    }
+                                },
+                                "required": [
+                                    "code",
+                                    "platform",
+                                    "version"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "agent_id": {
+                                            "type": "string"
+                                        },
+                                        "secret": {
+                                            "type": "string"
+                                        },
+                                        "household": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name"
+                                            ]
+                                        },
+                                        "heartbeat_seconds": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "agent_id",
+                                        "secret",
+                                        "household",
+                                        "heartbeat_seconds"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/households/{household}/events": {
             "get": {
                 "operationId": "events.index",
@@ -3949,6 +4057,218 @@
                     }
                 },
                 "security": []
+            }
+        },
+        "/agent/v1/heartbeat": {
+            "post": {
+                "operationId": "agent.heartbeat",
+                "tags": [
+                    "Heartbeat"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "version": {
+                                        "type": "string",
+                                        "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$",
+                                        "maxLength": 40
+                                    },
+                                    "platform": {
+                                        "type": "string",
+                                        "pattern": "^[a-z0-9]+-[a-z0-9]+$",
+                                        "maxLength": 30
+                                    },
+                                    "git_sha": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 40
+                                    },
+                                    "started_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "uptime_seconds": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 0
+                                    },
+                                    "inventory_hash": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 128,
+                                        "maxLength": 128
+                                    },
+                                    "outbox": {
+                                        "type": "object",
+                                        "properties": {
+                                            "pending": {
+                                                "type": "integer",
+                                                "minimum": 0
+                                            },
+                                            "dropped": {
+                                                "type": "integer",
+                                                "minimum": 0
+                                            }
+                                        }
+                                    },
+                                    "metrics": {
+                                        "type": "object",
+                                        "properties": {
+                                            "cpu_percent": {
+                                                "type": [
+                                                    "number",
+                                                    "null"
+                                                ],
+                                                "minimum": 0,
+                                                "maximum": 100
+                                            },
+                                            "memory": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "total_bytes": {
+                                                        "type": "integer",
+                                                        "minimum": 0
+                                                    },
+                                                    "used_bytes": {
+                                                        "type": "integer",
+                                                        "minimum": 0
+                                                    }
+                                                }
+                                            },
+                                            "disks": {
+                                                "type": [
+                                                    "array",
+                                                    "null"
+                                                ],
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "mount": {
+                                                            "type": "string",
+                                                            "maxLength": 255
+                                                        },
+                                                        "total_bytes": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                        },
+                                                        "free_bytes": {
+                                                            "type": "integer",
+                                                            "minimum": 0
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "mount",
+                                                        "total_bytes",
+                                                        "free_bytes"
+                                                    ]
+                                                },
+                                                "maxItems": 32
+                                            },
+                                            "temperatures": {
+                                                "type": [
+                                                    "array",
+                                                    "null"
+                                                ],
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "label": {
+                                                            "type": "string",
+                                                            "maxLength": 80
+                                                        },
+                                                        "celsius": {
+                                                            "type": "number",
+                                                            "minimum": -50,
+                                                            "maximum": 150
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "label",
+                                                        "celsius"
+                                                    ]
+                                                },
+                                                "maxItems": 32
+                                            },
+                                            "load": {
+                                                "type": [
+                                                    "array",
+                                                    "null"
+                                                ],
+                                                "items": {
+                                                    "type": "number",
+                                                    "minimum": 0
+                                                },
+                                                "maxItems": 3
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "version",
+                                    "platform",
+                                    "metrics"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "server_time": {
+                                            "type": "string"
+                                        },
+                                        "heartbeat_seconds": {
+                                            "type": "integer"
+                                        },
+                                        "inventory_wanted": {
+                                            "type": "string"
+                                        },
+                                        "commands": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "minItems": 0,
+                                            "maxItems": 0
+                                        },
+                                        "update": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "required": [
+                                        "server_time",
+                                        "heartbeat_seconds",
+                                        "inventory_wanted",
+                                        "commands",
+                                        "update"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
             }
         },
         "/households": {
@@ -11888,6 +12208,58 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/agent/v1/me": {
+            "get": {
+                "operationId": "agent.me",
+                "tags": [
+                    "WhoAmI"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "agent_id": {
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "household": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name"
+                                            ]
+                                        },
+                                        "server_time": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "agent_id",
+                                        "name",
+                                        "household",
+                                        "server_time"
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }

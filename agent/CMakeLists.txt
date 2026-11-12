@@ -39,21 +39,17 @@ endif()
 include(cmake/Dependencies.cmake)
 
 # --- Version: from project(VERSION) and git, baked into the binary ------------
-set(HHA_GIT_SHA "unknown")
-find_package(Git QUIET)
-if(GIT_FOUND)
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} rev-parse --short=12 HEAD
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE HHA_GIT_SHA_OUT
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_QUIET
-        RESULT_VARIABLE HHA_GIT_RESULT)
-    if(HHA_GIT_RESULT EQUAL 0 AND HHA_GIT_SHA_OUT)
-        set(HHA_GIT_SHA ${HHA_GIT_SHA_OUT})
-    endif()
-endif()
-configure_file(src/core/version.hpp.in ${CMAKE_BINARY_DIR}/generated/core/version.hpp @ONLY)
+# Regenerated on every build (cmake/GitVersion.cmake), so the commit is never stale
+set(HHA_VERSION_ARGS
+    -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+    -DTEMPLATE=${CMAKE_SOURCE_DIR}/src/core/version.hpp.in
+    -DOUTPUT=${CMAKE_BINARY_DIR}/generated/core/version.hpp
+    -DPROJECT_VERSION=${PROJECT_VERSION})
+execute_process(COMMAND ${CMAKE_COMMAND} ${HHA_VERSION_ARGS} -P ${CMAKE_SOURCE_DIR}/cmake/GitVersion.cmake)
+add_custom_target(hha_version
+    COMMAND ${CMAKE_COMMAND} ${HHA_VERSION_ARGS} -P ${CMAKE_SOURCE_DIR}/cmake/GitVersion.cmake
+    BYPRODUCTS ${CMAKE_BINARY_DIR}/generated/core/version.hpp
+    COMMENT "Version and git commit")
 
 # --- The agent library: everything but main(), so the tests link it ---------
 add_library(hha_core STATIC
@@ -81,6 +77,7 @@ add_library(hha_core STATIC
     src/monitor/linux_parsers.cpp
 )
 target_include_directories(hha_core PUBLIC src ${CMAKE_BINARY_DIR}/generated)
+add_dependencies(hha_core hha_version)
 target_link_libraries(hha_core
     PUBLIC  spdlog::spdlog nlohmann_json::nlohmann_json
     PRIVATE hha_warnings monocypher)
