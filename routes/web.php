@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\BriefingController;
 use App\Http\Controllers\Web\ChoresController;
+use App\Http\Controllers\Web\ComputersController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\HealthController;
 use App\Http\Controllers\Web\HouseholdController;
@@ -53,6 +54,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('turns', 'turn')->middleware('throttle:ai')->name('turns.store');
             Route::post('turns/{turn}/cancel', 'cancel')->name('turns.cancel');
             Route::post('speak', 'speak')->middleware('throttle:voice')->name('speak');
+        });
+
+        // The household's computers, through the local agent (agent/docs/design.md)
+        Route::controller(ComputersController::class)->prefix('computers')->name('computers')->group(function () {
+            Route::get('/', 'show');
+            Route::post('pair', 'pair')->middleware('throttle:10,1')->name('.pair');
+            Route::post('{agent}/commands', 'run')->middleware('throttle:30,1')->name('.commands.store');
+            Route::post('commands/{command}/confirm', 'confirm')->name('.commands.confirm');
+            Route::post('commands/{command}/cancel', 'cancel')->name('.commands.cancel');
+            Route::post('{agent}/update', 'update')->name('.update');
+            Route::patch('{agent}', 'rename')->name('.rename');
+            Route::delete('{agent}', 'revoke')->name('.revoke');
         });
 
         // The assistant (docs/assistant.md)
