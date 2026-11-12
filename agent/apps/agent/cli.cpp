@@ -8,6 +8,7 @@
 #include "commands/allowlist.hpp"
 #include "commands/executor.hpp"
 #include "core/time.hpp"
+#include "events/outbox.hpp"
 #include "core/args.hpp"
 #include "core/host.hpp"
 #include "core/logging.hpp"
@@ -274,10 +275,11 @@ struct Runtime {
     std::unique_ptr<monitor::SystemMonitor> monitor;
     std::unique_ptr<audio::AudioDiscovery> audio;
     commands::Allowlist allowlist;
+    std::unique_ptr<events::Outbox> outbox;
 };
 
 Runtime prepare(const Args& args) {
-    Runtime rt{loadConfig(args), {}, nullptr, nullptr, nullptr, nullptr, {}};
+    Runtime rt{loadConfig(args), {}, nullptr, nullptr, nullptr, nullptr, {}, nullptr};
     logging::install({.level = args.flag("verbose") ? "debug" : rt.config.logLevel,
                       .file = rt.config.logToFile ? std::optional(rt.config.logFile()) : std::nullopt,
                       .console = true});
@@ -294,13 +296,14 @@ Runtime prepare(const Args& args) {
     rt.monitor = monitor::makeSystemMonitor(rt.config.disks);
     if (rt.config.audioDiscovery) rt.audio = audio::makeAudioDiscovery();
     rt.allowlist = loadAllowlist(rt.config);
+    rt.outbox = std::make_unique<events::Outbox>(rt.config.outboxFile(), rt.config.outboxMaxEvents);
     spdlog::info("{} command(s) on the allowlist", rt.allowlist.entries().size());
     return rt;
 }
 
 int runCommand(const Args& args) {
     auto rt = prepare(args);
-    agent::Agent agent(rt.config, {*rt.api, *rt.monitor, rt.audio.get(), &rt.allowlist, commands::runProcess});
+    agent::Agent agent(rt.config, {*rt.api, *rt.monitor, rt.audio.get(), &rt.allowlist, commands::runProcess, rt.outbox.get()});
     spdlog::info("home-helper-agent {} ({}) for \"{}\" at {}", version::kVersion, version::kGitSha,
                  rt.credentials.household, rt.credentials.serverUrl);
 

@@ -2,6 +2,7 @@
 
 #include "agent/inventory.hpp"
 #include "core/time.hpp"
+#include "core/version.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -9,16 +10,28 @@
 
 namespace hha::agent {
 
+using events::Event;
+using events::Severity;
+using nlohmann::json;
+
 namespace {
 constexpr auto kAudioEvery = std::chrono::seconds(60);
-}
+constexpr std::size_t kEventBatch = 100;
+}  // namespace
 
 Agent::Agent(Config config, Dependencies deps)
     : config_(std::move(config)),
       deps_(deps),
       interval_(config_.heartbeat),
       startedAt_(time::nowIso8601()),
-      startedSteady_(SteadyClock::now()) {
+      startedSteady_(SteadyClock::now()),
+      thresholds_(config_.thresholds) {
+    if (deps_.outbox) {
+        outbox_ = deps_.outbox;
+    } else {
+        ownedOutbox_ = std::make_unique<events::Outbox>(std::filesystem::path{}, config_.outboxMaxEvents);
+        outbox_ = ownedOutbox_.get();
+    }
     if (deps_.allowlist) {
         commandSummary_ = deps_.allowlist->summary();
         worker_ = std::make_unique<commands::CommandWorker>(
@@ -28,16 +41,26 @@ Agent::Agent(Config config, Dependencies deps)
                 wake();  // report it now, not at the next heartbeat
             });
     }
+    outbox_->add(Event::make("agent.started", Severity::Info,
+                             "Agent " + std::string(version::kVersion) + " started",
+                             {{"version", std::string(version::kVersion)}, {"platform", std::string(version::platform())}}));
 }
 
 Agent::~Agent() {
     worker_.reset();
 }
 
+void Agent::emit(const Event& event) {
+    spdlog::info("Event {}: {}", event.type, event.message);
+    outbox_->add(event);
+    wake();
+}
+
 HeartbeatReply Agent::beat() {
     std::optional<monitor::Metrics> metrics;
     try {
         metrics = deps_.monitor.sample();
+        for (const auto& e : thresholds_.feed(*metrics)) emit(e);
     } catch (const std::exception& e) {
         // A broken sensor must not stop the heartbeat: the server still learns the agent is alive
         spdlog::warn("Reading the computer failed: {}", e.what());
@@ -50,6 +73,8 @@ HeartbeatReply Agent::beat() {
     status.startedAt = startedAt_;
     status.uptimeSeconds = std::chrono::duration_cast<std::chrono::seconds>(SteadyClock::now() - startedSteady_).count();
     status.inventoryHash = sentInventoryHash_;
+    status.outboxPending = outbox_->size();
+    status.outboxDropped = outbox_->dropped();
 
     const auto reply = HeartbeatReply::parse(deps_.api.post("heartbeat", buildHeartbeat(metrics, status)));
     for (const auto& problem : reply.problems) spdlog::warn("Heartbeat reply: {}", problem);
@@ -60,62 +85,8 @@ HeartbeatReply Agent::beat() {
     if (reply.inventoryWanted) syncInventory(true);
     dispatch(reply.commands);
     sendResults();
+    sendEvents();
     return reply;
-}
-
-void Agent::dispatch(const std::vector<CommandRequest>& requests) {
-    for (const auto& request : requests) {
-        if (!worker_) {
-            commands::CommandResult r;
-            r.id = request.id;
-            r.key = request.key;
-            r.status = "rejected";
-            r.reason = "this computer has no commands configured";
-            r.startedAt = time::nowIso8601();
-            spdlog::warn("Command {} ({}) refused: no allowlist", request.id, request.key);
-            addResult(std::move(r));
-        } else if (!worker_->submit(request)) {
-            spdlog::debug("Command {} already accepted", request.id);
-        }
-    }
-}
-
-void Agent::finishCommands(std::chrono::milliseconds limit) {
-    const auto until = SteadyClock::now() + limit;
-    while (commandsBusy() > 0 && SteadyClock::now() < until) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    }
-    sendResults();
-}
-
-void Agent::addResult(commands::CommandResult result) {
-    std::lock_guard lock(resultsMutex_);
-    results_.push_back(std::move(result));
-}
-
-std::size_t Agent::pendingResults() const {
-    std::lock_guard lock(resultsMutex_);
-    return results_.size();
-}
-
-void Agent::sendResults() {
-    while (true) {
-        commands::CommandResult result;
-        {
-            std::lock_guard lock(resultsMutex_);
-            if (results_.empty()) return;
-            result = results_.front();
-        }
-        try {
-            deps_.api.post("commands/" + result.id + "/result", result.toJson());
-        } catch (const net::ApiError& e) {
-            if (e.transient()) throw;
-            // The server refused it for good (an unknown id, say): resending won't help
-            spdlog::warn("The server refused the result of {}: {}", result.id, e.what());
-        }
-        std::lock_guard lock(resultsMutex_);
-        results_.pop_front();
-    }
 }
 
 void Agent::syncInventory(bool force) {
@@ -158,12 +129,105 @@ std::vector<audio::AudioDevice> Agent::audioDevices() {
     }
     if (audio_) {
         const auto changes = audio::diff(*audio_, devices);
-        for (const auto& d : changes.added) spdlog::info("Audio {} connected: {}", audio::toString(d.direction), d.name);
-        for (const auto& d : changes.removed) spdlog::info("Audio {} removed: {}", audio::toString(d.direction), d.name);
+        for (const auto& d : changes.added) {
+            const auto what = d.direction == audio::Direction::Input ? "Microphone" : "Speaker";
+            emit(Event::make("audio.added", Severity::Info, std::string(what) + " connected: " + d.name, d.toJson()));
+        }
+        for (const auto& d : changes.removed) {
+            const auto what = d.direction == audio::Direction::Input ? "Microphone" : "Speaker";
+            emit(Event::make("audio.removed", Severity::Info, std::string(what) + " removed: " + d.name, d.toJson()));
+        }
     }
     audio_ = devices;
     audioListedAt_ = now;
     return devices;
+}
+
+void Agent::dispatch(const std::vector<CommandRequest>& requests) {
+    for (const auto& request : requests) {
+        if (!worker_) {
+            commands::CommandResult r;
+            r.id = request.id;
+            r.key = request.key;
+            r.status = "rejected";
+            r.reason = "this computer has no commands configured";
+            r.startedAt = time::nowIso8601();
+            spdlog::warn("Command {} ({}) refused: no allowlist", request.id, request.key);
+            addResult(r);
+        } else if (!worker_->submit(request)) {
+            spdlog::debug("Command {} already accepted", request.id);
+        }
+    }
+}
+
+void Agent::addResult(const commands::CommandResult& result) {
+    auto body = result.toJson();
+    body["id"] = result.id;
+    body["key"] = result.key;
+    outbox_->addResult(body);
+    if (result.status == "rejected") {
+        // Somebody asked for something this computer doesn't allow: worth seeing on the dashboard
+        outbox_->add(Event::make("command.rejected", Severity::Warning,
+                                 "Refused \"" + result.key + "\": " + result.reason,
+                                 {{"command_id", result.id}, {"key", result.key}, {"reason", result.reason}}));
+    }
+}
+
+std::size_t Agent::pendingResults() const {
+    return outbox_->peek("result", 1'000'000).size();
+}
+
+void Agent::finishCommands(std::chrono::milliseconds limit) {
+    const auto until = SteadyClock::now() + limit;
+    while (commandsBusy() > 0 && SteadyClock::now() < until) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+    sendResults();
+    sendEvents();
+}
+
+void Agent::sendResults() {
+    for (const auto& entry : outbox_->peek("result", 50)) {
+        const auto id = entry.body.value("id", "");
+        auto body = entry.body;
+        body.erase("id");
+        body.erase("key");
+        try {
+            deps_.api.post("commands/" + id + "/result", body);
+        } catch (const net::ApiError& e) {
+            if (e.transient() || e.kind() == net::ApiError::Kind::Unauthorized ||
+                e.kind() == net::ApiError::Kind::Revoked) {
+                throw;
+            }
+            // Refused for good (validation): resending won't help
+            spdlog::warn("The server refused the result of {}: {}", id, e.what());
+        }
+        outbox_->remove("result", {id});
+    }
+}
+
+void Agent::sendEvents() {
+    while (true) {
+        const auto batch = outbox_->peek("event", kEventBatch);
+        if (batch.empty()) return;
+        json events = json::array();
+        std::vector<std::string> ids;
+        for (const auto& e : batch) {
+            events.push_back(e.body);
+            ids.push_back(e.body.value("id", ""));
+        }
+        try {
+            deps_.api.post("events", {{"events", events}});
+        } catch (const net::ApiError& e) {
+            if (e.transient() || e.kind() == net::ApiError::Kind::Unauthorized ||
+                e.kind() == net::ApiError::Kind::Revoked) {
+                throw;
+            }
+            spdlog::warn("The server refused {} event(s): {}", ids.size(), e.what());
+        }
+        outbox_->remove("event", ids);
+        if (batch.size() < kEventBatch) return;
+    }
 }
 
 void Agent::run(std::stop_token stop) {
@@ -181,6 +245,14 @@ void Agent::run(std::stop_token stop) {
             spdlog::warn("Server unreachable: {}", e.what());
         }
         if (!sleepFor(stop, interval_)) break;
+    }
+
+    // Say goodbye if the server is there; the outbox keeps it otherwise
+    outbox_->add(Event::make("agent.stopping", Severity::Info, "Agent stopping"));
+    try {
+        finishCommands(std::chrono::seconds(10));
+    } catch (const std::exception& e) {
+        spdlog::info("Not sent before stopping (kept for next time): {}", e.what());
     }
     spdlog::info("Agent stopped");
 }

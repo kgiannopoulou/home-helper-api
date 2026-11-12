@@ -13,6 +13,7 @@ erDiagram
     users |o--o{ agent_commands : "requested_by"
     agents |o--o{ agent_enrollment_codes : "agent_id"
     users ||--o{ agent_enrollment_codes : "user_id"
+    agents ||--o{ agent_events : "agent_id"
     agents ||--o{ agent_metrics : "agent_id"
     users |o--o{ agents : "enrolled_by"
     users ||--o{ ai_conversations : "user_id"
@@ -294,8 +295,8 @@ erDiagram
     chores ||--o{ chore_completions : "household_id"
     users |o--o{ chore_completions : "user_id"
     users |o--o{ chores : "assignee_id"
-    rooms ||--o{ chores : "household_id"
     households ||--o{ chores : "household_id"
+    rooms ||--o{ chores : "household_id"
     rooms ||--o{ chores : "room_id"
     rooms ||--o{ chores : "room_id"
     households ||--o{ rooms : "household_id"
@@ -702,6 +703,19 @@ erDiagram
         int duration_ms "nullable"
         varchar reason "nullable"
     }
+    agent_events {
+        char id PK
+        char agent_id FK
+        char household_id FK
+        char event_uuid
+        varchar type
+        enum severity
+        varchar message
+        json data "nullable"
+        enum source
+        timestamp occurred_at
+        timestamp received_at
+    }
     agents ||--o{ agent_commands : "agent_id"
     users |o--o{ agent_commands : "confirmed_by"
     households ||--o{ agent_commands : "household_id"
@@ -709,6 +723,8 @@ erDiagram
     agents |o--o{ agent_enrollment_codes : "agent_id"
     households ||--o{ agent_enrollment_codes : "household_id"
     users ||--o{ agent_enrollment_codes : "user_id"
+    agents ||--o{ agent_events : "agent_id"
+    households ||--o{ agent_events : "household_id"
     agents ||--o{ agent_metrics : "agent_id"
     users |o--o{ agents : "enrolled_by"
     households ||--o{ agents : "household_id"

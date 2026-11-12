@@ -3491,6 +3491,108 @@
                 }
             }
         },
+        "/agent/v1/events": {
+            "post": {
+                "operationId": "agent.events",
+                "tags": [
+                    "Events"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "events": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "pattern": "^[a-z]+(\\.[a-z_]+)+$",
+                                                    "maxLength": 40
+                                                },
+                                                "severity": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "info",
+                                                        "warning",
+                                                        "critical"
+                                                    ]
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "maxLength": 1000
+                                                },
+                                                "data": {
+                                                    "type": [
+                                                        "array",
+                                                        "null"
+                                                    ],
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "occurred_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "type",
+                                                "severity",
+                                                "message",
+                                                "occurred_at"
+                                            ]
+                                        },
+                                        "minItems": 1,
+                                        "maxItems": 100
+                                    }
+                                },
+                                "required": [
+                                    "events"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "accepted": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        },
+                                        "duplicates": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "accepted",
+                                        "duplicates"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/households/{household}/expenses": {
             "get": {
                 "operationId": "expenses.index",

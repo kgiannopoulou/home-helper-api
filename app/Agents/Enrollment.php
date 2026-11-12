@@ -79,6 +79,7 @@ class Enrollment
                 'last_ip' => $ip,
             ]);
             $row->update(['used_at' => CarbonImmutable::now(), 'agent_id' => $agent->id]);
+            app(AgentEvents::class)->record($agent, 'agent.enrolled', 'info', $agent->name.' joined the household', ['by' => $row->user->name, 'hostname' => $agent->hostname]);
 
             return [$agent, $secret];
         });

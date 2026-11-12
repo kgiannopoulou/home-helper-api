@@ -4,13 +4,15 @@
 #include "agent/heartbeat.hpp"
 #include "audio/audio_devices.hpp"
 #include "commands/executor.hpp"
+#include "events/outbox.hpp"
+#include "events/thresholds.hpp"
 #include "monitor/metrics.hpp"
 #include "net/api_client.hpp"
 
 #include <chrono>
 #include <condition_variable>
-#include <deque>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <stop_token>
@@ -18,8 +20,9 @@
 namespace hha::agent {
 
 /// The agent's loop (docs/design.md#shape): every heartbeat interval, read the
-/// computer, send the heartbeat, act on the reply. Everything it talks to is
-/// passed in, so the tests drive it with fakes.
+/// computer, send the heartbeat, act on the reply, and send what is waiting
+/// in the outbox. Everything it talks to is passed in, so the tests drive it
+/// with fakes.
 class Agent {
 public:
     using SteadyClock = std::chrono::steady_clock;
@@ -33,6 +36,8 @@ public:
         const commands::Allowlist* allowlist = nullptr;
         /// How programs are started (tests replace it); commands::runProcess by default
         commands::ProcessRunner runner = {};
+        /// Events and results waiting to be sent; an in-memory one when null
+        events::Outbox* outbox = nullptr;
     };
 
     Agent(Config config, Dependencies deps);
@@ -41,46 +46,55 @@ public:
     Agent(const Agent&) = delete;
     Agent& operator=(const Agent&) = delete;
 
-    /// One heartbeat: sample, send, handle the reply. Network and server
-    /// errors propagate (run() decides what to do about them).
+    /// One heartbeat: sample, send, handle the reply, flush the outbox.
+    /// Network and server errors propagate (run() decides what to do).
     HeartbeatReply beat();
 
     /// Until stop is requested. Returns early only when the computer was
     /// removed from the household (ApiError Revoked).
     void run(std::stop_token stop);
 
-    /// Wakes run() for an immediate heartbeat (a new event, a local command finished).
+    /// Wakes run() for an immediate heartbeat (a new event, a command finished).
     void wake();
 
-    std::chrono::seconds interval() const { return interval_; }
-    const std::optional<std::string>& sentInventoryHash() const { return sentInventoryHash_; }
+    /// Records an event and wakes the loop to send it
+    void emit(const events::Event& event);
 
     /// Waits (up to `limit`) for queued and running commands, then sends their
     /// results. For `run --once` and a clean shutdown.
     void finishCommands(std::chrono::milliseconds limit);
 
+    std::chrono::seconds interval() const { return interval_; }
+    const std::optional<std::string>& sentInventoryHash() const { return sentInventoryHash_; }
     /// Results waiting to be sent (finished commands whose result the server doesn't have yet)
     std::size_t pendingResults() const;
     /// Commands queued or running on this computer
     std::size_t commandsBusy() const { return worker_ ? worker_->busy() : 0; }
+    events::Outbox& outbox() { return *outbox_; }
 
 private:
     /// Sends the inventory when it changed, the server asked, or `force`
     void syncInventory(bool force);
-    /// Audio devices, re-listed at most once a minute; logs what appeared or went
+    /// Audio devices, re-listed at most once a minute; plugging and unplugging become events
     std::vector<audio::AudioDevice> audioDevices();
     bool sleepFor(std::stop_token& stop, std::chrono::milliseconds duration);
     /// Hands the reply's commands to the worker (or rejects them all without an allowlist)
     void dispatch(const std::vector<CommandRequest>& requests);
-    /// Posts finished results; a network error keeps the rest for the next beat
+    void addResult(const commands::CommandResult& result);
+    /// Posts finished results, oldest first; a network error keeps the rest
     void sendResults();
-    void addResult(commands::CommandResult result);
+    /// Posts waiting events in batches of up to 100
+    void sendEvents();
 
     Config config_;
     Dependencies deps_;
     std::chrono::seconds interval_;
     std::string startedAt_;
     SteadyClock::time_point startedSteady_;
+
+    std::unique_ptr<events::Outbox> ownedOutbox_;
+    events::Outbox* outbox_;
+    events::ThresholdWatcher thresholds_;
 
     nlohmann::json commandSummary_ = nlohmann::json::array();
     std::optional<std::string> sentInventoryHash_;
@@ -92,8 +106,6 @@ private:
     std::condition_variable_any wakeup_;
     bool woken_ = false;
 
-    mutable std::mutex resultsMutex_;
-    std::deque<commands::CommandResult> results_;
     /// Last: its thread calls back into the members above, so it stops first
     std::unique_ptr<commands::CommandWorker> worker_;
 };

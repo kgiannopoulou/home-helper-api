@@ -82,6 +82,9 @@ add_library(hha_core STATIC
     src/commands/allowlist.cpp
     src/commands/process.cpp
     src/commands/executor.cpp
+    # Local events and the outbox (day 66)
+    src/events/outbox.cpp
+    src/events/thresholds.cpp
 )
 target_include_directories(hha_core PUBLIC src ${CMAKE_BINARY_DIR}/generated)
 add_dependencies(hha_core hha_version)

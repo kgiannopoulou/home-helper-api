@@ -8,6 +8,7 @@ use App\Ai\Tools\Tool;
 use App\Ai\Tools\ToolContext;
 use App\Models\Agent;
 use App\Models\AgentCommand;
+use App\Models\AgentEvent;
 
 /**
  * The household's computers running the local agent (agent/docs/design.md):
@@ -28,7 +29,7 @@ class GetComputers extends Tool
 
     public function description(): string
     {
-        return 'The household\'s computers running the Home Helper agent: whether each is online, when it was last seen, CPU, memory, the fullest disk, the hottest temperature, its microphones and speakers, the commands it allows (sensitive ones only the owner can run from the Computers page), and its recent commands with their results. Use it for questions like "is the mini PC running hot?", "how full is the disk?", "which microphones are plugged in?" or before proposing a command.';
+        return 'The household\'s computers running the Home Helper agent: whether each is online, when it was last seen, CPU, memory, the fullest disk, the hottest temperature, its microphones and speakers, what happened on it recently (disk low, running hot, offline, devices plugged in), the commands it allows (sensitive ones only the owner can run from the Computers page), and its recent commands with their results. Use it for questions like "is the mini PC running hot?", "how full is the disk?", "which microphones are plugged in?" or before proposing a command.';
     }
 
     public function run(array $input, ToolContext $context): array
@@ -57,6 +58,8 @@ class GetComputers extends Tool
                         'sensitive' => $c['sensitive'],
                         'params' => array_map(fn ($p) => ['name' => $p['name'], 'pattern' => $p['pattern'], 'description' => $p['description'] ?? null], $c['params']),
                     ], Inventory::commands($agent)),
+                    'recent_events' => $agent->events()->orderByDesc('occurred_at')->limit(8)->get()
+                        ->map(fn (AgentEvent $e) => ['type' => $e->type, 'severity' => $e->severity, 'message' => $e->message, 'at' => $e->occurred_at->toIso8601ZuluString()])->all(),
                     'recent_commands' => AgentCommand::query()->where('agent_id', $agent->id)->latest()->limit(5)->get()
                         ->map(fn (AgentCommand $c) => [
                             'command' => $c->label(),
