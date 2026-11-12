@@ -4,6 +4,7 @@
 #include "agent/config.hpp"
 #include "agent/credentials.hpp"
 #include "agent/enrollment.hpp"
+#include "audio/audio_devices.hpp"
 #include "core/args.hpp"
 #include "core/host.hpp"
 #include "core/logging.hpp"
@@ -46,6 +47,7 @@ Running:
 
 Checking:
   monitor                  Print this computer's readings, as the heartbeat sends them
+  audio                    List microphones and speakers (they are never opened)
   status                   Config, credentials, and whether the server accepts them
   version                  Version, git commit and platform
   help                     This text
@@ -198,6 +200,16 @@ int monitorCommand(const Args& args) {
     return 0;
 }
 
+int audioCommand(const Args&) {
+    const auto devices = audio::makeAudioDiscovery()->list();
+    if (devices.empty()) std::cout << "No audio devices found.\n";
+    for (const auto& d : devices) {
+        std::cout << (d.direction == audio::Direction::Input ? "mic      " : "speaker  ") << (d.isDefault ? "* " : "  ")
+                  << d.name << "  [" << d.state << "]\n";
+    }
+    return 0;
+}
+
 /// Everything `run` needs, built from the config and credentials
 struct Runtime {
     agent::Config config;
@@ -205,10 +217,11 @@ struct Runtime {
     std::unique_ptr<net::HttpTransport> transport;
     std::unique_ptr<net::ApiClient> api;
     std::unique_ptr<monitor::SystemMonitor> monitor;
+    std::unique_ptr<audio::AudioDiscovery> audio;
 };
 
 Runtime prepare(const Args& args) {
-    Runtime rt{loadConfig(args), {}, nullptr, nullptr, nullptr};
+    Runtime rt{loadConfig(args), {}, nullptr, nullptr, nullptr, nullptr};
     logging::install({.level = args.flag("verbose") ? "debug" : rt.config.logLevel,
                       .file = rt.config.logToFile ? std::optional(rt.config.logFile()) : std::nullopt,
                       .console = true});
@@ -223,12 +236,13 @@ Runtime prepare(const Args& args) {
         *rt.transport);
     rt.api->setCredentials(rt.credentials);
     rt.monitor = monitor::makeSystemMonitor(rt.config.disks);
+    if (rt.config.audioDiscovery) rt.audio = audio::makeAudioDiscovery();
     return rt;
 }
 
 int runCommand(const Args& args) {
     auto rt = prepare(args);
-    agent::Agent agent(rt.config, {*rt.api, *rt.monitor});
+    agent::Agent agent(rt.config, {*rt.api, *rt.monitor, rt.audio.get()});
     spdlog::info("home-helper-agent {} ({}) for \"{}\" at {}", version::kVersion, version::kGitSha,
                  rt.credentials.household, rt.credentials.serverUrl);
 
@@ -257,7 +271,7 @@ int run(const std::vector<std::string>& argv) {
         const std::map<std::string, std::function<int(const Args&)>> commands = {
             {"version", version}, {"init", init},         {"check-config", checkConfig},
             {"enroll", enroll},   {"unenroll", unenroll}, {"status", status},
-            {"monitor", monitorCommand}, {"run", runCommand},
+            {"monitor", monitorCommand}, {"audio", audioCommand}, {"run", runCommand},
         };
 
         if (args.command.empty() || args.command == "help" || args.flag("help")) {

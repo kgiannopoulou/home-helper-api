@@ -2,6 +2,7 @@
 
 #include "agent/config.hpp"
 #include "agent/heartbeat.hpp"
+#include "audio/audio_devices.hpp"
 #include "monitor/metrics.hpp"
 #include "net/api_client.hpp"
 
@@ -9,13 +10,14 @@
 #include <condition_variable>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <stop_token>
 
 namespace hha::agent {
 
 /// The agent's loop (docs/design.md#shape): every heartbeat interval, read the
 /// computer, send the heartbeat, act on the reply. Everything it talks to is
-/// passed in, so the tests drive it with fakes and a fake clock.
+/// passed in, so the tests drive it with fakes.
 class Agent {
 public:
     using SteadyClock = std::chrono::steady_clock;
@@ -23,6 +25,8 @@ public:
     struct Dependencies {
         net::ApiClient& api;
         monitor::SystemMonitor& monitor;
+        /// Null when audio discovery is off in the config
+        audio::AudioDiscovery* audio = nullptr;
     };
 
     Agent(Config config, Dependencies deps);
@@ -39,9 +43,16 @@ public:
     void wake();
 
     std::chrono::seconds interval() const { return interval_; }
+    const std::optional<std::string>& sentInventoryHash() const { return sentInventoryHash_; }
+
+    /// The allowlist as the inventory shows it (key, description, params)
+    void setCommandSummary(nlohmann::json commands) { commandSummary_ = std::move(commands); }
 
 private:
-    /// Sleeps up to `duration`; false when stop was requested.
+    /// Sends the inventory when it changed, the server asked, or `force`
+    void syncInventory(bool force);
+    /// Audio devices, re-listed at most once a minute; logs what appeared or went
+    std::vector<audio::AudioDevice> audioDevices();
     bool sleepFor(std::stop_token& stop, std::chrono::milliseconds duration);
 
     Config config_;
@@ -49,6 +60,12 @@ private:
     std::chrono::seconds interval_;
     std::string startedAt_;
     SteadyClock::time_point startedSteady_;
+
+    nlohmann::json commandSummary_ = nlohmann::json::array();
+    std::optional<std::string> sentInventoryHash_;
+    std::optional<SteadyClock::time_point> inventorySentAt_;
+    std::optional<std::vector<audio::AudioDevice>> audio_;
+    std::optional<SteadyClock::time_point> audioListedAt_;
 
     std::mutex mutex_;
     std::condition_variable_any wakeup_;

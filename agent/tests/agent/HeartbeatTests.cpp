@@ -34,6 +34,15 @@ struct Harness {
         transport.setHandler([body](const net::HttpRequest& r) { return signedResponse(kSecret, r, 200, body.dump()); });
     }
 
+    /// The body of the first request to an endpoint (the inventory goes before the first heartbeat)
+    json sent(const std::string& endpoint) {
+        for (const auto& r : transport.requests()) {
+            if (r.url.ends_with("/" + endpoint)) return json::parse(r.body);
+        }
+        FAIL("no request to " << endpoint);
+        return {};
+    }
+
     agent::Config config() {
         auto c = agent::Config::fromJson(json::object());
         c.heartbeat = 30s;
@@ -95,7 +104,7 @@ TEST_CASE("agent: a heartbeat carries version, uptime and readings") {
     agent::Agent a(h.config(), {*h.api, h.monitor});
 
     a.beat();
-    const auto sent = json::parse(h.transport.requests().at(0).body);
+    const auto sent = h.sent("heartbeat");
     CHECK(sent.contains("version"));
     CHECK(sent.contains("platform"));
     CHECK(sent["metrics"]["cpu_percent"] == 10.0);
@@ -110,7 +119,7 @@ TEST_CASE("agent: a broken sensor still sends the heartbeat, without readings") 
     h.monitor.broken = true;
     agent::Agent a(h.config(), {*h.api, h.monitor});
     a.beat();
-    CHECK_FALSE(json::parse(h.transport.requests().at(0).body).contains("metrics"));
+    CHECK_FALSE(h.sent("heartbeat").contains("metrics"));
 }
 
 TEST_CASE("agent: run keeps beating until stopped, and stops for good when revoked") {

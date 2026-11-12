@@ -4915,6 +4915,217 @@
                 }
             }
         },
+        "/agent/v1/inventory": {
+            "post": {
+                "operationId": "agent.inventory",
+                "tags": [
+                    "Inventory"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "hostname": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "os": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "maxLength": 40
+                                            },
+                                            "version": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ],
+                                                "maxLength": 120
+                                            }
+                                        },
+                                        "required": [
+                                            "name"
+                                        ]
+                                    },
+                                    "cpu": {
+                                        "type": "object",
+                                        "properties": {
+                                            "model": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ],
+                                                "maxLength": 120
+                                            },
+                                            "cores": {
+                                                "type": [
+                                                    "integer",
+                                                    "null"
+                                                ],
+                                                "minimum": 0,
+                                                "maximum": 1024
+                                            }
+                                        }
+                                    },
+                                    "memory_bytes": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 0
+                                    },
+                                    "disks": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "mount": {
+                                                    "type": "string",
+                                                    "maxLength": 255
+                                                },
+                                                "total_bytes": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                },
+                                                "filesystem": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "maxLength": 40
+                                                }
+                                            },
+                                            "required": [
+                                                "mount",
+                                                "total_bytes"
+                                            ]
+                                        },
+                                        "maxItems": 32
+                                    },
+                                    "audio": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "maxLength": 255
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "maxLength": 255
+                                                },
+                                                "direction": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "input",
+                                                        "output"
+                                                    ]
+                                                },
+                                                "default": {
+                                                    "type": "boolean"
+                                                },
+                                                "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "active",
+                                                        "unplugged",
+                                                        "disabled",
+                                                        "unknown"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "direction",
+                                                "default",
+                                                "state"
+                                            ]
+                                        },
+                                        "maxItems": 64
+                                    },
+                                    "commands": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "key": {
+                                                    "type": "string",
+                                                    "pattern": "^[a-z][a-z0-9_]{0,49}$"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "maxLength": 200
+                                                },
+                                                "sensitive": {
+                                                    "type": "boolean"
+                                                },
+                                                "params": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string",
+                                                                "pattern": "^[a-z][a-z0-9_]{0,29}$"
+                                                            },
+                                                            "description": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ],
+                                                                "maxLength": 200
+                                                            },
+                                                            "pattern": {
+                                                                "type": "string",
+                                                                "maxLength": 300
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "name",
+                                                            "pattern"
+                                                        ]
+                                                    },
+                                                    "maxItems": 10
+                                                }
+                                            },
+                                            "required": [
+                                                "key",
+                                                "description",
+                                                "sensitive",
+                                                "params"
+                                            ]
+                                        },
+                                        "maxItems": 50,
+                                        "uniqueItems": true
+                                    }
+                                },
+                                "required": [
+                                    "hostname",
+                                    "os",
+                                    "disks",
+                                    "audio",
+                                    "commands"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/households/{household}/inventory-items": {
             "get": {
                 "operationId": "inventory-items.index",

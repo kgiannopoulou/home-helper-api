@@ -10,6 +10,7 @@ add_executable(hha_tests
     agent/EnrollmentTests.cpp
     agent/HeartbeatTests.cpp
     monitor/MonitorTests.cpp
+    audio/AudioTests.cpp
 )
 target_include_directories(hha_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(hha_tests PRIVATE hha_core hha_warnings Catch2::Catch2WithMain)

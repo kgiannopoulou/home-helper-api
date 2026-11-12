@@ -75,6 +75,9 @@ add_library(hha_core STATIC
     src/agent/agent.cpp
     # Local system monitoring (day 62); one file per platform below
     src/monitor/linux_parsers.cpp
+    # Microphones, speakers and the inventory (day 64)
+    src/audio/audio_devices.cpp
+    src/agent/inventory.cpp
 )
 target_include_directories(hha_core PUBLIC src ${CMAKE_BINARY_DIR}/generated)
 add_dependencies(hha_core hha_version)
@@ -85,11 +88,13 @@ if(WIN32)
     # One file per platform where the operating system does the work
     target_sources(hha_core PRIVATE src/net/winhttp_transport.cpp)
     target_sources(hha_core PRIVATE src/monitor/windows_monitor.cpp)
+    target_sources(hha_core PRIVATE src/audio/windows_audio.cpp)
     target_compile_definitions(hha_core PUBLIC WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE _WIN32_WINNT=0x0A00)
     target_link_libraries(hha_core PUBLIC shell32 ole32 oleaut32 wbemuuid winhttp bcrypt crypt32 advapi32)
 else()
     target_sources(hha_core PRIVATE src/net/curl_transport.cpp)
     target_sources(hha_core PRIVATE src/monitor/linux_monitor.cpp)
+    target_sources(hha_core PRIVATE src/audio/linux_audio.cpp)
     find_package(CURL REQUIRED)
     target_link_libraries(hha_core PRIVATE CURL::libcurl)
 endif()
