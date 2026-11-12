@@ -8,6 +8,7 @@ import {
     HeartPulse,
     House,
     LayoutGrid,
+    Monitor,
     Sparkles,
     Sun,
     Wallet,
@@ -29,6 +30,7 @@ import {
     assistant,
     briefing,
     chores,
+    computers,
     dashboard,
     health,
     memory,
@@ -48,6 +50,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Health', href: health(), icon: HeartPulse },
     { title: 'Chores', href: chores(), icon: Sparkles },
     { title: 'Week planner', href: planner(), icon: CalendarCheck },
+    { title: 'Computers', href: computers(), icon: Monitor },
     { title: 'Household', href: household(), icon: House },
 ];
 

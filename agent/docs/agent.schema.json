@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kgiannopoulou/home-helper-api/agent/docs/agent.schema.json",
+  "title": "Home Helper Agent configuration (agent.json)",
+  "description": "See agent/docs/configuration.md. The agent checks the same rules itself: `home-helper-agent check-config`.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "_comment": { "type": "string" },
+    "server_url": {
+      "type": "string",
+      "description": "Where Home Helper is. Only used by `enroll`; afterwards the server comes from the credentials.",
+      "pattern": "^https?://"
+    },
+    "name": { "type": "string", "maxLength": 80, "description": "Shown on the dashboard; the hostname when empty." },
+    "allow_insecure_http": {
+      "type": "boolean",
+      "default": false,
+      "description": "Plain http:// to something other than localhost. A lab only: requests stay signed, but readings travel in clear text."
+    },
+    "ca_file": { "type": "string", "description": "Linux: a PEM bundle to trust instead of the system's (a home CA)." },
+    "data_dir": { "type": "string", "description": "Credentials, outbox, logs, staged updates. Default: %ProgramData%\\HomeHelperAgent\\data or /var/lib/home-helper-agent." },
+    "log": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": { "enum": ["trace", "debug", "info", "warn", "error", "critical", "off"], "default": "info" },
+        "file": { "type": "boolean", "default": true, "description": "Also log to <data_dir>/logs/agent.log (5 MB x 3)." }
+      }
+    },
+    "heartbeat_seconds": { "type": "number", "minimum": 5, "maximum": 3600, "default": 30, "description": "Until the server says otherwise." },
+    "inventory_hours": { "type": "number", "minimum": 1, "maximum": 168, "default": 6 },
+    "monitor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cpu_high_percent": { "type": "number", "minimum": 1, "maximum": 100, "default": 90 },
+        "memory_high_percent": { "type": "number", "minimum": 1, "maximum": 100, "default": 90 },
+        "disk_low_free_percent": { "type": "number", "minimum": 0, "maximum": 99, "default": 10 },
+        "temperature_high_c": { "type": "number", "minimum": 30, "maximum": 120, "default": 85 },
+        "sustain_samples": { "type": "number", "minimum": 1, "maximum": 100, "default": 3, "description": "Readings in a row before an event, either way." },
+        "disks": { "type": "array", "items": { "type": "string" }, "description": "Only these (\"C:\\\\\", \"/\"); all fixed disks when empty." }
+      }
+    },
+    "audio": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "enabled": { "type": "boolean", "default": true, "description": "List microphones and speakers (never opened)." } }
+    },
+    "outbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "max_events": { "type": "number", "minimum": 10, "maximum": 100000, "default": 1000 } }
+    },
+    "commands": {
+      "type": "array",
+      "description": "The only things Home Helper can run on this computer (agent/docs/commands.md).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "description", "program"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,49}$" },
+          "description": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "program": { "type": "string", "description": "Absolute path; not a shell, a script host or a .bat/.cmd/.ps1 script." },
+          "args": { "type": "array", "items": { "type": "string" }, "description": "Fixed arguments; a parameter is a whole argument: \"{host}\"." },
+          "params": {
+            "type": "object",
+            "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,29}$" },
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["pattern"],
+              "properties": {
+                "pattern": { "type": "string", "description": "ECMAScript regular expression, matched against the whole value." },
+                "description": { "type": "string" }
+              }
+            }
+          },
+          "sensitive": { "type": "boolean", "default": false, "description": "Runs only after the household owner confirms." },
+          "timeout_seconds": { "type": "integer", "minimum": 1, "maximum": 3600, "default": 30 },
+          "max_output_kb": { "type": "integer", "minimum": 1, "maximum": 1024, "default": 16 }
+        }
+      }
+    },
+    "updates": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "public_key": {
+          "type": "string",
+          "pattern": "^([0-9a-fA-F]{64})?$",
+          "description": "Ed25519 key that releases must be signed with (php artisan agent:release-key). No updates without it."
+        }
+      }
+    }
+  }
+}

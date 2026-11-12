@@ -170,4 +170,27 @@ return [
         'disk_min_free_mb' => (int) env('HEALTH_DISK_MIN_FREE_MB', 1024),
     ],
 
+    /*
+    | The local agent on the household's computers (agent/docs/design.md,
+    | agent/docs/protocol.md, docs/agents.md).
+    */
+    'agents' => [
+        // A pairing code works once, for this long
+        'code_minutes' => 10,
+        // How often agents check in; offline after this many missed heartbeats
+        'heartbeat_seconds' => (int) env('AGENT_HEARTBEAT_SECONDS', 30),
+        'offline_after_heartbeats' => 4,
+        // Signed requests: how far the agent's clock may be off, how long a nonce is remembered
+        'clock_skew_seconds' => 300,
+        'nonce_minutes' => 10,
+        // Metrics history for the dashboard charts
+        'metrics_keep_days' => 7,
+        // A queued command the agent hasn't picked up by then expires
+        'command_minutes' => 10,
+        'output_kb' => 16,
+        // Ed25519 key that signs agent releases (php artisan agent:release-key)
+        'release_public_key' => env('AGENT_RELEASE_PUBLIC_KEY'),
+        'release_secret_key' => env('AGENT_RELEASE_SECRET_KEY'),
+    ],
+
 ];

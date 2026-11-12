@@ -1,0 +1,18 @@
+// Lets the agent's user restart exactly these units and nothing else, so an
+// allowlist entry like
+//
+//   { "key": "restart_media_server", "program": "/usr/bin/systemctl",
+//     "args": ["restart", "jellyfin.service"], "sensitive": true }
+//
+// works without running the agent as root or giving it sudo.
+//
+//   sudo cp polkit-restart-units.rules.example /etc/polkit-1/rules.d/50-home-helper-agent.rules
+polkit.addRule(function (action, subject) {
+    var units = ["jellyfin.service", "smbd.service"];
+    if (action.id == "org.freedesktop.systemd1.manage-units" &&
+        subject.user == "home-helper-agent" &&
+        units.indexOf(action.lookup("unit")) >= 0 &&
+        action.lookup("verb") == "restart") {
+        return polkit.Result.YES;
+    }
+});

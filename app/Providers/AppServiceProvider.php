@@ -118,6 +118,15 @@ class AppServiceProvider extends ServiceProvider
         // The health check queries the database, Redis and the disk: enough for
         // a monitor polling every few seconds, not for someone hammering it
         RateLimiter::for('health', fn (Request $request) => Limit::perMinute(30)->by('health:'.$request->ip()));
+
+        // Pairing codes are 40 bits and last 10 minutes; this makes guessing one hopeless
+        RateLimiter::for('agent-enroll', fn (Request $request) => [
+            Limit::perMinute(5)->by('agent-enroll:'.$request->ip()),
+            Limit::perHour(30)->by('agent-enroll-h:'.$request->ip()),
+        ]);
+
+        // A signed agent: a heartbeat every 30 s, plus events, results and inventory
+        RateLimiter::for('agent', fn (Request $request) => Limit::perMinute(60)->by('agent:'.$request->header('X-HH-Agent', $request->ip())));
     }
 
     /**

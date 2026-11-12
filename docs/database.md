@@ -8,6 +8,15 @@ Every household table has a ULID `id`, `household_id`, millisecond `created_at`/
 
 ```mermaid
 erDiagram
+    agents ||--o{ agent_commands : "agent_id"
+    users |o--o{ agent_commands : "confirmed_by"
+    users |o--o{ agent_commands : "requested_by"
+    agents |o--o{ agent_enrollment_codes : "agent_id"
+    users ||--o{ agent_enrollment_codes : "user_id"
+    agents ||--o{ agent_events : "agent_id"
+    agents ||--o{ agent_metrics : "agent_id"
+    users |o--o{ agents : "enrolled_by"
+    users |o--o{ agents : "update_requested_by"
     users ||--o{ ai_conversations : "user_id"
     ai_conversations ||--o{ ai_messages : "conversation_id"
     ai_conversations ||--o{ ai_pending_actions : "conversation_id"
@@ -283,8 +292,8 @@ erDiagram
     }
     chores ||--o{ chore_completions : "chore_id"
     chores ||--o{ chore_completions : "chore_id"
-    households ||--o{ chore_completions : "household_id"
     chores ||--o{ chore_completions : "household_id"
+    households ||--o{ chore_completions : "household_id"
     users |o--o{ chore_completions : "user_id"
     users |o--o{ chores : "assignee_id"
     households ||--o{ chores : "household_id"
@@ -627,4 +636,113 @@ erDiagram
         tinyint remember
     }
     users ||--o{ voice_settings : "user_id"
+```
+
+## Computers (local agent)
+
+```mermaid
+erDiagram
+    agents {
+        char id PK
+        char household_id FK
+        bigint enrolled_by FK "nullable"
+        varchar name
+        varchar hostname "nullable"
+        varchar platform
+        varchar version
+        varchar git_sha "nullable"
+        varchar update_requested_version "nullable"
+        bigint update_requested_by FK "nullable"
+        text secret
+        timestamp last_seen_at "nullable"
+        timestamp offline_reported_at "nullable"
+        varchar last_ip "nullable"
+        timestamp started_at "nullable"
+        bigint uptime_seconds "nullable"
+        json metrics "nullable"
+        int outbox_pending
+        int outbox_dropped
+        json inventory "nullable"
+        char inventory_hash "nullable"
+        timestamp inventory_at "nullable"
+        timestamp revoked_at "nullable"
+    }
+    agent_enrollment_codes {
+        char id PK
+        char household_id FK
+        bigint user_id FK
+        varchar name "nullable"
+        char code_hash UK
+        timestamp expires_at
+        timestamp used_at "nullable"
+        char agent_id FK "nullable"
+    }
+    agent_metrics {
+        bigint id PK
+        char agent_id FK
+        timestamp recorded_at
+        decimal cpu_percent "nullable"
+        decimal memory_percent "nullable"
+        decimal disk_used_percent "nullable"
+        decimal temperature_c "nullable"
+    }
+    agent_commands {
+        char id PK
+        char agent_id FK
+        char household_id FK
+        bigint requested_by FK "nullable"
+        enum source
+        varchar command_key
+        json params
+        tinyint sensitive
+        enum status
+        bigint confirmed_by FK "nullable"
+        timestamp confirmed_at "nullable"
+        timestamp expires_at
+        timestamp sent_at "nullable"
+        timestamp finished_at "nullable"
+        int exit_code "nullable"
+        mediumtext output "nullable"
+        tinyint truncated
+        int duration_ms "nullable"
+        varchar reason "nullable"
+    }
+    agent_events {
+        char id PK
+        char agent_id FK
+        char household_id FK
+        char event_uuid
+        varchar type
+        enum severity
+        varchar message
+        json data "nullable"
+        enum source
+        timestamp occurred_at
+        timestamp received_at
+    }
+    agent_releases {
+        char id PK
+        varchar version
+        varchar platform
+        varchar path "nullable"
+        varchar url "nullable"
+        char sha512
+        bigint size
+        char signature
+        text notes "nullable"
+        timestamp published_at
+    }
+    agents ||--o{ agent_commands : "agent_id"
+    users |o--o{ agent_commands : "confirmed_by"
+    households ||--o{ agent_commands : "household_id"
+    users |o--o{ agent_commands : "requested_by"
+    agents |o--o{ agent_enrollment_codes : "agent_id"
+    households ||--o{ agent_enrollment_codes : "household_id"
+    users ||--o{ agent_enrollment_codes : "user_id"
+    agents ||--o{ agent_events : "agent_id"
+    households ||--o{ agent_events : "household_id"
+    agents ||--o{ agent_metrics : "agent_id"
+    users |o--o{ agents : "enrolled_by"
+    households ||--o{ agents : "household_id"
+    users |o--o{ agents : "update_requested_by"
 ```

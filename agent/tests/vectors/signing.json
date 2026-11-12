@@ -1,0 +1,63 @@
+{
+    "about": "Shared by agent/tests (Catch2) and tests/Feature/Agents (Pest). Generated with PHP hash() and sodium; do not edit by hand.",
+    "secret_hex": "e7df88c70876da7f857825f8799e7e75029659465eaaaa70702374ca495aa75d",
+    "requests": [
+        {
+            "method": "POST",
+            "path": "/api/agent/v1/heartbeat",
+            "timestamp": "1794470400",
+            "nonce": "00112233445566778899aabbccddeeff",
+            "agent_id": "01JCXK3Z9Q0000000000000000",
+            "body": "{\"status\":\"online\",\"version\":\"0.5.0\"}",
+            "canonical": "HH-AGENT-V1\nPOST\n/api/agent/v1/heartbeat\n1794470400\n00112233445566778899aabbccddeeff\n01JCXK3Z9Q0000000000000000\n9ac8490f63b28de9521f87d00afad8d64278df05b06b877f0b2018b4efd7ebc84fb58750879fe5fe34dbd611dbc9cee2331127052200e7d99e0536cad7f263c4",
+            "signature": "bd6205df0a932291ff677954452e80a02f7a41db84252206f26e69387e477ba0503b493920a03467a44c59a96b4e93c2c9878baa84b399f52d3a7356fe4ccce8"
+        },
+        {
+            "method": "GET",
+            "path": "/api/agent/v1/commands",
+            "timestamp": "1794470401",
+            "nonce": "ffeeddccbbaa99887766554433221100",
+            "agent_id": "01JCXK3Z9Q0000000000000000",
+            "body": "",
+            "canonical": "HH-AGENT-V1\nGET\n/api/agent/v1/commands\n1794470401\nffeeddccbbaa99887766554433221100\n01JCXK3Z9Q0000000000000000\ncf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+            "signature": "394514f01bb6ea8b0500169863b8dd2c067062619ab94c99680a2434e11c55207c92ae4f9b2728279b9ad8faf5f24cbcd7192d7d7417d18f4edccacedfa93c58"
+        },
+        {
+            "method": "POST",
+            "path": "/sub/dir/api/agent/v1/events",
+            "timestamp": "1794470402",
+            "nonce": "0123456789abcdef0123456789abcdef",
+            "agent_id": "01JCXK3Z9Q0000000000000000",
+            "body": "{\"events\":[{\"type\":\"disk.low\",\"message\":\"Ünïcode ✓\"}]}",
+            "canonical": "HH-AGENT-V1\nPOST\n/sub/dir/api/agent/v1/events\n1794470402\n0123456789abcdef0123456789abcdef\n01JCXK3Z9Q0000000000000000\n4e3c48d2efb679beeabb4ac1107f719080c44da8cf12ace34869d19c32a918af099ca81567da88dc4d8064253ad0963c5188d679102bd447f23330f5dc24b22d",
+            "signature": "7b9368146c9c5312164d0bd9d92b43dcd66e4002d4e44d16160c6c12b7cc968711d2f3a5018fed7182bf3048fe906bd3accc7216e1b302e0cc3063824e06471c"
+        }
+    ],
+    "responses": [
+        {
+            "status": 200,
+            "request_nonce": "00112233445566778899aabbccddeeff",
+            "body": "{\"commands\":[],\"heartbeat_seconds\":30}",
+            "canonical": "HH-AGENT-V1-RESPONSE\n200\n00112233445566778899aabbccddeeff\n1b3b8a968579feb4caadccd9b033049fc11dba902657a29a60ddc2f5d2da7d1dfdff407d27ce975480b826431246103543de5fbf2f8fd236644f81aa65c0d186",
+            "signature": "f24efcebfaa6129db04cda132d6fc82b17f83198ebc9a9fb2c0d3e3d517651ae331130bb39a8f6fd21c537c03eadd128ec996f2bad199fc6f083a25f6ef68b9d"
+        },
+        {
+            "status": 204,
+            "request_nonce": "ffeeddccbbaa99887766554433221100",
+            "body": "",
+            "canonical": "HH-AGENT-V1-RESPONSE\n204\nffeeddccbbaa99887766554433221100\ncf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+            "signature": "23b3fe5cfdccefde98dcab88e509e2ad55a66c7574ce5c2e0f7241e008fb22a5f2095e4bb4465c2be531b96ee4ecd71298ed4fdf8489c71742daaef344c0e92e"
+        }
+    ],
+    "release": {
+        "seed": "927d5f991b0ba49b37ef1224fdd995428928a356932db4e08ba39ee79f0dea0c",
+        "public_key": "1bba429ddd8a085865d77e9c97abe377d694f258669ff2cf6fe873dd82bcb97d",
+        "version": "0.6.0",
+        "platform": "windows-x64",
+        "file": "fake release bytes",
+        "sha512": "5ddfd487f6483d4acc71540d2f458d42b6c4f5c5c07cbdd7e085c3f439bb1f4d4379bd7b8113bf1c7dd3af20be2030326ee87d7c217eb5939f83cfbd1e134e73",
+        "size": 18,
+        "manifest": "HH-AGENT-RELEASE-V1\n0.6.0\nwindows-x64\n5ddfd487f6483d4acc71540d2f458d42b6c4f5c5c07cbdd7e085c3f439bb1f4d4379bd7b8113bf1c7dd3af20be2030326ee87d7c217eb5939f83cfbd1e134e73\n18",
+        "signature": "62f588aa8b3e808b0e829975a0284f567fc4e62d534a28cd0f992aba5c37a048bc91e9d2e35752074a80a70ef8c1d78d9791386b35d39660f06fa3774486960d"
+    }
+}

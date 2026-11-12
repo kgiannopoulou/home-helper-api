@@ -1,0 +1,64 @@
+# Home Helper Agent (agent/docs/service.md)
+#
+#   sudo packaging/linux/install.sh
+#   sudo systemctl enable --now home-helper-agent
+#
+# Runs as its own unprivileged user with a read-only view of the system. It can
+# read /proc and /sys (the readings), write only its state directory, and start
+# the programs on its allowlist, which run with the same restrictions.
+[Unit]
+Description=Home Helper Agent
+Documentation=https://github.com/kgiannopoulou/home-helper-api/tree/main/agent
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=home-helper-agent
+Group=home-helper-agent
+# A verified update staged by the last run is installed here, with root rights ("+")
+# for this one step only; it checks size, SHA-512 and the Ed25519 signature again
+ExecStartPre=+/usr/local/bin/home-helper-agent --config /etc/home-helper-agent/agent.json update apply-staged
+ExecStart=/usr/local/bin/home-helper-agent --config /etc/home-helper-agent/agent.json run
+# 3 = removed from the household on the dashboard: stay stopped
+# 75 = restart to install an update: restarted like a failure
+Restart=on-failure
+RestartSec=10
+RestartPreventExitStatus=3
+TimeoutStopSec=20
+
+# /var/lib/home-helper-agent (credentials, outbox, updates) and its logs, owned by the service user
+StateDirectory=home-helper-agent
+StateDirectoryMode=0700
+LogsDirectory=home-helper-agent
+ConfigurationDirectory=home-helper-agent
+ConfigurationDirectoryMode=0750
+
+# Hardening: see `systemd-analyze security home-helper-agent`
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=false
+# ^ the readings need /sys and the sound cards in /proc/asound, not device nodes
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

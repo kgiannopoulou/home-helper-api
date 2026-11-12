@@ -2,6 +2,7 @@
 
 use App\Enums\PlantCareType;
 use App\Http\Controllers\Api\AdminItemController;
+use App\Http\Controllers\Api\Agent as AgentApi;
 use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BriefingController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\Api\VoiceController;
 use App\Http\Controllers\Api\WaterEntryController;
 use App\Http\Controllers\Api\WeightController;
 use App\Http\Controllers\Api\WorkoutController;
+use App\Http\Middleware\AuthenticateAgent;
 use Illuminate\Support\Facades\Route;
 
 Route::name('api.')->group(function () {
@@ -43,6 +45,21 @@ Route::name('api.')->group(function () {
 
     // For an uptime monitor; details only with an admin's token (docs/operations.md)
     Route::get('health', HealthController::class)->middleware('throttle:health')->name('health');
+
+    // The local agent on the household's computers (agent/docs/protocol.md): signed
+    // requests instead of a Sanctum token, every response signed back
+    Route::prefix('agent/v1')->name('agent.')->group(function () {
+        Route::post('enroll', AgentApi\EnrollController::class)->middleware('throttle:agent-enroll')->name('enroll');
+
+        Route::middleware([AuthenticateAgent::class, 'throttle:agent'])->group(function () {
+            Route::get('me', AgentApi\WhoAmIController::class)->name('me');
+            Route::post('heartbeat', AgentApi\HeartbeatController::class)->name('heartbeat');
+            Route::post('inventory', AgentApi\InventoryController::class)->name('inventory');
+            Route::post('commands/{command}/result', AgentApi\CommandResultController::class)->name('commands.result');
+            Route::post('events', AgentApi\EventsController::class)->name('events');
+            Route::get('releases/{release}/download', AgentApi\ReleaseDownloadController::class)->name('releases.download');
+        });
+    });
 
     // Limits: app/Providers/AppServiceProvider.php::configureRateLimits()
     Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {

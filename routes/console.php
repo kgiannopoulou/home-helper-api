@@ -12,6 +12,8 @@ use App\Jobs\PruneVoiceConversations;
 use App\Jobs\RememberConversations;
 use App\Jobs\WeeklyDigest;
 use App\Jobs\WeeklySummary;
+use App\Models\AgentEvent;
+use App\Models\AgentMetric;
 use App\Ops\SystemHealth;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -69,9 +71,13 @@ Schedule::command('queue:monitor', [
 Schedule::command('db:backup')->dailyAt('03:00')->timezone($home)->onOneServer();
 Schedule::command('db:restore-test')->sundays()->at('03:30')->timezone($home)->onOneServer();
 
+// Computers that stopped checking in (agent.offline, pushed to the phones)
+Schedule::command('agents:check-offline')->everyMinute()->onOneServer()->withoutOverlapping();
+
 // Housekeeping
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily()->onOneServer();
 Schedule::command('queue:prune-failed', ['--hours' => 24 * 14])->daily()->onOneServer();
+Schedule::command('model:prune', ['--model' => [AgentMetric::class, AgentEvent::class]])->dailyAt('04:30')->timezone($home)->onOneServer();
 
 // Run one now, for every household: php artisan household:run PrepareShoppingList --date=2026-10-09
 Artisan::command('household:run {job} {--date= : "today" at home, YYYY-MM-DD}', function (string $job) {

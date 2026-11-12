@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AuthenticateAgent;
 use App\Models\Household;
 use App\Models\User;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -15,7 +16,10 @@ use Laravel\Sanctum\Sanctum;
  */
 
 /** Routes anyone may call */
-const PUBLIC_API_ROUTES = ['api.login', 'api.health'];
+const PUBLIC_API_ROUTES = ['api.login', 'api.health', 'api.agent.enroll'];
+
+/** The local agent's routes: a request signature instead of a token (tests/Feature/Agents) */
+const AGENT_API_PREFIX = 'api.agent.';
 
 /**
  * @return list<array{string, string, string}> [name, method, uri]
@@ -47,6 +51,14 @@ test('every API route needs a token, except login', function () {
 
     foreach (apiRoutes() as [$name, $method, $uri]) {
         if (in_array($name, PUBLIC_API_ROUTES)) {
+            continue;
+        }
+        if (str_starts_with($name, AGENT_API_PREFIX)) {
+            $this->json($method, fillUri($uri, $home))
+                ->assertUnauthorized()
+                ->assertJsonPath('error', 'missing_signature');
+            $checked++;
+
             continue;
         }
         $this->json($method, fillUri($uri, $home))
@@ -84,6 +96,7 @@ test('the public routes are only the ones we meant', function () {
     $public = collect(Router::getRoutes()->getRoutes())
         ->filter(fn (Route $r) => str_starts_with($r->uri(), 'api/'))
         ->reject(fn (Route $r) => in_array('auth:sanctum', $r->gatherMiddleware()))
+        ->reject(fn (Route $r) => in_array(AuthenticateAgent::class, $r->gatherMiddleware()))
         ->map(fn (Route $r) => $r->getName())
         ->values()
         ->all();

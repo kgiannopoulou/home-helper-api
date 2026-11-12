@@ -1,0 +1,179 @@
+name: agent
+
+# The C++ local agent (agent/, docs in agent/docs). Runs when the agent, the
+# Laravel side it talks to, or this file changes.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - 'agent/**'
+      - 'app/Agents/**'
+      - 'app/Http/Controllers/Api/Agent/**'
+      - 'routes/**'
+      - 'database/migrations/**'
+      - '.github/workflows/agent.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: agent
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install libcurl (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel 4
+
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure -j 4
+
+      - name: Smoke test the binary
+        shell: bash
+        run: |
+          ./build/home-helper-agent version
+          ./build/home-helper-agent help
+
+      - name: Check the Linux install script
+        if: runner.os == 'Linux'
+        run: shellcheck packaging/linux/install.sh
+
+      - name: Upload the binary
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: home-helper-agent-${{ runner.os }}
+          path: |
+            agent/build/home-helper-agent
+            agent/build/home-helper-agent.exe
+          if-no-files-found: ignore
+
+  # Memory errors and undefined behaviour, on the whole test suite
+  sanitizers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: agent
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install libcurl
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+
+      - name: Configure
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          -DHHA_SANITIZE=address,undefined
+
+      - name: Build
+        run: cmake --build build --parallel 4
+
+      - name: Test
+        env:
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ctest --test-dir build --output-on-failure -j 4
+
+  # Day 70: the real agent, built here, against the real Laravel app on MySQL
+  # (agent/scripts/e2e.sh): pairing, signed requests and responses, the inventory,
+  # commands both ways, the owner's confirmation, the agent refusing what its
+  # allowlist doesn't hold, and removal stopping it
+  end-to-end:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: e2e
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -ppassword"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: e2e
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: sync
+      AI_PROVIDER: offline
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, bcmath, sodium
+          tools: composer:v2
+          coverage: none
+
+      - name: Install libcurl
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+
+      - name: Build the agent
+        working-directory: agent
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DHHA_BUILD_TESTS=OFF
+          cmake --build build --parallel 4
+
+      - name: Prepare the app (demo household)
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --force
+          php artisan db:seed --class=DemoSeeder --force
+
+      - name: Serve it
+        run: |
+          # server.php finds the app from the working directory: start it inside public/
+          (cd public && PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8077 ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php > /tmp/server.log 2>&1 &)
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8077/api/health > /dev/null && break; sleep 1; done
+
+      - name: End to end
+        run: AGENT_BIN=agent/build/home-helper-agent SERVER=http://127.0.0.1:8077 agent/scripts/e2e.sh
+
+      - name: Server log (on failure)
+        if: failure()
+        run: tail -n 100 /tmp/server.log; tail -n 100 storage/logs/laravel.log || true

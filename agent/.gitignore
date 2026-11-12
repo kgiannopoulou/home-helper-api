@@ -1,0 +1,13 @@
+build/
+build-*/
+out/
+.vs/
+.vscode/
+.idea/
+CMakeUserPresets.json
+*.user
+# Local runs: credentials, outbox, logs, staged updates
+data/
+*.key
+agent.local.json
+build-config.log
