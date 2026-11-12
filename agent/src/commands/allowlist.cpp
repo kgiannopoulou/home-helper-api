@@ -34,10 +34,14 @@ bool isInterpreter(const std::filesystem::path& program) {
     // through cmd.exe, which re-parses the arguments (the "BatBadBut" class of bugs)
     static const std::set<std::string> scripts = {".bat", ".cmd", ".ps1", ".vbs", ".vbe", ".js",
                                                   ".jse", ".wsf", ".wsh", ".hta", ".msc", ".lnk"};
-    if (scripts.contains(strings::toLower(program.extension().string()))) return true;
+    // The file name, split on both separators: std::filesystem only knows '/' on
+    // Linux, and the same rules must hold for a Windows path checked anywhere
+    const auto text = program.string();
+    const auto slash = text.find_last_of("/\\");
+    auto name = strings::toLower(slash == std::string::npos ? text : text.substr(slash + 1));
+    if (const auto dot = name.rfind('.'); dot != std::string::npos && scripts.contains(name.substr(dot))) return true;
 
-    // The file name without its extension: on Linux too, so "/bin/bash" is checked on any platform
-    auto name = strings::toLower(program.filename().string());
+    // Without its extension: "cmd.exe" and "bash" alike
     for (const auto* ext : {".exe", ".com", ".bat", ".cmd"}) {
         if (name.ends_with(ext)) name.resize(name.size() - 4);
     }
