@@ -62,14 +62,25 @@ add_library(hha_core STATIC
     src/core/semver.cpp
     src/core/strings.cpp
     src/core/paths.cpp
+    # Secure communication with the Laravel API (day 59)
+    src/crypto/crypto.cpp
+    src/net/url.cpp
+    src/net/signing.cpp
+    src/net/api_client.cpp
 )
 target_include_directories(hha_core PUBLIC src ${CMAKE_BINARY_DIR}/generated)
 target_link_libraries(hha_core
     PUBLIC  spdlog::spdlog nlohmann_json::nlohmann_json
-    PRIVATE hha_warnings)
+    PRIVATE hha_warnings monocypher)
 if(WIN32)
+    # One file per platform where the operating system does the work
+    target_sources(hha_core PRIVATE src/net/winhttp_transport.cpp)
     target_compile_definitions(hha_core PUBLIC WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE _WIN32_WINNT=0x0A00)
-    target_link_libraries(hha_core PUBLIC shell32 ole32)
+    target_link_libraries(hha_core PUBLIC shell32 ole32 winhttp bcrypt crypt32 advapi32)
+else()
+    target_sources(hha_core PRIVATE src/net/curl_transport.cpp)
+    find_package(CURL REQUIRED)
+    target_link_libraries(hha_core PRIVATE CURL::libcurl)
 endif()
 
 add_executable(home-helper-agent apps/agent/main.cpp apps/agent/cli.cpp)
