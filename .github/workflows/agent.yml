@@ -167,7 +167,8 @@ jobs:
 
       - name: Serve it
         run: |
-          PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8077 -t public vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php > /tmp/server.log 2>&1 &
+          # server.php finds the app from the working directory: start it inside public/
+          (cd public && PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8077 ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php > /tmp/server.log 2>&1 &)
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:8077/api/health > /dev/null && break; sleep 1; done
 
       - name: End to end
