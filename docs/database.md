@@ -8,6 +8,9 @@ Every household table has a ULID `id`, `household_id`, millisecond `created_at`/
 
 ```mermaid
 erDiagram
+    agents ||--o{ agent_commands : "agent_id"
+    users |o--o{ agent_commands : "confirmed_by"
+    users |o--o{ agent_commands : "requested_by"
     agents |o--o{ agent_enrollment_codes : "agent_id"
     users ||--o{ agent_enrollment_codes : "user_id"
     agents ||--o{ agent_metrics : "agent_id"
@@ -678,6 +681,31 @@ erDiagram
         decimal disk_used_percent "nullable"
         decimal temperature_c "nullable"
     }
+    agent_commands {
+        char id PK
+        char agent_id FK
+        char household_id FK
+        bigint requested_by FK "nullable"
+        enum source
+        varchar command_key
+        json params
+        tinyint sensitive
+        enum status
+        bigint confirmed_by FK "nullable"
+        timestamp confirmed_at "nullable"
+        timestamp expires_at
+        timestamp sent_at "nullable"
+        timestamp finished_at "nullable"
+        int exit_code "nullable"
+        mediumtext output "nullable"
+        tinyint truncated
+        int duration_ms "nullable"
+        varchar reason "nullable"
+    }
+    agents ||--o{ agent_commands : "agent_id"
+    users |o--o{ agent_commands : "confirmed_by"
+    households ||--o{ agent_commands : "household_id"
+    users |o--o{ agent_commands : "requested_by"
     agents |o--o{ agent_enrollment_codes : "agent_id"
     households ||--o{ agent_enrollment_codes : "household_id"
     users ||--o{ agent_enrollment_codes : "user_id"

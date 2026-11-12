@@ -2885,6 +2885,94 @@
                 }
             }
         },
+        "/agent/v1/commands/{command}/result": {
+            "post": {
+                "operationId": "agent.commands.result",
+                "tags": [
+                    "CommandResult"
+                ],
+                "parameters": [
+                    {
+                        "name": "command",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "succeeded",
+                                            "failed",
+                                            "timed_out",
+                                            "rejected"
+                                        ]
+                                    },
+                                    "exit_code": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "output": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 1100000
+                                    },
+                                    "truncated": {
+                                        "type": "boolean"
+                                    },
+                                    "duration_ms": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 0,
+                                        "maximum": 4294967295
+                                    },
+                                    "started_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "reason": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 2000
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/devices": {
             "post": {
                 "operationId": "devices.store",
@@ -4245,10 +4333,36 @@
                                         "commands": {
                                             "type": "array",
                                             "items": {
-                                                "type": "string"
-                                            },
-                                            "minItems": 0,
-                                            "maxItems": 0
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "key": {
+                                                        "type": "string"
+                                                    },
+                                                    "params": {
+                                                        "type": "string"
+                                                    },
+                                                    "sensitive": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "confirmed": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "expires_at": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "key",
+                                                    "params",
+                                                    "sensitive",
+                                                    "confirmed",
+                                                    "expires_at"
+                                                ]
+                                            }
                                         },
                                         "update": {
                                             "type": "null"

@@ -5,6 +5,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <thread>
+
 namespace hha::agent {
 
 namespace {
@@ -16,7 +18,21 @@ Agent::Agent(Config config, Dependencies deps)
       deps_(deps),
       interval_(config_.heartbeat),
       startedAt_(time::nowIso8601()),
-      startedSteady_(SteadyClock::now()) {}
+      startedSteady_(SteadyClock::now()) {
+    if (deps_.allowlist) {
+        commandSummary_ = deps_.allowlist->summary();
+        worker_ = std::make_unique<commands::CommandWorker>(
+            *deps_.allowlist, deps_.runner ? deps_.runner : commands::ProcessRunner(commands::runProcess),
+            [this](const commands::CommandResult& result) {
+                addResult(result);
+                wake();  // report it now, not at the next heartbeat
+            });
+    }
+}
+
+Agent::~Agent() {
+    worker_.reset();
+}
 
 HeartbeatReply Agent::beat() {
     std::optional<monitor::Metrics> metrics;
@@ -42,7 +58,64 @@ HeartbeatReply Agent::beat() {
         interval_ = reply.heartbeat;
     }
     if (reply.inventoryWanted) syncInventory(true);
+    dispatch(reply.commands);
+    sendResults();
     return reply;
+}
+
+void Agent::dispatch(const std::vector<CommandRequest>& requests) {
+    for (const auto& request : requests) {
+        if (!worker_) {
+            commands::CommandResult r;
+            r.id = request.id;
+            r.key = request.key;
+            r.status = "rejected";
+            r.reason = "this computer has no commands configured";
+            r.startedAt = time::nowIso8601();
+            spdlog::warn("Command {} ({}) refused: no allowlist", request.id, request.key);
+            addResult(std::move(r));
+        } else if (!worker_->submit(request)) {
+            spdlog::debug("Command {} already accepted", request.id);
+        }
+    }
+}
+
+void Agent::finishCommands(std::chrono::milliseconds limit) {
+    const auto until = SteadyClock::now() + limit;
+    while (commandsBusy() > 0 && SteadyClock::now() < until) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+    sendResults();
+}
+
+void Agent::addResult(commands::CommandResult result) {
+    std::lock_guard lock(resultsMutex_);
+    results_.push_back(std::move(result));
+}
+
+std::size_t Agent::pendingResults() const {
+    std::lock_guard lock(resultsMutex_);
+    return results_.size();
+}
+
+void Agent::sendResults() {
+    while (true) {
+        commands::CommandResult result;
+        {
+            std::lock_guard lock(resultsMutex_);
+            if (results_.empty()) return;
+            result = results_.front();
+        }
+        try {
+            deps_.api.post("commands/" + result.id + "/result", result.toJson());
+        } catch (const net::ApiError& e) {
+            if (e.transient()) throw;
+            // The server refused it for good (an unknown id, say): resending won't help
+            spdlog::warn("The server refused the result of {}: {}", result.id, e.what());
+        }
+        std::lock_guard lock(resultsMutex_);
+        results_.pop_front();
+    }
 }
 
 void Agent::syncInventory(bool force) {

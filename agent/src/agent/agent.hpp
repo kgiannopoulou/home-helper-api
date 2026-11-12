@@ -3,11 +3,13 @@
 #include "agent/config.hpp"
 #include "agent/heartbeat.hpp"
 #include "audio/audio_devices.hpp"
+#include "commands/executor.hpp"
 #include "monitor/metrics.hpp"
 #include "net/api_client.hpp"
 
 #include <chrono>
 #include <condition_variable>
+#include <deque>
 #include <functional>
 #include <mutex>
 #include <optional>
@@ -27,9 +29,17 @@ public:
         monitor::SystemMonitor& monitor;
         /// Null when audio discovery is off in the config
         audio::AudioDiscovery* audio = nullptr;
+        /// This computer's allowlist; no commands run without one
+        const commands::Allowlist* allowlist = nullptr;
+        /// How programs are started (tests replace it); commands::runProcess by default
+        commands::ProcessRunner runner = {};
     };
 
     Agent(Config config, Dependencies deps);
+    ~Agent();
+
+    Agent(const Agent&) = delete;
+    Agent& operator=(const Agent&) = delete;
 
     /// One heartbeat: sample, send, handle the reply. Network and server
     /// errors propagate (run() decides what to do about them).
@@ -45,8 +55,14 @@ public:
     std::chrono::seconds interval() const { return interval_; }
     const std::optional<std::string>& sentInventoryHash() const { return sentInventoryHash_; }
 
-    /// The allowlist as the inventory shows it (key, description, params)
-    void setCommandSummary(nlohmann::json commands) { commandSummary_ = std::move(commands); }
+    /// Waits (up to `limit`) for queued and running commands, then sends their
+    /// results. For `run --once` and a clean shutdown.
+    void finishCommands(std::chrono::milliseconds limit);
+
+    /// Results waiting to be sent (finished commands whose result the server doesn't have yet)
+    std::size_t pendingResults() const;
+    /// Commands queued or running on this computer
+    std::size_t commandsBusy() const { return worker_ ? worker_->busy() : 0; }
 
 private:
     /// Sends the inventory when it changed, the server asked, or `force`
@@ -54,6 +70,11 @@ private:
     /// Audio devices, re-listed at most once a minute; logs what appeared or went
     std::vector<audio::AudioDevice> audioDevices();
     bool sleepFor(std::stop_token& stop, std::chrono::milliseconds duration);
+    /// Hands the reply's commands to the worker (or rejects them all without an allowlist)
+    void dispatch(const std::vector<CommandRequest>& requests);
+    /// Posts finished results; a network error keeps the rest for the next beat
+    void sendResults();
+    void addResult(commands::CommandResult result);
 
     Config config_;
     Dependencies deps_;
@@ -70,6 +91,11 @@ private:
     std::mutex mutex_;
     std::condition_variable_any wakeup_;
     bool woken_ = false;
+
+    mutable std::mutex resultsMutex_;
+    std::deque<commands::CommandResult> results_;
+    /// Last: its thread calls back into the members above, so it stops first
+    std::unique_ptr<commands::CommandWorker> worker_;
 };
 
 }  // namespace hha::agent

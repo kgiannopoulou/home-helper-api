@@ -10,11 +10,13 @@ use Carbon\CarbonImmutable;
  *
  * In: the agent's version, uptime and latest readings. The row on `agents`
  * always has the latest; agent_metrics gets one summary row a minute.
- * Out: the server time, how often to call, and whether the server wants the
- * inventory again.
+ * Out: the server time, how often to call, whether the server wants the
+ * inventory again, and the commands waiting for this computer.
  */
 class Heartbeats
 {
+    public function __construct(private Commands $commands) {}
+
     /**
      * @param  array<string, mixed>  $data  validated by HeartbeatController
      * @return array<string, mixed> the reply body
@@ -45,7 +47,7 @@ class Heartbeats
             'server_time' => $now->getTimestamp(),
             'heartbeat_seconds' => (int) config('homehelper.agents.heartbeat_seconds'),
             'inventory_wanted' => ! isset($data['inventory_hash']) || $data['inventory_hash'] !== $agent->inventory_hash,
-            'commands' => [],
+            'commands' => $this->commands->forHeartbeat($agent),
             'update' => null,
         ];
     }

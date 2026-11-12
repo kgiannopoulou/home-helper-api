@@ -78,6 +78,10 @@ add_library(hha_core STATIC
     # Microphones, speakers and the inventory (day 64)
     src/audio/audio_devices.cpp
     src/agent/inventory.cpp
+    # Local commands with an explicit allowlist (day 65)
+    src/commands/allowlist.cpp
+    src/commands/process.cpp
+    src/commands/executor.cpp
 )
 target_include_directories(hha_core PUBLIC src ${CMAKE_BINARY_DIR}/generated)
 add_dependencies(hha_core hha_version)

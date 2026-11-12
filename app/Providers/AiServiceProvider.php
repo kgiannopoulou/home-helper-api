@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Ai\ChatModel;
 use App\Ai\Providers\ClaudeChatModel;
 use App\Ai\Providers\OfflineChatModel;
+use App\Ai\Tools\Computers\GetComputers;
+use App\Ai\Tools\Computers\RunComputerCommand;
 use App\Ai\Tools\Finance\GetSpendingSummary;
 use App\Ai\Tools\Finance\GetUpcomingBills;
 use App\Ai\Tools\Finance\ListExpenses;
@@ -91,6 +93,9 @@ class AiServiceProvider extends ServiceProvider
         RememberFact::class,
         ForgetFact::class,
         SaveNote::class,
+        // The household's computers, through the local agent (Phase 5, day 65)
+        GetComputers::class,
+        RunComputerCommand::class,
     ];
 
     public function register(): void

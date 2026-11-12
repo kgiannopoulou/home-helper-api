@@ -5,6 +5,9 @@
 #include "agent/credentials.hpp"
 #include "agent/enrollment.hpp"
 #include "audio/audio_devices.hpp"
+#include "commands/allowlist.hpp"
+#include "commands/executor.hpp"
+#include "core/time.hpp"
 #include "core/args.hpp"
 #include "core/host.hpp"
 #include "core/logging.hpp"
@@ -48,6 +51,10 @@ Running:
 Checking:
   monitor                  Print this computer's readings, as the heartbeat sends them
   audio                    List microphones and speakers (they are never opened)
+  commands                 The allowlist: the only commands Home Helper can run here
+  run-command KEY [name=value…] [--confirm]
+                           Try one allowlisted command locally, exactly as a request
+                           from the dashboard would run (--confirm for a sensitive one)
   status                   Config, credentials, and whether the server accepts them
   version                  Version, git commit and platform
   help                     This text
@@ -210,6 +217,54 @@ int audioCommand(const Args&) {
     return 0;
 }
 
+commands::Allowlist loadAllowlist(const agent::Config& config) {
+    return commands::Allowlist::fromJson(config.commands);  // ConfigError lists every problem
+}
+
+int commandsCommand(const Args& args) {
+    const auto config = loadConfig(args);
+    const auto list = loadAllowlist(config);
+    if (list.empty()) {
+        std::cout << "No commands: Home Helper can't run anything on this computer.\n";
+        return 0;
+    }
+    for (const auto& c : list.entries()) {
+        std::cout << c.key << (c.sensitive ? "  [sensitive: the owner confirms]" : "") << "\n"
+                  << "    " << c.description << "\n"
+                  << "    " << c.program.string();
+        for (const auto& a : c.args) std::cout << " " << a;
+        std::cout << "\n";
+        for (const auto& p : c.params) std::cout << "    {" << p.name << "} must match " << p.pattern << "\n";
+        std::cout << "    timeout " << c.timeout.count() << " s\n";
+    }
+    return 0;
+}
+
+int runCommandLocally(const Args& args) {
+    const auto config = loadConfig(args);
+    const auto list = loadAllowlist(config);
+    if (args.positional.empty()) throw std::invalid_argument("run-command needs a KEY (see: home-helper-agent commands)");
+
+    agent::CommandRequest request;
+    request.id = "local-" + crypto::randomHex(4);
+    request.key = args.positional[0];
+    request.confirmed = args.flag("confirm");  // the person at the keyboard wrote the allowlist
+    for (std::size_t i = 1; i < args.positional.size(); ++i) {
+        const auto& kv = args.positional[i];
+        const auto eq = kv.find('=');
+        if (eq == std::string::npos) throw std::invalid_argument("parameters are name=value, got: " + kv);
+        request.params[kv.substr(0, eq)] = kv.substr(eq + 1);
+    }
+    const auto result = commands::execute(list, request, commands::runProcess);
+    std::cout << result.output;
+    if (!result.output.empty() && result.output.back() != '\n') std::cout << "\n";
+    std::cout << "-- " << result.status;
+    if (result.status == "rejected") std::cout << ": " << result.reason;
+    else std::cout << " (exit " << result.exitCode << ", " << result.durationMs << " ms" << (result.truncated ? ", output cut" : "") << ")";
+    std::cout << "\n";
+    return result.status == "succeeded" ? 0 : 1;
+}
+
 /// Everything `run` needs, built from the config and credentials
 struct Runtime {
     agent::Config config;
@@ -218,10 +273,11 @@ struct Runtime {
     std::unique_ptr<net::ApiClient> api;
     std::unique_ptr<monitor::SystemMonitor> monitor;
     std::unique_ptr<audio::AudioDiscovery> audio;
+    commands::Allowlist allowlist;
 };
 
 Runtime prepare(const Args& args) {
-    Runtime rt{loadConfig(args), {}, nullptr, nullptr, nullptr, nullptr};
+    Runtime rt{loadConfig(args), {}, nullptr, nullptr, nullptr, nullptr, {}};
     logging::install({.level = args.flag("verbose") ? "debug" : rt.config.logLevel,
                       .file = rt.config.logToFile ? std::optional(rt.config.logFile()) : std::nullopt,
                       .console = true});
@@ -237,19 +293,22 @@ Runtime prepare(const Args& args) {
     rt.api->setCredentials(rt.credentials);
     rt.monitor = monitor::makeSystemMonitor(rt.config.disks);
     if (rt.config.audioDiscovery) rt.audio = audio::makeAudioDiscovery();
+    rt.allowlist = loadAllowlist(rt.config);
+    spdlog::info("{} command(s) on the allowlist", rt.allowlist.entries().size());
     return rt;
 }
 
 int runCommand(const Args& args) {
     auto rt = prepare(args);
-    agent::Agent agent(rt.config, {*rt.api, *rt.monitor, rt.audio.get()});
+    agent::Agent agent(rt.config, {*rt.api, *rt.monitor, rt.audio.get(), &rt.allowlist, commands::runProcess});
     spdlog::info("home-helper-agent {} ({}) for \"{}\" at {}", version::kVersion, version::kGitSha,
                  rt.credentials.household, rt.credentials.serverUrl);
 
     if (args.flag("once")) {
         const auto reply = agent.beat();
+        agent.finishCommands(std::chrono::minutes(5));
         std::cout << "Heartbeat OK: next in " << reply.heartbeat.count() << " s, " << reply.commands.size()
-                  << " command(s) waiting\n";
+                  << " command(s) run\n";
         return 0;
     }
 
@@ -272,6 +331,7 @@ int run(const std::vector<std::string>& argv) {
             {"version", version}, {"init", init},         {"check-config", checkConfig},
             {"enroll", enroll},   {"unenroll", unenroll}, {"status", status},
             {"monitor", monitorCommand}, {"audio", audioCommand}, {"run", runCommand},
+            {"commands", commandsCommand}, {"run-command", runCommandLocally},
         };
 
         if (args.command.empty() || args.command == "help" || args.flag("help")) {

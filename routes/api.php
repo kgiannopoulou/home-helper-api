@@ -55,6 +55,7 @@ Route::name('api.')->group(function () {
             Route::get('me', AgentApi\WhoAmIController::class)->name('me');
             Route::post('heartbeat', AgentApi\HeartbeatController::class)->name('heartbeat');
             Route::post('inventory', AgentApi\InventoryController::class)->name('inventory');
+            Route::post('commands/{command}/result', AgentApi\CommandResultController::class)->name('commands.result');
         });
     });
 
