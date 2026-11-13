@@ -53,7 +53,11 @@ class StateChanges
         return $changed;
     }
 
-    /** A pushed state: find the device by entity id. Unknown entities wait for the next sync. */
+    /**
+     * A pushed state: find the device by entity id. Unknown entities wait for the next sync.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
     public function applyPushed(SmartHomeConnection $connection, string $entityId, ?string $state, array $attributes, ?string $lastChanged): ?SmartDevice
     {
         $device = SmartDevice::query()->where('connection_id', $connection->id)->where('entity_id', $entityId)->first();

@@ -19,7 +19,7 @@ final class DevicePresenter
             'entity_id' => $device->entity_id,
             'name' => $device->name,
             'kind' => $device->kind,
-            'room' => $device->room?->name ?? $device->area,
+            'room' => $device->room !== null ? $device->room->name : $device->area,
             'room_id' => $device->room_id,
             'state' => $device->state,
             'state_label' => Capabilities::stateLabel($device),

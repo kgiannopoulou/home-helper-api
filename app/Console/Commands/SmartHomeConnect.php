@@ -37,7 +37,7 @@ class SmartHomeConnect extends Command
             return self::FAILURE;
         }
 
-        $token = (string) ($this->option('token') ?: env('HOME_ASSISTANT_TOKEN', ''));
+        $token = (string) ($this->option('token') ?: getenv('HOME_ASSISTANT_TOKEN') ?: '');
         try {
             [$connection, $secret] = $connections->connect($household, $user, (string) $this->argument('url'), $token);
         } catch (ValidationException $e) {

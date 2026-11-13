@@ -6,7 +6,7 @@ use App\Models\Household;
 use App\Models\SmartDevice;
 use App\Models\User;
 use App\Policies\SmartHomePolicy;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 

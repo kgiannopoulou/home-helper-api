@@ -11010,6 +11010,311 @@
                 }
             }
         },
+        "/households/{household}/smart-home": {
+            "get": {
+                "operationId": "smart-home.index",
+                "summary": "GET /api/households/{household}/smart-home",
+                "tags": [
+                    "SmartHome"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "summary": {
+                                            "type": [
+                                                "object",
+                                                "null"
+                                            ],
+                                            "properties": {
+                                                "connected": {
+                                                    "type": "boolean"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "lights_on": {
+                                                    "type": "string"
+                                                },
+                                                "lights": {
+                                                    "type": "string"
+                                                },
+                                                "open": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "motion": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "unlocked": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "temperature": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "min": {
+                                                            "type": "number"
+                                                        },
+                                                        "max": {
+                                                            "type": "number"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "min",
+                                                        "max"
+                                                    ]
+                                                },
+                                                "humidity": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "max": {
+                                                            "type": "number"
+                                                        },
+                                                        "room": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "max",
+                                                        "room"
+                                                    ]
+                                                },
+                                                "unavailable": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                }
+                                            },
+                                            "required": [
+                                                "connected",
+                                                "status",
+                                                "lights_on",
+                                                "lights",
+                                                "open",
+                                                "motion",
+                                                "unlocked",
+                                                "temperature",
+                                                "humidity",
+                                                "unavailable"
+                                            ]
+                                        },
+                                        "devices": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "summary",
+                                        "devices"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/smart-home/devices/{device}/actions": {
+            "post": {
+                "operationId": "smart-home.actions.store",
+                "summary": "POST /api/households/{household}/smart-home/devices/{device}/actions {action, brightness?}",
+                "tags": [
+                    "SmartHome"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "device",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "action": {
+                                        "type": "string",
+                                        "enum": [
+                                            "turn_on",
+                                            "turn_off",
+                                            "toggle",
+                                            "set_brightness",
+                                            "lock",
+                                            "unlock"
+                                        ]
+                                    },
+                                    "brightness": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 1,
+                                        "maximum": 100
+                                    }
+                                },
+                                "required": [
+                                    "action"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/smart-home/v1/states": {
+            "post": {
+                "operationId": "home-assistant.states",
+                "tags": [
+                    "StatesWebhook"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "entity_id": {
+                                        "type": "string",
+                                        "pattern": "^[a-z_]+\\.[a-z0-9_]+$",
+                                        "maxLength": 255
+                                    },
+                                    "state": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 255
+                                    },
+                                    "attributes": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "last_changed": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "old_state": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 255
+                                    }
+                                },
+                                "required": [
+                                    "entity_id"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "accepted": {
+                                            "type": "boolean"
+                                        },
+                                        "known": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "required": [
+                                        "accepted",
+                                        "known"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/households/{household}/supplies": {
             "get": {
                 "operationId": "supplies.index",

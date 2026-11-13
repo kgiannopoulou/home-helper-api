@@ -15,7 +15,7 @@ use Illuminate\Support\Collection;
 final class HomeSummary
 {
     /**
-     * @return array{connected: bool, status: ?string, lights_on: int, lights: int, open: list<string>, motion: list<string>, unlocked: list<string>, temperature: ?array{min: float, max: float}, humidity: ?array{max: float, room: ?string}, unavailable: list<string>}|null
+     * @return array{connected: bool, status: string, lights_on: int, lights: int, open: list<string>, motion: list<string>, unlocked: list<string>, temperature: ?array{min: float, max: float}, humidity: ?array{max: float, room: ?string}, unavailable: list<string>}|null
      */
     public static function for(Household $household): ?array
     {
@@ -26,7 +26,7 @@ final class HomeSummary
         /** @var Collection<int, SmartDevice> $devices */
         $devices = $household->smartDevices()->active()->with('room')->get();
         $available = $devices->where('available', true);
-        $names = fn (Collection $c) => $c->map(fn (SmartDevice $d) => $d->name)->values()->all();
+        $names = fn (Collection $c): array => array_values($c->map(fn (SmartDevice $d) => $d->name)->all());
 
         $lights = $devices->filter(fn (SmartDevice $d) => $d->kind === 'light' || ($d->kind === 'switch' && str_contains(mb_strtolower($d->name), 'light')));
         $temps = $available->where('kind', 'temperature')->map(fn (SmartDevice $d) => $d->numericState())->filter(fn ($v) => $v !== null);
@@ -41,7 +41,7 @@ final class HomeSummary
             'motion' => $names($available->where('kind', 'motion')->where('state', 'on')),
             'unlocked' => $names($available->where('kind', 'lock')->where('state', 'unlocked')),
             'temperature' => $temps->isEmpty() ? null : ['min' => (float) $temps->min(), 'max' => (float) $temps->max()],
-            'humidity' => $humid ? ['max' => (float) $humid->numericState(), 'room' => $humid->room?->name ?? $humid->area] : null,
+            'humidity' => $humid ? ['max' => (float) $humid->numericState(), 'room' => $humid->room !== null ? $humid->room->name : $humid->area] : null,
             'unavailable' => $names($devices->where('available', false)),
         ];
     }

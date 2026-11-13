@@ -48,7 +48,9 @@ class HomeAssistant
     /**
      * GET /api/states: every entity and its current state
      *
-     * @return list<array{entity_id: string, state: string, attributes: array<string, mixed>, last_changed: string, last_updated?: string}>
+     * Each: entity_id, state, attributes, last_changed (as Home Assistant sends them; not trusted)
+     *
+     * @return list<array<string, mixed>>
      */
     public function states(): array
     {
@@ -60,7 +62,7 @@ class HomeAssistant
     /**
      * GET /api/states/<entity_id>
      *
-     * @return array{entity_id: string, state: string, attributes: array<string, mixed>, last_changed: string}
+     * @return array<string, mixed>
      */
     public function state(string $entityId): array
     {

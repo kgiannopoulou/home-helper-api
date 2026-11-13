@@ -58,7 +58,7 @@ class Discovery
         $new = $changed = 0;
 
         foreach ($states as $s) {
-            $entityId = $s['entity_id'];
+            $entityId = (string) $s['entity_id'];
             if (! DeviceKind::isSupported($entityId) || ! preg_match('/^[a-z_]+\.[a-z0-9_]+$/', $entityId)) {
                 continue;
             }
@@ -90,13 +90,13 @@ class Discovery
                     'state' => mb_substr((string) $s['state'], 0, 255),
                     'ha_attributes' => StateChanges::keep($attributes),
                     'available' => ! in_array($s['state'], SmartDevice::UNAVAILABLE, true),
-                    'last_changed_at' => isset($s['last_changed']) ? CarbonImmutable::parse($s['last_changed'])->min($now) : $now,
+                    'last_changed_at' => isset($s['last_changed']) ? CarbonImmutable::parse((string) $s['last_changed'])->min($now) : $now,
                     'seen_at' => $now,
                 ])->save();
 
                 continue;
             }
-            if ($this->changes->apply($device, (string) $s['state'], $attributes, $s['last_changed'] ?? null, 'sync')) {
+            if ($this->changes->apply($device, (string) $s['state'], $attributes, isset($s['last_changed']) ? (string) $s['last_changed'] : null, 'sync')) {
                 $changed++;
             }
         }
