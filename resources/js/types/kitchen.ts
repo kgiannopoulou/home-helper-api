@@ -68,3 +68,39 @@ export type ScanResult = {
     /** Open Food Facts couldn't be asked */
     lookup_error: string | null;
 };
+
+/** One line of a receipt draft (App\Http\Controllers\Api\ReceiptController::receipt) */
+export type ReceiptLine = {
+    index: number;
+    /** As printed, made readable */
+    name: string;
+    raw: string;
+    /** After any discount */
+    price: number;
+    discount: number;
+    quantity: number | null;
+    amount: number | null;
+    unit: 'g' | 'ml' | 'pcs' | null;
+    ingredient: string;
+    food: boolean;
+    /** Goes to the kitchen unless unticked */
+    include: boolean;
+    /** The household's item it most likely is */
+    item_id: string | null;
+    item_name: string | null;
+};
+
+/** A receipt read from a photo or text, waiting to be checked */
+export type ReceiptDraft = {
+    id: string;
+    status: 'draft' | 'imported' | 'discarded';
+    source: 'photo' | 'text';
+    store: string | null;
+    purchased_on: string | null;
+    total: number | null;
+    /** The lines add up to the printed total */
+    adds_up: boolean;
+    lines: ReceiptLine[];
+    shopping_trip_id: string | null;
+    created_at: string;
+};

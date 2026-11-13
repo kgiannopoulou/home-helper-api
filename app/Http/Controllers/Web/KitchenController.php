@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Enums\ItemCategory;
 use App\Enums\StorageLocation;
 use App\Http\Controllers\Api\KitchenController as Api;
+use App\Http\Controllers\Api\ReceiptController as ReceiptApi;
 use App\Kitchen\Pantry;
 use App\Kitchen\Units;
 use App\Models\InventoryItem;
@@ -39,6 +40,9 @@ class KitchenController extends WebController
                 ->orderByDesc('occurred_at')->limit(30)->get()
                 ->map(fn (KitchenMovement $m) => Api::movement($m))->all(),
             'locations' => StorageLocation::values(),
+            // The newest draft receipt waiting to be checked (docs/kitchen.md#receipts)
+            'receipt' => ($draft = $household->receipts()->where('status', 'draft')->latest()->first()) ? ReceiptApi::receipt($draft) : null,
+            'photos' => config('homehelper.kitchen.receipts.ocr') !== 'none',
         ]);
     }
 

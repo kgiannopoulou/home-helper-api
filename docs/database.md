@@ -57,6 +57,8 @@ erDiagram
     inventory_items ||--o{ purchases : "inventory_item_id"
     inventory_items ||--o{ purchases : "inventory_item_id"
     shopping_trips |o--o{ purchases : "shopping_trip_id"
+    shopping_trips |o--o{ receipts : "shopping_trip_id"
+    users |o--o{ receipts : "user_id"
     users ||--o{ recommendation_feedback : "user_id"
     users |o--o{ shopping_items : "added_by"
     users |o--o{ shopping_trips : "user_id"
@@ -279,6 +281,22 @@ erDiagram
         varchar source
         timestamp fetched_at
     }
+    receipts {
+        char id PK
+        char household_id FK
+        bigint user_id FK "nullable"
+        enum status
+        enum source
+        varchar store "nullable"
+        date purchased_on "nullable"
+        decimal total "nullable"
+        tinyint adds_up
+        text ocr_text
+        json lines
+        varchar image_path "nullable"
+        char shopping_trip_id FK "nullable"
+        timestamp imported_at "nullable"
+    }
     households ||--o{ inventory_items : "household_id"
     households ||--o{ item_prices : "household_id"
     shopping_trips |o--o{ item_prices : "shopping_trip_id"
@@ -290,6 +308,9 @@ erDiagram
     inventory_items ||--o{ purchases : "inventory_item_id"
     inventory_items ||--o{ purchases : "inventory_item_id"
     shopping_trips |o--o{ purchases : "shopping_trip_id"
+    households ||--o{ receipts : "household_id"
+    shopping_trips |o--o{ receipts : "shopping_trip_id"
+    users |o--o{ receipts : "user_id"
     users |o--o{ shopping_items : "added_by"
     households ||--o{ shopping_items : "household_id"
     households ||--o{ shopping_trips : "household_id"

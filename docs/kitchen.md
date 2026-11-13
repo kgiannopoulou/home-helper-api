@@ -11,10 +11,11 @@ built in [Phase 7](phase-7.md) on top of the phone's inventory, shopping list an
 | `app/Kitchen/Ingredients` | one key per ingredient, English and Greek |
 | `app/Kitchen/Pantry` | every change of an amount, recorded and locked |
 | `app/Kitchen/Barcodes/*` | `Gtin` check digits, `Scanner`, `OpenFoodFacts` behind `ProductLookup` |
+| `app/Kitchen/Receipts/*` | `TesseractOcr` behind `Ocr`, `OcrText`, `ReceiptParser`, `Receipts` (read, import, discard) |
 | `app/Http/Controllers/Api/KitchenController` | use, add and history for the phone |
 | `app/Http/Controllers/Web/KitchenController` | the Kitchen page |
 
-Tables: `inventory_items` (since Phase 1, extended), `kitchen_movements`, `products`
+Tables: `inventory_items` (since Phase 1, extended), `kitchen_movements`, `products`, `receipts`
 ([diagram](database.md)).
 
 ## Amounts and units
@@ -103,6 +104,63 @@ Android), else [ZXing](https://github.com/zxing-js/browser), loaded only then (S
 else type the digits. A USB scanner types them too. `KITCHEN_BARCODES=none` keeps every scan on
 the server.
 
+## Receipts
+
+A photo of the till slip, or its text, becomes a **draft**. Nothing changes until someone checks
+it and presses Import.
+
+**Reading.** The photo is read on this server by [Tesseract](https://github.com/tesseract-ocr/tesseract)
+5 with Greek and English (`tesseract-ocr-ell`), page mode 6, which keeps a receipt's columns on
+one line. The photo never leaves the server, stays on the private disk only until the receipt is
+imported or thrown away, and unfinished drafts are pruned after a week. Card numbers in the
+text are masked. `KITCHEN_OCR=none` turns photos off; pasting the text still works, for example
+from the phone's own text recognition or an e-receipt.
+
+**What OCR gets wrong.** Tesseract was run on a real receipt image
+([`tests/Fixtures/receipts/corner-shop.png`](../tests/Fixtures/receipts/corner-shop.png),
+its output next to it) before the parser was written. On uppercase Greek it:
+
+- gives Latin letters for Greek capitals that look the same: `MAKAPONIA`, `AYTA`, `TO`
+- swaps lookalikes: Γ→Τ (`ΤΑΛΑ` for ΓΑΛΑ, `500ΤΡ` for 500ΓΡ), Σ→Χ, Ι→Τ, Π→Η or Ι, Ξ→Ε
+- doubles or drops letters, and splits prices: `23, 98`, `-0, 60`
+- reads `1L` as `11,`
+
+So `OcrText` turns all-lookalike words back into Greek, and compares words as **skeletons**:
+the confused letters as one, doubled letters as one. `XTPATTIXTO` and `ΣΤΡΑΓΓΙΣΤΟ` have the
+same skeleton, and `ΕΚΗΤΩΣΗ` is still a discount. Ingredients are found the same way, so
+`ΤΑΛΑ ΦΡΕΣΚΟ` is milk.
+
+**Parsing** (`ReceiptParser`):
+
+| Line | Read as |
+|---|---|
+| `ΓΑΛΑ ΦΡΕΣΚΟ 1L   1,89 Β` | an item: name, price, VAT letter; the pack size from the name, only with a unit ("2%" isn't 2) |
+| `2 X 1,15` | two of the neighbour whose price it explains (2 × 1,15 = 2,30); chains print it before or after |
+| `0,850 KG X 2,40` | 850 g, weighed |
+| `ΕΚΠΤΩΣΗ  -0,60` | a discount on the item above |
+| `ΣΥΝΟΛΟ  23,98` | the total; items end here (`ΜΕΡΙΚΟ ΣΥΝΟΛΟ` is skipped) |
+| `ΑΦΜ`, `ΦΠΑ`, `ΚΑΡΤΑ`, `ΜΕΤΡΗΤΑ`, … | never items |
+
+The shop comes from the known chains (Sklavenitis, AB Vassilopoulos, Lidl, Masoutis, My Market,
+Kritikos…) or the first header line, and the date is the first valid one. When the lines don't
+add up to the printed total, the draft says so: a line was missed or misread. Kitchen roll,
+detergent and the carrier-bag charge are not food and come unticked.
+
+**The draft** matches each line to the household's item with the same ingredient. The person
+can untick lines, rename new items, correct amounts, and fix the shop and date.
+
+**Importing** happens in one transaction:
+
+- one `shopping_trips` row (source `receipt`) and one grocery expense, so spending sees it
+- per line, a purchase and an `item_prices` row (per unit for "2 X")
+- the amounts go into the kitchen as `bought` movements. When the receipt didn't say the size,
+  the item's usual pack is used; if that's unknown too, the item is just marked full
+- shopping-list items for the same ingredients are checked off
+
+Real-OCR test: `ReceiptsTest` reads the fixture photo with the real `tesseract` and expects all
+six food lines, the date and a total that adds up. It runs in CI (Tesseract is installed there)
+and locally in `ops/ocr/Dockerfile`'s image. Elsewhere it's skipped.
+
 ## API
 
 | | |
@@ -112,6 +170,10 @@ the server.
 | `POST /api/households/{h}/inventory-items/{item}/add` | `{amount, unit?}` |
 | `GET  /api/households/{h}/kitchen/movements` | `?item=&kind=`, newest first |
 | `GET  /api/households/{h}/kitchen/barcodes/{code}` | the household's item, a suggestion and the product; 422 for a misread. 30 a minute |
+| `POST /api/households/{h}/kitchen/receipts` | multipart `photo` (jpg, png, webp, 10 MB) or `text`: a draft. 10 a minute |
+| `GET  /api/households/{h}/kitchen/receipts/{id}` | the draft |
+| `POST /api/households/{h}/kitchen/receipts/{id}/import` | `{store?, purchased_on?, lines?: {index: {include, item_id, name, amount_text, location}}}` |
+| `DELETE /api/households/{h}/kitchen/receipts/{id}` | throw the draft and its photo away |
 | `POST /api/households/{h}/kitchen/barcodes/{code}` | `{action: add\|use, item_id?, name?, location?, amount_text?}`: one pack unless an amount is given |
 
 ## The Kitchen page

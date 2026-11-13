@@ -4,6 +4,7 @@ import InputError from '@/components/input-error';
 import Heading from '@/components/heading';
 import { BarcodeScanner } from '@/components/kitchen/barcode-scanner';
 import { InventoryCard } from '@/components/kitchen/inventory-card';
+import { ReceiptCard } from '@/components/kitchen/receipt-card';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -17,12 +18,16 @@ import { Label } from '@/components/ui/label';
 import { byLocation, LOCATION_LABEL } from '@/lib/kitchen';
 import { kitchen as kitchenRoute } from '@/routes';
 import { store } from '@/routes/kitchen/items';
-import type { KitchenItem, Movement } from '@/types/kitchen';
+import type { KitchenItem, Movement, ReceiptDraft } from '@/types/kitchen';
 
 type Props = {
     items: KitchenItem[];
     movements: Movement[];
     locations: string[];
+    /** The newest receipt waiting to be checked */
+    receipt: ReceiptDraft | null;
+    /** Photos can be read here (KITCHEN_OCR) */
+    photos: boolean;
 };
 
 const KIND_LABEL: Record<Movement['kind'], string> = {
@@ -38,7 +43,13 @@ const KIND_LABEL: Record<Movement['kind'], string> = {
  * The Kitchen (docs/kitchen.md): what's in the fridge, freezer and
  * cupboards, how much, and what came and went.
  */
-export default function Kitchen({ items, movements, locations }: Props) {
+export default function Kitchen({
+    items,
+    movements,
+    locations,
+    receipt,
+    photos,
+}: Props) {
     const groups = byLocation(items);
     const kitchenPlaces = locations.filter(
         (l) => l !== 'bathroom' && l !== 'cleaning',
@@ -128,6 +139,8 @@ export default function Kitchen({ items, movements, locations }: Props) {
                         </CardContent>
                     </Card>
                 </div>
+
+                <ReceiptCard receipt={receipt} photos={photos} />
 
                 {groups.length === 0 ? (
                     <p className="text-muted-foreground">

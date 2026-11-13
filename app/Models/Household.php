@@ -98,6 +98,12 @@ class Household extends Model
         return $this->hasMany(InventoryItem::class);
     }
 
+    /** @return HasMany<Receipt, $this> */
+    public function receipts(): HasMany
+    {
+        return $this->hasMany(Receipt::class);
+    }
+
     /** @return HasMany<KitchenMovement, $this> */
     public function kitchenMovements(): HasMany
     {

@@ -244,6 +244,14 @@ return [
             'found_days' => 30,
             'missing_days' => 7,
         ],
+        'receipts' => [
+            // tesseract | none (no photos; pasting the text still works)
+            'ocr' => env('KITCHEN_OCR', 'tesseract'),
+            'tesseract' => env('TESSERACT_BINARY', 'tesseract'),
+            // Greek and English: apt install tesseract-ocr tesseract-ocr-ell
+            'languages' => env('TESSERACT_LANGUAGES', 'ell+eng'),
+            'timeout_seconds' => 60,
+        ],
     ],
 
 ];

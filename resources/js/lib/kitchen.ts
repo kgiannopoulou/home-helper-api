@@ -42,3 +42,29 @@ export function fullness(item: KitchenItem): number {
 
     return { full: 1, half: 0.5, low: 0.2, empty: 0 }[item.level ?? 'full'];
 }
+
+/** 1.89 → "€1.89" */
+export function euros(amount: number): string {
+    return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: 'EUR',
+    }).format(amount);
+}
+
+/** A receipt line's amount as a hint: "1 kg", "850 g", "6" */
+export function lineAmount(line: {
+    amount: number | null;
+    unit: string | null;
+}): string {
+    if (line.amount === null || line.unit === null) {
+        return '';
+    }
+    if (line.unit === 'pcs') {
+        return String(line.amount);
+    }
+    const big = line.amount >= 1000;
+    const value = big ? line.amount / 1000 : line.amount;
+    const unit = big ? (line.unit === 'g' ? 'kg' : 'l') : line.unit;
+
+    return `${Number(value.toFixed(2))} ${unit}`;
+}

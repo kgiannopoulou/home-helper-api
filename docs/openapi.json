@@ -9957,6 +9957,384 @@
                 }
             }
         },
+        "/households/{household}/kitchen/receipts": {
+            "post": {
+                "operationId": "kitchen.receipts.store",
+                "summary": "POST kitchen/receipts: multipart `photo` (jpg, png, webp, 10 MB) or `text`",
+                "tags": [
+                    "Receipt"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "receipt": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "source": {
+                                                    "type": "string"
+                                                },
+                                                "store": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "purchased_on": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "total": {
+                                                    "type": [
+                                                        "number",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "adds_up": {
+                                                    "type": "boolean"
+                                                },
+                                                "lines": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "shopping_trip_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "status",
+                                                "source",
+                                                "store",
+                                                "purchased_on",
+                                                "total",
+                                                "adds_up",
+                                                "lines",
+                                                "shopping_trip_id",
+                                                "created_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "receipt"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/receipts/{receipt}": {
+            "get": {
+                "operationId": "kitchen.receipts.show",
+                "tags": [
+                    "Receipt"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "receipt",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "receipt": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "source": {
+                                                    "type": "string"
+                                                },
+                                                "store": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "purchased_on": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "total": {
+                                                    "type": [
+                                                        "number",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "adds_up": {
+                                                    "type": "boolean"
+                                                },
+                                                "lines": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "shopping_trip_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "status",
+                                                "source",
+                                                "store",
+                                                "purchased_on",
+                                                "total",
+                                                "adds_up",
+                                                "lines",
+                                                "shopping_trip_id",
+                                                "created_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "receipt"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "kitchen.receipts.destroy",
+                "tags": [
+                    "Receipt"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "receipt",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/receipts/{receipt}/import": {
+            "post": {
+                "operationId": "kitchen.receipts.import",
+                "summary": "POST kitchen/receipts/{receipt}/import {store?, purchased_on?, lines?: {index: {include, item_id, name, amount_text, location}}}",
+                "tags": [
+                    "Receipt"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "receipt",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "receipt": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "source": {
+                                                    "type": "string"
+                                                },
+                                                "store": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "purchased_on": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "total": {
+                                                    "type": [
+                                                        "number",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "adds_up": {
+                                                    "type": "boolean"
+                                                },
+                                                "lines": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "shopping_trip_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "status",
+                                                "source",
+                                                "store",
+                                                "purchased_on",
+                                                "total",
+                                                "adds_up",
+                                                "lines",
+                                                "shopping_trip_id",
+                                                "created_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "receipt"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/households/{household}/recurring-bills": {
             "get": {
                 "operationId": "recurring-bills.index",

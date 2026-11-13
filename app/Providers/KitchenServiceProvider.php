@@ -5,6 +5,9 @@ namespace App\Providers;
 use App\Kitchen\Barcodes\NoLookup;
 use App\Kitchen\Barcodes\OpenFoodFacts;
 use App\Kitchen\Barcodes\ProductLookup;
+use App\Kitchen\Receipts\NoOcr;
+use App\Kitchen\Receipts\Ocr;
+use App\Kitchen\Receipts\TesseractOcr;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -21,6 +24,16 @@ class KitchenServiceProvider extends ServiceProvider
             default => new OpenFoodFacts(
                 (string) config('homehelper.kitchen.barcodes.url'),
                 (int) config('homehelper.kitchen.barcodes.timeout_seconds'),
+            ),
+        });
+
+        // Receipts (day 87): KITCHEN_OCR=tesseract|none; the photo never leaves this server
+        $this->app->bind(Ocr::class, fn () => match (config('homehelper.kitchen.receipts.ocr')) {
+            'none' => new NoOcr,
+            default => new TesseractOcr(
+                (string) config('homehelper.kitchen.receipts.tesseract'),
+                (string) config('homehelper.kitchen.receipts.languages'),
+                (int) config('homehelper.kitchen.receipts.timeout_seconds'),
             ),
         });
     }

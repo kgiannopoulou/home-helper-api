@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\PlantCareController;
 use App\Http\Controllers\Api\PlantCareLogController;
 use App\Http\Controllers\Api\PlantController;
 use App\Http\Controllers\Api\PurchaseController;
+use App\Http\Controllers\Api\ReceiptController;
 use App\Http\Controllers\Api\RecurringBillController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\ShoppingItemController;
@@ -160,6 +161,13 @@ Route::name('api.')->group(function () {
             // Barcodes (docs/kitchen.md#barcodes)
             Route::get('kitchen/barcodes/{code}', [BarcodeController::class, 'show'])->middleware('throttle:barcodes')->name('kitchen.barcodes.show');
             Route::post('kitchen/barcodes/{code}', [BarcodeController::class, 'apply'])->name('kitchen.barcodes.apply');
+            // Receipts (docs/kitchen.md#receipts)
+            Route::controller(ReceiptController::class)->prefix('kitchen/receipts')->name('kitchen.receipts.')->group(function () {
+                Route::post('/', 'store')->middleware('throttle:uploads')->name('store');
+                Route::get('{receipt}', 'show')->name('show');
+                Route::post('{receipt}/import', 'import')->name('import');
+                Route::delete('{receipt}', 'destroy')->name('destroy');
+            });
 
             // Memory (docs/memory.md#api): facts, notes and documents, search
             Route::prefix('memory')->name('memory.')->controller(MemoryController::class)->group(function () {

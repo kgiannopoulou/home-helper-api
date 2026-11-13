@@ -67,6 +67,8 @@ describe('Kitchen page', () => {
                 ]}
                 movements={[movement]}
                 locations={['fridge', 'freezer', 'pantry', 'cleaning']}
+                receipt={null}
+                photos
             />,
         );
 
@@ -88,6 +90,8 @@ describe('Kitchen page', () => {
                 items={[kitchenItem()]}
                 movements={[]}
                 locations={['fridge']}
+                receipt={null}
+                photos={false}
             />,
         );
 
