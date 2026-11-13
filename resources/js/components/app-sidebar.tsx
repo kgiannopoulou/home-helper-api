@@ -4,6 +4,7 @@ import {
     Bot,
     Brain,
     CalendarCheck,
+    ChefHat,
     FolderGit2,
     HeartPulse,
     House,
@@ -12,6 +13,7 @@ import {
     Monitor,
     Sparkles,
     Sun,
+    UtensilsCrossed,
     Wallet,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -34,6 +36,8 @@ import {
     computers,
     dashboard,
     health,
+    kitchen,
+    meals,
     memory,
     planner,
     smartHome,
@@ -51,6 +55,8 @@ const mainNavItems: NavItem[] = [
     { title: 'Spending', href: spending(), icon: Wallet },
     { title: 'Health', href: health(), icon: HeartPulse },
     { title: 'Chores', href: chores(), icon: Sparkles },
+    { title: 'Kitchen', href: kitchen(), icon: ChefHat },
+    { title: 'Meals', href: meals(), icon: UtensilsCrossed },
     { title: 'Week planner', href: planner(), icon: CalendarCheck },
     { title: 'Smart home', href: smartHome(), icon: Lightbulb },
     { title: 'Computers', href: computers(), icon: Monitor },

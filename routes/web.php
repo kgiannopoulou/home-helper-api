@@ -2,14 +2,19 @@
 
 use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\AutomationsController;
+use App\Http\Controllers\Web\BarcodeController;
 use App\Http\Controllers\Web\BriefingController;
 use App\Http\Controllers\Web\ChoresController;
 use App\Http\Controllers\Web\ComputersController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\HealthController;
 use App\Http\Controllers\Web\HouseholdController;
+use App\Http\Controllers\Web\KitchenController;
+use App\Http\Controllers\Web\MealsController;
 use App\Http\Controllers\Web\MemoryController;
 use App\Http\Controllers\Web\PlannerController;
+use App\Http\Controllers\Web\ReceiptController;
+use App\Http\Controllers\Web\RecipeController;
 use App\Http\Controllers\Web\SmartHomeController;
 use App\Http\Controllers\Web\SpendingController;
 use App\Http\Controllers\Web\SystemHealthController;
@@ -56,6 +61,43 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('turns', 'turn')->middleware('throttle:ai')->name('turns.store');
             Route::post('turns/{turn}/cancel', 'cancel')->name('turns.cancel');
             Route::post('speak', 'speak')->middleware('throttle:voice')->name('speak');
+        });
+
+        // The kitchen: inventory with amounts (docs/kitchen.md)
+        Route::controller(KitchenController::class)->prefix('kitchen')->name('kitchen')->group(function () {
+            Route::get('/', 'show');
+            Route::post('items', 'store')->name('.items.store');
+            Route::post('items/{item}/use', 'take')->name('.items.take');
+            Route::post('items/{item}/add', 'add')->name('.items.add');
+            Route::post('items/{item}/set', 'set')->name('.items.set');
+            Route::post('items/{item}/opened', 'opened')->name('.items.opened');
+            Route::post('items/{item}/expiry', 'expiry')->name('.items.expiry');
+            Route::post('items/{item}/still-good', 'stillGood')->name('.items.still-good');
+            Route::delete('items/{item}', 'destroy')->name('.items.destroy');
+        });
+        Route::controller(BarcodeController::class)->prefix('kitchen/barcodes')->name('kitchen.barcodes.')->group(function () {
+            Route::get('{code}', 'show')->middleware('throttle:barcodes')->name('lookup');
+            Route::post('{code}', 'apply')->name('apply');
+        });
+        Route::controller(RecipeController::class)->prefix('kitchen/recipes')->name('kitchen.recipes.')->group(function () {
+            Route::post('/', 'store')->name('store');
+            Route::get('{recipe}', 'show')->name('show');
+            Route::post('{recipe}/cook', 'cook')->name('cook');
+            Route::post('{recipe}/shopping', 'shopping')->name('shopping');
+        });
+        Route::controller(ReceiptController::class)->prefix('kitchen/receipts')->name('kitchen.receipts.')->group(function () {
+            Route::post('/', 'store')->middleware('throttle:uploads')->name('store');
+            Route::post('{receipt}/import', 'import')->name('import');
+            Route::delete('{receipt}', 'destroy')->name('destroy');
+        });
+
+        // The meal plan (docs/kitchen.md#meal-plan)
+        Route::controller(MealsController::class)->prefix('meals')->name('meals')->group(function () {
+            Route::get('/', 'show');
+            Route::post('plan', 'auto')->name('.plan');
+            Route::post('{entry}/cooked', 'cooked')->name('.cooked');
+            Route::put('{date}/{meal}', 'set')->where(['date' => '\d{4}-\d{2}-\d{2}', 'meal' => 'breakfast|lunch|dinner'])->name('.set');
+            Route::delete('{date}/{meal}', 'clear')->where(['date' => '\d{4}-\d{2}-\d{2}', 'meal' => 'breakfast|lunch|dinner'])->name('.clear');
         });
 
         // The household's computers, through the local agent (agent/docs/design.md)

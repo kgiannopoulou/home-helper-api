@@ -132,6 +132,9 @@ class AppServiceProvider extends ServiceProvider
         // Each one is a call to the household's Home Assistant
         RateLimiter::for('smart-home-control', fn (Request $request) => Limit::perMinute(60)->by('smart-home:'.$byUser($request)));
 
+        // A barcode lookup may ask Open Food Facts, which asks apps to stay well under 100 a minute
+        RateLimiter::for('barcodes', fn (Request $request) => Limit::perMinute(30)->by('barcodes:'.$byUser($request)));
+
         RateLimiter::for('agent', fn (Request $request) => Limit::perMinute(60)->by('agent:'.$request->header('X-HH-Agent', $request->ip())));
     }
 

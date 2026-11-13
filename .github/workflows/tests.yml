@@ -95,6 +95,13 @@ jobs:
       - name: Build the dashboard
         run: npm run build
 
+      # tests/Feature/Kitchen/ReceiptsTest.php reads a receipt photo with the real tesseract (docs/kitchen.md#receipts)
+      - name: Install Tesseract (Greek and English)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends tesseract-ocr tesseract-ocr-ell tesseract-ocr-eng
+          tesseract --version | head -1
+
       # tests/Feature/Ops/BackupTest.php uses the runner's real mysqldump and mysql clients
       - name: PHP tests (Pest)
         run: php artisan test

@@ -2,6 +2,7 @@
 
 use App\Jobs\ApplyRecurringBills;
 use App\Jobs\BudgetAlert;
+use App\Jobs\CheckExpiringFood;
 use App\Jobs\CheckPlantCare;
 use App\Jobs\DailyBriefing;
 use App\Jobs\HouseholdJob;
@@ -15,6 +16,7 @@ use App\Jobs\WeeklySummary;
 use App\Models\AgentEvent;
 use App\Models\AgentMetric;
 use App\Models\AutomationRun;
+use App\Models\Receipt;
 use App\Models\SmartDeviceReading;
 use App\Models\SmartHomeEvent;
 use App\Ops\SystemHealth;
@@ -39,6 +41,8 @@ Schedule::job(new ApplyRecurringBills)->dailyAt('06:00')->timezone($home)->onOne
 Schedule::job(new LearnChoreFrequencies)->dailyAt('04:00')->timezone($home)->onOneServer();
 Schedule::job(new PrepareShoppingList)->dailyAt('17:00')->timezone($home)->onOneServer();
 Schedule::job(new BudgetAlert)->dailyAt('18:00')->timezone($home)->onOneServer();
+// What goes off today or tomorrow (docs/kitchen.md#expiry)
+Schedule::job(new CheckExpiringFood)->dailyAt('09:00')->timezone($home)->onOneServer();
 Schedule::job(new WeeklySummary)->sundays()->at('19:00')->timezone($home)->onOneServer();
 // One evaluator for every plant, not one schedule per plant (app/Jobs/CheckPlantCare.php)
 Schedule::job(new CheckPlantCare)->hourly()->timezone($home)->onOneServer();
@@ -88,7 +92,7 @@ Schedule::command('smart-home:automations')->everyMinute()->onOneServer();
 // Housekeeping
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily()->onOneServer();
 Schedule::command('queue:prune-failed', ['--hours' => 24 * 14])->daily()->onOneServer();
-Schedule::command('model:prune', ['--model' => [AgentMetric::class, AgentEvent::class, SmartDeviceReading::class, SmartHomeEvent::class, AutomationRun::class]])->dailyAt('04:30')->timezone($home)->onOneServer();
+Schedule::command('model:prune', ['--model' => [AgentMetric::class, AgentEvent::class, SmartDeviceReading::class, SmartHomeEvent::class, AutomationRun::class, Receipt::class]])->dailyAt('04:30')->timezone($home)->onOneServer();
 
 // Run one now, for every household: php artisan household:run PrepareShoppingList --date=2026-10-09
 Artisan::command('household:run {job} {--date= : "today" at home, YYYY-MM-DD}', function (string $job) {

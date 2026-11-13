@@ -58,6 +58,7 @@ export const inertiaMock = {
         post: vi.fn(),
         get: vi.fn(),
         patch: vi.fn(),
+        put: vi.fn(),
         delete: vi.fn(),
         on: vi.fn(() => () => {}),
     },

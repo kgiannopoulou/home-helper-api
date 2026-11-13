@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminItemController;
 use App\Http\Controllers\Api\Agent as AgentApi;
 use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BarcodeController;
 use App\Http\Controllers\Api\BriefingController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\ChoreCompletionController;
@@ -19,12 +20,16 @@ use App\Http\Controllers\Api\InsightController;
 use App\Http\Controllers\Api\InventoryItemController;
 use App\Http\Controllers\Api\InviteController;
 use App\Http\Controllers\Api\ItemPriceController;
+use App\Http\Controllers\Api\KitchenController;
+use App\Http\Controllers\Api\MealPlanController;
 use App\Http\Controllers\Api\MemoryController;
 use App\Http\Controllers\Api\PlantAlertController;
 use App\Http\Controllers\Api\PlantCareController;
 use App\Http\Controllers\Api\PlantCareLogController;
 use App\Http\Controllers\Api\PlantController;
 use App\Http\Controllers\Api\PurchaseController;
+use App\Http\Controllers\Api\ReceiptController;
+use App\Http\Controllers\Api\RecipeController;
 use App\Http\Controllers\Api\RecurringBillController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\ShoppingItemController;
@@ -147,6 +152,44 @@ Route::name('api.')->group(function () {
             Route::prefix('plant-care')->name('plant-care.')->controller(PlantCareController::class)->group(function () {
                 Route::get('today', 'today')->name('today');
                 Route::get('plan', 'plan')->name('plan');
+            });
+
+            // The kitchen (docs/kitchen.md#api): amounts in and out of the inventory
+            Route::controller(KitchenController::class)->group(function () {
+                Route::post('inventory-items/{item}/use', 'take')->name('kitchen.use');
+                Route::post('inventory-items/{item}/add', 'add')->name('kitchen.add');
+                Route::get('kitchen/movements', 'movements')->name('kitchen.movements');
+                Route::get('kitchen/expiring', 'expiring')->name('kitchen.expiring');
+                Route::get('kitchen/waste', 'waste')->name('kitchen.waste');
+                Route::post('inventory-items/{item}/opened', 'opened')->name('kitchen.opened');
+                Route::post('inventory-items/{item}/expiry', 'expiry')->name('kitchen.expiry');
+                Route::post('inventory-items/{item}/still-good', 'stillGood')->name('kitchen.still-good');
+            });
+            // Barcodes (docs/kitchen.md#barcodes)
+            Route::get('kitchen/barcodes/{code}', [BarcodeController::class, 'show'])->middleware('throttle:barcodes')->name('kitchen.barcodes.show');
+            Route::post('kitchen/barcodes/{code}', [BarcodeController::class, 'apply'])->name('kitchen.barcodes.apply');
+            // Recipes (docs/kitchen.md#recipes)
+            Route::controller(RecipeController::class)->prefix('kitchen/recipes')->name('kitchen.recipes.')->group(function () {
+                Route::get('suggestions', 'suggestions')->name('suggestions');
+                Route::post('/', 'store')->name('store');
+                Route::get('{recipe}', 'show')->name('show');
+                Route::post('{recipe}/cook', 'cook')->name('cook');
+                Route::post('{recipe}/shopping', 'shopping')->name('shopping');
+            });
+            // The meal plan (docs/kitchen.md#meal-plan)
+            Route::controller(MealPlanController::class)->prefix('meal-plan')->name('meal-plan.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('plan', 'auto')->name('plan');
+                Route::post('{entry}/cooked', 'cooked')->name('cooked');
+                Route::put('{date}/{meal}', 'set')->where(['date' => '\d{4}-\d{2}-\d{2}', 'meal' => 'breakfast|lunch|dinner'])->name('set');
+                Route::delete('{date}/{meal}', 'clear')->where(['date' => '\d{4}-\d{2}-\d{2}', 'meal' => 'breakfast|lunch|dinner'])->name('clear');
+            });
+            // Receipts (docs/kitchen.md#receipts)
+            Route::controller(ReceiptController::class)->prefix('kitchen/receipts')->name('kitchen.receipts.')->group(function () {
+                Route::post('/', 'store')->middleware('throttle:uploads')->name('store');
+                Route::get('{receipt}', 'show')->name('show');
+                Route::post('{receipt}/import', 'import')->name('import');
+                Route::delete('{receipt}', 'destroy')->name('destroy');
             });
 
             // Memory (docs/memory.md#api): facts, notes and documents, search

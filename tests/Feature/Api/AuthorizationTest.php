@@ -43,8 +43,9 @@ function apiRoutes(): array
 function fillUri(string $uri, Household $household): string
 {
     return '/'.preg_replace(
-        ['/\{household\}/', '/\{[^}]+\}/'],
-        [$household->id, '01JAAAAAAAAAAAAAAAAAAAAAAA'],
+        // Routes with constrained parameters (the meal plan's {date}/{meal}) need values that match
+        ['/\{household\}/', '/\{date\}/', '/\{meal\}/', '/\{[^}]+\}/'],
+        [$household->id, '2026-11-16', 'dinner', '01JAAAAAAAAAAAAAAAAAAAAAAA'],
         $uri,
     );
 }

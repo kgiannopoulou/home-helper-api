@@ -1200,6 +1200,137 @@
                 }
             }
         },
+        "/households/{household}/kitchen/barcodes/{code}": {
+            "get": {
+                "operationId": "kitchen.barcodes.show",
+                "summary": "GET kitchen/barcodes/{code}: the household's item, a suggestion, the product",
+                "tags": [
+                    "Barcode"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "gtin": {
+                                            "type": "string"
+                                        },
+                                        "item": {
+                                            "type": [
+                                                "array",
+                                                "null"
+                                            ],
+                                            "items": {}
+                                        },
+                                        "suggestion": {
+                                            "type": [
+                                                "array",
+                                                "null"
+                                            ],
+                                            "items": {}
+                                        },
+                                        "product": {
+                                            "type": "string"
+                                        },
+                                        "lookup_error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "gtin",
+                                        "item",
+                                        "suggestion",
+                                        "product",
+                                        "lookup_error"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "kitchen.barcodes.apply",
+                "summary": "POST kitchen/barcodes/{code} {action: add|use, item_id?, name?, location?, amount_text?}",
+                "tags": [
+                    "Barcode"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/households/{household}/briefing": {
             "get": {
                 "operationId": "briefing",
@@ -6161,6 +6292,1203 @@
                 }
             }
         },
+        "/households/{household}/inventory-items/{item}/use": {
+            "post": {
+                "operationId": "kitchen.use",
+                "description": "Without an amount: all of it (\"used it up\", \"threw it away\").",
+                "summary": "POST inventory-items/{item}/use {kind: used|cooked|wasted|expired, amount?, unit?}",
+                "tags": [
+                    "Kitchen"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "kind": {
+                                        "type": "string",
+                                        "enum": [
+                                            "used",
+                                            "cooked",
+                                            "wasted",
+                                            "expired"
+                                        ]
+                                    },
+                                    "amount": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ],
+                                        "maximum": 1000000
+                                    },
+                                    "unit": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 10
+                                    },
+                                    "note": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 200
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "item": {
+                                            "$ref": "#/components/schemas/InventoryItemResource"
+                                        },
+                                        "movement": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "item_id": {
+                                                    "type": "string"
+                                                },
+                                                "item": {
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "type": "string"
+                                                },
+                                                "amount": {
+                                                    "type": "number"
+                                                },
+                                                "unit": {
+                                                    "type": "string"
+                                                },
+                                                "label": {
+                                                    "type": "string"
+                                                },
+                                                "by": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "note": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "occurred_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "item_id",
+                                                "item",
+                                                "kind",
+                                                "amount",
+                                                "unit",
+                                                "label",
+                                                "by",
+                                                "note",
+                                                "occurred_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "item",
+                                        "movement"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/inventory-items/{item}/add": {
+            "post": {
+                "operationId": "kitchen.add",
+                "summary": "POST inventory-items/{item}/add {amount, unit?}: bought or found more",
+                "tags": [
+                    "Kitchen"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "amount": {
+                                        "type": "number",
+                                        "maximum": 1000000
+                                    },
+                                    "unit": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 10
+                                    },
+                                    "note": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 200
+                                    }
+                                },
+                                "required": [
+                                    "amount"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "item": {
+                                            "$ref": "#/components/schemas/InventoryItemResource"
+                                        },
+                                        "movement": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "item_id": {
+                                                    "type": "string"
+                                                },
+                                                "item": {
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "type": "string"
+                                                },
+                                                "amount": {
+                                                    "type": "number"
+                                                },
+                                                "unit": {
+                                                    "type": "string"
+                                                },
+                                                "label": {
+                                                    "type": "string"
+                                                },
+                                                "by": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "note": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "occurred_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "item_id",
+                                                "item",
+                                                "kind",
+                                                "amount",
+                                                "unit",
+                                                "label",
+                                                "by",
+                                                "note",
+                                                "occurred_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "item",
+                                        "movement"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/movements": {
+            "get": {
+                "operationId": "kitchen.movements",
+                "summary": "GET kitchen/movements?item=&kind=: newest first, 100 at most",
+                "tags": [
+                    "Kitchen"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "minLength": 26,
+                            "maxLength": 26
+                        }
+                    },
+                    {
+                        "name": "kind",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "bought",
+                                "used",
+                                "cooked",
+                                "wasted",
+                                "expired",
+                                "adjusted",
+                                null
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "item_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "item": {
+                                                        "type": "string"
+                                                    },
+                                                    "kind": {
+                                                        "type": "string"
+                                                    },
+                                                    "amount": {
+                                                        "type": "number"
+                                                    },
+                                                    "unit": {
+                                                        "type": "string"
+                                                    },
+                                                    "label": {
+                                                        "type": "string"
+                                                    },
+                                                    "by": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "note": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "occurred_at": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "item_id",
+                                                    "item",
+                                                    "kind",
+                                                    "amount",
+                                                    "unit",
+                                                    "label",
+                                                    "by",
+                                                    "note",
+                                                    "occurred_at"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/expiring": {
+            "get": {
+                "operationId": "kitchen.expiring",
+                "summary": "GET kitchen/expiring?days=7: in stock and going off within the days (or already), soonest first",
+                "tags": [
+                    "Kitchen"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "days",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 60
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "array",
+                                                "items": {}
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/waste": {
+            "get": {
+                "operationId": "kitchen.waste",
+                "summary": "GET kitchen/waste?days=30: what was thrown away, and roughly what it cost",
+                "tags": [
+                    "Kitchen"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "days",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 365
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "days": {
+                                            "type": "integer"
+                                        },
+                                        "items": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "value": {
+                                            "type": "number"
+                                        },
+                                        "priced": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "days",
+                                        "items",
+                                        "value",
+                                        "priced"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/inventory-items/{item}/opened": {
+            "post": {
+                "operationId": "kitchen.opened",
+                "summary": "POST inventory-items/{item}/opened: the date can only come closer",
+                "tags": [
+                    "Kitchen"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "item": {
+                                            "$ref": "#/components/schemas/InventoryItemResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "item"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/inventory-items/{item}/expiry": {
+            "post": {
+                "operationId": "kitchen.expiry",
+                "summary": "POST inventory-items/{item}/expiry {expires_on}: the date printed on the pack",
+                "tags": [
+                    "Kitchen"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "expires_on": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "required": [
+                                    "expires_on"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "item": {
+                                            "$ref": "#/components/schemas/InventoryItemResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "item"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/inventory-items/{item}/still-good": {
+            "post": {
+                "operationId": "kitchen.still-good",
+                "summary": "POST inventory-items/{item}/still-good: checked it; ask again in two days",
+                "tags": [
+                    "Kitchen"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "item",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "item": {
+                                            "$ref": "#/components/schemas/InventoryItemResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "item"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/meal-plan": {
+            "get": {
+                "operationId": "meal-plan.index",
+                "summary": "GET meal-plan?from=YYYY-MM-DD: a week of meals and what they still need",
+                "tags": [
+                    "MealPlan"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "from": {
+                                            "type": "string"
+                                        },
+                                        "entries": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "date": {
+                                                        "type": "string"
+                                                    },
+                                                    "meal": {
+                                                        "type": "string"
+                                                    },
+                                                    "recipe_id": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "label": {
+                                                        "type": "string"
+                                                    },
+                                                    "servings": {
+                                                        "type": "integer"
+                                                    },
+                                                    "auto": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "cooked": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "minutes": {
+                                                        "type": [
+                                                            "integer",
+                                                            "null"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "date",
+                                                    "meal",
+                                                    "recipe_id",
+                                                    "label",
+                                                    "servings",
+                                                    "auto",
+                                                    "cooked",
+                                                    "minutes"
+                                                ]
+                                            }
+                                        },
+                                        "shopping": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "array",
+                                                "items": {}
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "from",
+                                        "entries",
+                                        "shopping"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/meal-plan/plan": {
+            "post": {
+                "operationId": "meal-plan.plan",
+                "summary": "POST meal-plan/plan {from?, days?, meals?, tag?, servings?}: fill the empty meals",
+                "tags": [
+                    "MealPlan"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "added": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "added"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/meal-plan/{entry}/cooked": {
+            "post": {
+                "operationId": "meal-plan.cooked",
+                "summary": "POST meal-plan/{entry}/cooked: takes the ingredients out of the kitchen",
+                "tags": [
+                    "MealPlan"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "entry",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "used": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "missing": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "minItems": 0,
+                                                    "maxItems": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "used",
+                                                "missing"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "used": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "minItems": 0,
+                                                    "maxItems": 0
+                                                },
+                                                "missing": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "minItems": 0,
+                                                    "maxItems": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "used",
+                                                "missing"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/meal-plan/{date}/{meal}": {
+            "put": {
+                "operationId": "meal-plan.set",
+                "summary": "PUT meal-plan/{date}/{meal} {recipe_id | title, servings}",
+                "tags": [
+                    "MealPlan"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "meal",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "entry": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "meal": {
+                                                    "type": "string"
+                                                },
+                                                "recipe_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "label": {
+                                                    "type": "string"
+                                                },
+                                                "servings": {
+                                                    "type": "integer"
+                                                },
+                                                "auto": {
+                                                    "type": "boolean"
+                                                },
+                                                "cooked": {
+                                                    "type": "boolean"
+                                                },
+                                                "minutes": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "date",
+                                                "meal",
+                                                "recipe_id",
+                                                "label",
+                                                "servings",
+                                                "auto",
+                                                "cooked",
+                                                "minutes"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "entry"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "meal-plan.clear",
+                "tags": [
+                    "MealPlan"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "meal",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/households/{household}/memory/facts": {
             "get": {
                 "operationId": "memory.facts.index",
@@ -9377,6 +10705,875 @@
                     },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/receipts": {
+            "post": {
+                "operationId": "kitchen.receipts.store",
+                "summary": "POST kitchen/receipts: multipart `photo` (jpg, png, webp, 10 MB) or `text`",
+                "tags": [
+                    "Receipt"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "receipt": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "source": {
+                                                    "type": "string"
+                                                },
+                                                "store": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "purchased_on": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "total": {
+                                                    "type": [
+                                                        "number",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "adds_up": {
+                                                    "type": "boolean"
+                                                },
+                                                "lines": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "shopping_trip_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "status",
+                                                "source",
+                                                "store",
+                                                "purchased_on",
+                                                "total",
+                                                "adds_up",
+                                                "lines",
+                                                "shopping_trip_id",
+                                                "created_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "receipt"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/receipts/{receipt}": {
+            "get": {
+                "operationId": "kitchen.receipts.show",
+                "tags": [
+                    "Receipt"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "receipt",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "receipt": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "source": {
+                                                    "type": "string"
+                                                },
+                                                "store": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "purchased_on": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "total": {
+                                                    "type": [
+                                                        "number",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "adds_up": {
+                                                    "type": "boolean"
+                                                },
+                                                "lines": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "shopping_trip_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "status",
+                                                "source",
+                                                "store",
+                                                "purchased_on",
+                                                "total",
+                                                "adds_up",
+                                                "lines",
+                                                "shopping_trip_id",
+                                                "created_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "receipt"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "kitchen.receipts.destroy",
+                "tags": [
+                    "Receipt"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "receipt",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/receipts/{receipt}/import": {
+            "post": {
+                "operationId": "kitchen.receipts.import",
+                "summary": "POST kitchen/receipts/{receipt}/import {store?, purchased_on?, lines?: {index: {include, item_id, name, amount_text, location}}}",
+                "tags": [
+                    "Receipt"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "receipt",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "receipt": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "source": {
+                                                    "type": "string"
+                                                },
+                                                "store": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "purchased_on": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "total": {
+                                                    "type": [
+                                                        "number",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "adds_up": {
+                                                    "type": "boolean"
+                                                },
+                                                "lines": {
+                                                    "type": "array",
+                                                    "items": {}
+                                                },
+                                                "shopping_trip_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "status",
+                                                "source",
+                                                "store",
+                                                "purchased_on",
+                                                "total",
+                                                "adds_up",
+                                                "lines",
+                                                "shopping_trip_id",
+                                                "created_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "receipt"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/recipes/suggestions": {
+            "get": {
+                "operationId": "kitchen.recipes.suggestions",
+                "summary": "GET kitchen/recipes/suggestions?tag=&limit=",
+                "tags": [
+                    "Recipe"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/recipes": {
+            "post": {
+                "operationId": "kitchen.recipes.store",
+                "summary": "POST kitchen/recipes {name, servings, minutes?, tags?, steps, ingredients: [{name, amount_text?, optional?}]}",
+                "tags": [
+                    "Recipe"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "recipe": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "servings": {
+                                                    "type": "integer"
+                                                },
+                                                "minutes": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "tags": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "own": {
+                                                    "type": "boolean"
+                                                },
+                                                "steps": {
+                                                    "type": "string"
+                                                },
+                                                "ingredients": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "ingredient": {
+                                                                "type": "string"
+                                                            },
+                                                            "amount": {
+                                                                "type": [
+                                                                    "number",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "unit": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "optional": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "staple": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "ingredient",
+                                                            "amount",
+                                                            "unit",
+                                                            "label",
+                                                            "optional",
+                                                            "staple"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "servings",
+                                                "minutes",
+                                                "tags",
+                                                "own",
+                                                "steps",
+                                                "ingredients"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "recipe"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/recipes/{recipe}": {
+            "get": {
+                "operationId": "kitchen.recipes.show",
+                "summary": "GET kitchen/recipes/{recipe}",
+                "tags": [
+                    "Recipe"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "recipe",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "recipe": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "servings": {
+                                                    "type": "integer"
+                                                },
+                                                "minutes": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "tags": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "own": {
+                                                    "type": "boolean"
+                                                },
+                                                "steps": {
+                                                    "type": "string"
+                                                },
+                                                "ingredients": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "ingredient": {
+                                                                "type": "string"
+                                                            },
+                                                            "amount": {
+                                                                "type": [
+                                                                    "number",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "unit": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "optional": {
+                                                                "type": "boolean"
+                                                            },
+                                                            "staple": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "ingredient",
+                                                            "amount",
+                                                            "unit",
+                                                            "label",
+                                                            "optional",
+                                                            "staple"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "servings",
+                                                "minutes",
+                                                "tags",
+                                                "own",
+                                                "steps",
+                                                "ingredients"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "recipe"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/recipes/{recipe}/cook": {
+            "post": {
+                "operationId": "kitchen.recipes.cook",
+                "summary": "POST kitchen/recipes/{recipe}/cook {servings?}: takes the ingredients out of the kitchen",
+                "tags": [
+                    "Recipe"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "recipe",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "servings": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 1,
+                                        "maximum": 50
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "used": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "missing": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "minItems": 0,
+                                            "maxItems": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "used",
+                                        "missing"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/kitchen/recipes/{recipe}/shopping": {
+            "post": {
+                "operationId": "kitchen.recipes.shopping",
+                "summary": "POST kitchen/recipes/{recipe}/shopping {servings?}: what's missing onto the list",
+                "tags": [
+                    "Recipe"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "recipe",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "servings": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 1,
+                                        "maximum": 50
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "added": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "added"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
@@ -13599,6 +15796,111 @@
                     "longitude"
                 ],
                 "title": "HouseholdResource"
+            },
+            "InventoryItemResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "location": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "level": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "quantity": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "ingredient": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "amount": {
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "unit": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "full_amount": {
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "amount_text": {
+                        "type": "string"
+                    },
+                    "barcode": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "expires_on": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "expiry_estimated": {
+                        "type": "boolean"
+                    },
+                    "opened_on": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "category",
+                    "location",
+                    "level",
+                    "quantity",
+                    "ingredient",
+                    "amount",
+                    "unit",
+                    "full_amount",
+                    "amount_text",
+                    "barcode",
+                    "expires_on",
+                    "expiry_estimated",
+                    "opened_on",
+                    "updated_at"
+                ],
+                "title": "InventoryItemResource"
             },
             "InviteResource": {
                 "type": "object",

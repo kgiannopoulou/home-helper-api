@@ -44,6 +44,10 @@ erDiagram
     users |o--o{ invites : "invited_by"
     shopping_trips |o--o{ item_prices : "shopping_trip_id"
     households ||--o{ job_runs : "household_id"
+    inventory_items ||--o{ kitchen_movements : "inventory_item_id"
+    users |o--o{ kitchen_movements : "user_id"
+    users |o--o{ meal_plan_entries : "created_by"
+    recipes |o--o{ meal_plan_entries : "recipe_id"
     users |o--o{ memory_chunks : "user_id"
     users |o--o{ notes : "user_id"
     plants ||--o{ plant_alerts : "plant_id"
@@ -55,6 +59,10 @@ erDiagram
     inventory_items ||--o{ purchases : "inventory_item_id"
     inventory_items ||--o{ purchases : "inventory_item_id"
     shopping_trips |o--o{ purchases : "shopping_trip_id"
+    shopping_trips |o--o{ receipts : "shopping_trip_id"
+    users |o--o{ receipts : "user_id"
+    recipes ||--o{ recipe_ingredients : "recipe_id"
+    users |o--o{ recipes : "created_by"
     users ||--o{ recommendation_feedback : "user_id"
     users |o--o{ shopping_items : "added_by"
     users |o--o{ shopping_trips : "user_id"
@@ -230,11 +238,20 @@ erDiagram
         char id PK
         char household_id FK
         varchar name
+        varchar ingredient "nullable"
+        varchar barcode "nullable"
         enum category
         enum location
         enum level
         varchar quantity "nullable"
+        decimal amount "nullable"
+        enum unit "nullable"
+        decimal full_amount "nullable"
+        decimal pack_amount "nullable"
         date expires_on "nullable"
+        tinyint expiry_estimated
+        date opened_on "nullable"
+        date expiry_notified_on "nullable"
         tinyint alive "nullable, generated"
     }
     purchases {
@@ -245,14 +262,100 @@ erDiagram
         date bought_on
         decimal price "nullable"
     }
+    kitchen_movements {
+        char id PK
+        char household_id FK
+        char inventory_item_id FK
+        bigint user_id FK "nullable"
+        enum kind
+        decimal amount
+        enum unit
+        varchar note "nullable"
+        timestamp occurred_at
+    }
+    products {
+        varchar gtin PK
+        tinyint found
+        varchar name "nullable"
+        varchar brand "nullable"
+        varchar quantity "nullable"
+        decimal amount "nullable"
+        enum unit "nullable"
+        varchar ingredient "nullable"
+        enum category "nullable"
+        enum location "nullable"
+        varchar image_url "nullable"
+        varchar source
+        timestamp fetched_at
+    }
+    receipts {
+        char id PK
+        char household_id FK
+        bigint user_id FK "nullable"
+        enum status
+        enum source
+        varchar store "nullable"
+        date purchased_on "nullable"
+        decimal total "nullable"
+        tinyint adds_up
+        text ocr_text
+        json lines
+        varchar image_path "nullable"
+        char shopping_trip_id FK "nullable"
+        timestamp imported_at "nullable"
+    }
+    recipes {
+        char id PK
+        char household_id FK "nullable"
+        varchar slug UK "nullable"
+        varchar name
+        tinyint servings
+        smallint minutes "nullable"
+        json tags
+        text steps
+        bigint created_by FK "nullable"
+    }
+    recipe_ingredients {
+        bigint id PK
+        char recipe_id FK
+        varchar ingredient
+        decimal amount "nullable"
+        enum unit "nullable"
+        tinyint optional
+        tinyint staple
+    }
+    meal_plan_entries {
+        char id PK
+        char household_id FK
+        date date
+        enum meal
+        char recipe_id FK "nullable"
+        varchar title "nullable"
+        tinyint servings
+        tinyint auto
+        timestamp cooked_at "nullable"
+        bigint created_by FK "nullable"
+    }
     households ||--o{ inventory_items : "household_id"
     households ||--o{ item_prices : "household_id"
     shopping_trips |o--o{ item_prices : "shopping_trip_id"
+    households ||--o{ kitchen_movements : "household_id"
+    inventory_items ||--o{ kitchen_movements : "inventory_item_id"
+    users |o--o{ kitchen_movements : "user_id"
+    users |o--o{ meal_plan_entries : "created_by"
+    households ||--o{ meal_plan_entries : "household_id"
+    recipes |o--o{ meal_plan_entries : "recipe_id"
     households ||--o{ purchases : "household_id"
     inventory_items ||--o{ purchases : "household_id"
     inventory_items ||--o{ purchases : "inventory_item_id"
     inventory_items ||--o{ purchases : "inventory_item_id"
     shopping_trips |o--o{ purchases : "shopping_trip_id"
+    households ||--o{ receipts : "household_id"
+    shopping_trips |o--o{ receipts : "shopping_trip_id"
+    users |o--o{ receipts : "user_id"
+    recipes ||--o{ recipe_ingredients : "recipe_id"
+    users |o--o{ recipes : "created_by"
+    households |o--o{ recipes : "household_id"
     users |o--o{ shopping_items : "added_by"
     households ||--o{ shopping_items : "household_id"
     households ||--o{ shopping_trips : "household_id"

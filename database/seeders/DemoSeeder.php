@@ -24,7 +24,9 @@ use App\Enums\SupplyLevel;
 use App\Enums\TripSource;
 use App\Enums\WorkoutSource;
 use App\Enums\WorkoutType;
+use App\Kitchen\Ingredients;
 use App\Models\Household;
+use App\Models\InventoryItem;
 use App\Models\User;
 use App\Support\HomeTime;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -332,6 +334,20 @@ class DemoSeeder extends Seeder
                 'note' => $trip->store,
                 'source' => ExpenseSource::Shopping,
             ]);
+        }
+
+        // Amounts (Phase 7): a full pack of each, then what's left today
+        $packs = ['Milk' => [1000, 'ml', 300], 'Bread' => [500, 'g', 350], 'Eggs' => [10, 'pcs', 4], 'Greek yoghurt' => [1000, 'g', 450],
+            'Feta' => [400, 'g', 400], 'Tomatoes' => [1000, 'g', 600], 'Olive oil' => [1000, 'ml', 200], 'Coffee' => [250, 'g', 0],
+            'Pasta' => [500, 'g', 500], 'Chicken breast' => [1000, 'g', 500]];
+        foreach ($packs as $name => [$full, $unit, $left]) {
+            /** @var InventoryItem $item */
+            $item = $items[$name] ?? throw new \LogicException($name);
+            $item->forceFill(['full_amount' => $full, 'unit' => $unit, 'amount' => $left, 'level' => InventoryItem::levelFor($left, $full)])->save();
+        }
+        // The seeder runs without model events, so the ingredient keys are set here
+        foreach ($items as $name => $item) {
+            $item->forceFill(['ingredient' => Ingredients::key($name)])->save();
         }
 
         // Today's kitchen: some things running low, some about to expire

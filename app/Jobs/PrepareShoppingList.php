@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\ShoppingSource;
 use App\Enums\StockLevel;
 use App\Enums\SupplyLevel;
+use App\Kitchen\Planning\PlanShoppingList;
 use App\Models\Household;
 use App\Push\ExpoPush;
 use App\Queries\RunOutQuery;
@@ -45,17 +46,21 @@ class PrepareShoppingList extends HouseholdJob
             }
         });
 
+        // What the next week's planned meals need (docs/kitchen.md#meal-plan)
+        $planned = app(PlanShoppingList::class)->sync($household, null, $shoppingDay, $shoppingDay->addDays(6))['added'];
+        $names = [...array_column($toBuy, 'name'), ...$planned];
+
         $push = null;
-        if ($toBuy) {
+        if ($names) {
             $push = app(ExpoPush::class)->toUsers(
                 $household->users,
                 "🛒 Tomorrow is {$usual['name']} shopping",
-                self::listText(array_column($toBuy, 'name')),
+                self::listText($names),
                 ['url' => '/shopping'],
             );
         }
 
-        return ['shopping_day' => $usual['next_on'], 'added' => $toBuy, 'push' => $push];
+        return ['shopping_day' => $usual['next_on'], 'added' => $toBuy, 'meal_plan' => $planned, 'push' => $push];
     }
 
     /**
