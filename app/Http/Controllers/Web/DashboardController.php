@@ -6,6 +6,7 @@ use App\Queries\BudgetForecastQuery;
 use App\Queries\OverdueChoresQuery;
 use App\Queries\ShoppingDayQuery;
 use App\Queries\WeeklySpendingQuery;
+use App\SmartHome\HomeSummary;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,6 +28,8 @@ class DashboardController extends WebController
                 ->latest('updated_at')->limit(12)->get(['id', 'name', 'quantity', 'updated_at'])
                 ->map(fn ($i) => ['id' => $i->id, 'name' => $i->name, 'quantity' => $i->quantity])->all(),
             'toBuy' => $household->shoppingItems()->where('checked', false)->count(),
+            // null until the household connects Home Assistant (docs/smart-home.md)
+            'smartHome' => HomeSummary::for($household),
         ]);
     }
 }

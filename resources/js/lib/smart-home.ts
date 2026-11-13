@@ -28,3 +28,25 @@ export function groupByRoom(devices: Device[]): [string, Device[]][] {
         a === 'No room' ? 1 : b === 'No room' ? -1 : a.localeCompare(b),
     );
 }
+
+/** "Front door", "Front door and Bedroom window", "Front door, Bedroom window and 2 more" */
+export function listNames(names: string[], max = 2): string {
+    if (names.length <= 1) {
+        return names[0] ?? '';
+    }
+    if (names.length <= max) {
+        return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+    }
+
+    return `${names.slice(0, max).join(', ')} and ${names.length - max} more`;
+}
+
+/** 21.5 → "21.5", 21 → "21" */
+export function reading(value: number | null, unit: string | null): string {
+    if (value === null) {
+        return '–';
+    }
+    const v = Number.isInteger(value) ? String(value) : value.toFixed(1);
+
+    return unit ? `${v} ${unit}` : v;
+}

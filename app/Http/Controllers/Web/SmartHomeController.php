@@ -10,6 +10,7 @@ use App\SmartHome\Connections;
 use App\SmartHome\DevicePresenter;
 use App\SmartHome\Discovery;
 use App\SmartHome\HomeAssistantError;
+use App\SmartHome\HomeSummary;
 use App\SmartHome\Import;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,6 +33,7 @@ class SmartHomeController extends WebController
         return Inertia::render('smart-home', [
             'connection' => $connection ? $this->connection($connection) : null,
             'webhook' => $request->session()->get('smart_home_webhook'),
+            'summary' => HomeSummary::for($household),
             'devices' => $household->smartDevices()->active()->with('room')->orderBy('name')->get()
                 ->map(fn (SmartDevice $d) => DevicePresenter::toArray($d))->values()->all(),
             'candidates' => $policy->manage($user, $household)

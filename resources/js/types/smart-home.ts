@@ -63,3 +63,17 @@ export type Device = {
 };
 
 export type Room = { id: string; name: string };
+
+/** App\SmartHome\HomeSummary */
+export type HomeSummary = {
+    connected: boolean;
+    status: ConnectionStatus | null;
+    lights_on: number;
+    lights: number;
+    open: string[];
+    motion: string[];
+    unlocked: string[];
+    temperature: { min: number; max: number } | null;
+    humidity: { max: number; room: string | null } | null;
+    unavailable: string[];
+};

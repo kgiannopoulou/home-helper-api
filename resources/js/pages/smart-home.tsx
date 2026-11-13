@@ -1,16 +1,24 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePoll } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import Heading from '@/components/heading';
 import { ConnectionCard } from '@/components/smart-home/connection-card';
+import { DeviceTile } from '@/components/smart-home/device-tile';
 import { ImportCard } from '@/components/smart-home/import-card';
-import { Badge } from '@/components/ui/badge';
+import { SummaryTiles } from '@/components/smart-home/summary-tiles';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { groupByRoom, KIND_LABEL } from '@/lib/smart-home';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { groupByRoom } from '@/lib/smart-home';
 import { smartHome } from '@/routes';
 import { destroy as removeDevice } from '@/routes/smart-home/devices';
 import type {
     Device,
+    HomeSummary,
     Room,
     SmartHomeConnection,
     WebhookSecret,
@@ -19,19 +27,77 @@ import type {
 type Props = {
     connection: SmartHomeConnection | null;
     webhook: WebhookSecret | null;
+    summary: HomeSummary | null;
     devices: Device[];
     candidates: Device[];
     rooms: Room[];
     can: { manage: boolean; control: boolean };
 };
 
+/**
+ * States reach Home Helper within a second (the webhook) or a minute (the
+ * sync); the page stays a few seconds behind
+ */
+const REFRESH_MS = 5_000;
+
+function RoomCard({
+    room,
+    devices,
+    canManage,
+}: {
+    room: string;
+    devices: Device[];
+    canManage: boolean;
+}) {
+    return (
+        <Card className="gap-3" role="region" aria-label={room}>
+            <CardHeader>
+                <CardTitle className="text-base">{room}</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 sm:grid-cols-2">
+                {devices.map((d) => (
+                    <DeviceTile key={d.id} device={d}>
+                        {canManage && (
+                            <div className="flex justify-end">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-1 text-xs text-muted-foreground"
+                                    aria-label={`Stop using ${d.name}`}
+                                    onClick={() => {
+                                        if (
+                                            window.confirm(
+                                                `Stop using ${d.name} in Home Helper? It stays in Home Assistant.`,
+                                            )
+                                        ) {
+                                            router.delete(
+                                                removeDevice.url(d.id),
+                                                { preserveScroll: true },
+                                            );
+                                        }
+                                    }}
+                                >
+                                    <X /> Remove
+                                </Button>
+                            </div>
+                        )}
+                    </DeviceTile>
+                ))}
+            </CardContent>
+        </Card>
+    );
+}
+
 export default function SmartHome({
     connection,
     webhook,
+    summary,
     devices,
     candidates,
     can,
 }: Props) {
+    usePoll(REFRESH_MS);
+
     return (
         <>
             <Head title="Smart home" />
@@ -40,68 +106,40 @@ export default function SmartHome({
                     title="Smart home"
                     description="Lights, plugs and sensors, through the household's Home Assistant."
                 />
+
+                {summary && devices.length > 0 && (
+                    <SummaryTiles summary={summary} />
+                )}
+
+                {connection && devices.length === 0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>No devices yet</CardTitle>
+                            <CardDescription>
+                                {can.manage
+                                    ? 'Choose devices from the list Home Assistant gave us, below.'
+                                    : 'The household owner chooses which devices Home Helper uses.'}
+                            </CardDescription>
+                        </CardHeader>
+                    </Card>
+                )}
+
+                <div className="grid gap-4 lg:grid-cols-2">
+                    {groupByRoom(devices).map(([room, list]) => (
+                        <RoomCard
+                            key={room}
+                            room={room}
+                            devices={list}
+                            canManage={can.manage}
+                        />
+                    ))}
+                </div>
+
                 <ConnectionCard
                     connection={connection}
                     webhook={webhook}
                     canManage={can.manage}
                 />
-
-                {connection && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Devices</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {devices.length === 0 && (
-                                <p className="text-sm text-muted-foreground">
-                                    No devices imported yet.
-                                </p>
-                            )}
-                            {groupByRoom(devices).map(([room, list]) => (
-                                <section key={room} className="space-y-1">
-                                    <h3 className="text-sm font-medium">
-                                        {room}
-                                    </h3>
-                                    <ul className="space-y-1 text-sm">
-                                        {list.map((d) => (
-                                            <li
-                                                key={d.id}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <span>{d.name}</span>
-                                                <Badge variant="outline">
-                                                    {KIND_LABEL[d.kind]}
-                                                </Badge>
-                                                <span className="text-muted-foreground">
-                                                    {d.state_label}
-                                                </span>
-                                                {can.manage && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        aria-label={`Stop using ${d.name}`}
-                                                        onClick={() =>
-                                                            router.delete(
-                                                                removeDevice.url(
-                                                                    d.id,
-                                                                ),
-                                                                {
-                                                                    preserveScroll: true,
-                                                                },
-                                                            )
-                                                        }
-                                                    >
-                                                        <X />
-                                                    </Button>
-                                                )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </section>
-                            ))}
-                        </CardContent>
-                    </Card>
-                )}
 
                 {connection && can.manage && (
                     <ImportCard candidates={candidates} />
