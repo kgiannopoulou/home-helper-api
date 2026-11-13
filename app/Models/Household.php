@@ -230,6 +230,12 @@ class Household extends Model
         return $this->hasOne(SmartHomeConnection::class);
     }
 
+    /** @return HasMany<AutomationRule, $this> */
+    public function automationRules(): HasMany
+    {
+        return $this->hasMany(AutomationRule::class);
+    }
+
     /** @return HasMany<SmartDevice, $this> */
     public function smartDevices(): HasMany
     {

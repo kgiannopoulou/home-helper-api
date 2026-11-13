@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Models\AutomationRule;
+use App\Models\AutomationRun;
 use App\Models\Household;
 use App\Models\SmartDevice;
 use App\Models\SmartHomeConnection;
 use App\Models\SmartHomeEvent;
 use App\Policies\SmartHomePolicy;
+use App\SmartHome\Automation\Describe;
 use App\SmartHome\Comfort;
 use App\SmartHome\Connections;
 use App\SmartHome\Control;
@@ -62,6 +65,7 @@ class SmartHomeController extends WebController
                 ? $import->candidates($household)->load('room')->map(fn (SmartDevice $d) => DevicePresenter::toArray($d))->values()->all()
                 : [],
             'rooms' => $household->rooms()->where('personal', false)->orderBy('name')->get(['id', 'name'])->toArray(),
+            'automations' => $this->automations($household),
             'notifications' => [
                 'settings' => Notifications::settings($connection),
                 'labels' => array_map(fn (array $t) => $t[1], Notifications::TYPES),
@@ -72,6 +76,38 @@ class SmartHomeController extends WebController
                 'control' => $policy->control($user, $household),
             ],
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function automations(Household $household): array
+    {
+        $rules = $household->automationRules()->orderBy('name')->get();
+        $devices = $household->smartDevices()->get()->keyBy('id')->all();
+        $lastRuns = AutomationRun::query()->where('household_id', $household->id)->latest('ran_at')->limit(30)->get();
+
+        return [
+            'rules' => $rules->map(fn (AutomationRule $r) => [
+                'id' => $r->id,
+                'name' => $r->name,
+                'enabled' => $r->enabled,
+                'template' => $r->template,
+                'description' => Describe::rule($r, $devices),
+                'trigger' => $r->trigger,
+                'conditions' => $r->conditions,
+                'actions' => $r->actions,
+                'cooldown_minutes' => $r->cooldown_minutes,
+                'last_fired_at' => $r->last_fired_at?->toIso8601String(),
+            ])->values()->all(),
+            'runs' => $lastRuns->map(fn (AutomationRun $run) => [
+                'id' => $run->id,
+                'rule' => $rules->firstWhere('id', $run->rule_id)?->name,
+                'trigger' => $run->trigger,
+                'status' => $run->status,
+                'reason' => $run->reason,
+                'results' => $run->results ?? [],
+                'at' => $run->ran_at->toIso8601String(),
+            ])->all(),
+        ];
     }
 
     /** @return array<string, mixed> */

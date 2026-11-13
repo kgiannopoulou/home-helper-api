@@ -128,3 +128,31 @@ export type NotifySettings = {
     labels: Record<string, string>;
     night: { from: string; to: string };
 };
+
+export type AutomationRuleRow = {
+    id: string;
+    name: string;
+    enabled: boolean;
+    template: string | null;
+    description: string;
+    trigger: Record<string, unknown>;
+    conditions: Record<string, unknown>[];
+    actions: Record<string, unknown>[];
+    cooldown_minutes: number;
+    last_fired_at: string | null;
+};
+
+export type AutomationRunRow = {
+    id: string;
+    rule: string | null;
+    trigger: string;
+    status: 'done' | 'partial' | 'failed' | 'skipped' | 'awaiting_approval';
+    reason: string | null;
+    results: { type: string; status: string; detail: string }[];
+    at: string;
+};
+
+export type Automations = {
+    rules: AutomationRuleRow[];
+    runs: AutomationRunRow[];
+};

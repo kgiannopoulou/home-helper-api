@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\AssistantController;
+use App\Http\Controllers\Web\AutomationsController;
 use App\Http\Controllers\Web\BriefingController;
 use App\Http\Controllers\Web\ChoresController;
 use App\Http\Controllers\Web\ComputersController;
@@ -82,6 +83,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::patch('devices/{device}', 'updateDevice')->name('.devices.update');
             Route::delete('devices/{device}', 'removeDevice')->name('.devices.destroy');
             Route::post('devices/{device}/actions', 'control')->middleware('throttle:smart-home-control')->name('.devices.actions.store');
+        });
+
+        // Automations (docs/smart-home.md#automations)
+        Route::controller(AutomationsController::class)->prefix('smart-home/automations')->name('smart-home.automations.')->group(function () {
+            Route::post('/', 'store')->name('store');
+            Route::patch('{rule}', 'update')->name('update');
+            Route::delete('{rule}', 'destroy')->name('destroy');
+            Route::post('{rule}/run', 'run')->middleware('throttle:smart-home-control')->name('run');
         });
 
         // The assistant (docs/assistant.md)

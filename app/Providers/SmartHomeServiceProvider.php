@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\SmartHome\Alerts;
+use App\SmartHome\Automation\RuleEngine;
 use App\SmartHome\Events\DeviceStateChanged;
 use App\SmartHome\Events\HomeEventRecorded;
 use App\SmartHome\Notifications;
@@ -24,12 +25,16 @@ class SmartHomeServiceProvider extends ServiceProvider
         [Openings::class, 'handle'],
         // Devices that stop answering, humidity and cold (day 80)
         [Alerts::class, 'handle'],
+        // Automations last, so they see the readings and events above (day 81)
+        [RuleEngine::class, 'onStateChanged'],
     ];
 
     /** What listens to the event log */
     public const EVENT_LISTENERS = [
         // Push to the phones (day 80)
         [Notifications::class, 'handle'],
+        // Automations that start from an event, e.g. door.left_open (day 81)
+        [RuleEngine::class, 'onEvent'],
     ];
 
     public function boot(): void

@@ -20,6 +20,8 @@ use Inertia\Testing\AssertableInertia as Page;
 use Tests\Support\FakeHomeAssistant;
 
 beforeEach(function () {
+    // Daytime at home, unless a test says otherwise. First, so every state is from "today"
+    $this->travelTo(CarbonImmutable::parse('2026-11-13 14:00', 'Europe/Athens'));
     $this->ha = FakeHomeAssistant::install();
     Http::fake(['exp.host/*' => Http::response(['data' => [['status' => 'ok', 'id' => 't1']]])]);
     $this->home = Household::factory()->create();
@@ -32,8 +34,6 @@ beforeEach(function () {
     app(Discovery::class)->sync($this->connection);
     SmartDevice::query()->whereNot('kind', 'sensor')->update(['imported' => true]);
     $this->seq = 0;
-    // Daytime at home, unless a test says otherwise
-    $this->travelTo(CarbonImmutable::parse('2026-11-13 14:00', 'Europe/Athens'));
 });
 
 function pushed(object $test, string $entityId, string $state): void

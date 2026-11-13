@@ -101,6 +101,7 @@ function show(props: Partial<Parameters<typeof SmartHome>[0]> = {}) {
             comfort={[]}
             openings={[]}
             events={[]}
+            automations={{ rules: [], runs: [] }}
             notifications={{
                 settings: { 'door.opened': 'night' },
                 labels: { 'door.opened': 'A door opens' },
@@ -196,6 +197,51 @@ describe('the smart home page', () => {
         expect(inertiaMock.router.patch).toHaveBeenCalledWith(
             expect.stringContaining('/smart-home/notifications'),
             { notify: { 'door.opened': 'always' } },
+            expect.anything(),
+        );
+    });
+
+    test('lists automations in words, and switches one off', () => {
+        show({
+            automations: {
+                rules: [
+                    {
+                        id: 'r1',
+                        name: 'Hall light',
+                        enabled: true,
+                        template: null,
+                        description:
+                            'When Front door opens, if after dark: turn on Hallway light.',
+                        trigger: {},
+                        conditions: [],
+                        actions: [],
+                        cooldown_minutes: 1,
+                        last_fired_at: null,
+                    },
+                ],
+                runs: [
+                    {
+                        id: 'u1',
+                        rule: 'Hall light',
+                        trigger: 'Front door: off → on',
+                        status: 'skipped',
+                        reason: 'the sun is not down',
+                        results: [],
+                        at: new Date().toISOString(),
+                    },
+                ],
+            },
+        });
+        const rule = screen.getByTestId('rule-Hall light');
+        expect(
+            within(rule).getByText(/When Front door opens, if after dark/),
+        ).toBeInTheDocument();
+        expect(screen.getByText(/the sun is not down/)).toBeInTheDocument();
+
+        fireEvent.click(screen.getByLabelText('Switch off Hall light'));
+        expect(inertiaMock.router.patch).toHaveBeenCalledWith(
+            expect.stringContaining('/smart-home/automations/r1'),
+            { enabled: false },
             expect.anything(),
         );
     });

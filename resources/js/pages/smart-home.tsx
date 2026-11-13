@@ -2,6 +2,7 @@ import { Head, router, usePage, usePoll } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import Heading from '@/components/heading';
 import AlertError from '@/components/alert-error';
+import { AutomationsCard } from '@/components/smart-home/automations-card';
 import { ClimateChart, ComfortCard } from '@/components/smart-home/climate';
 import { ConnectionCard } from '@/components/smart-home/connection-card';
 import { DeviceControls } from '@/components/smart-home/device-controls';
@@ -22,6 +23,7 @@ import { groupByRoom } from '@/lib/smart-home';
 import { smartHome } from '@/routes';
 import { destroy as removeDevice } from '@/routes/smart-home/devices';
 import type {
+    Automations,
     Climate,
     Device,
     HomeEvent,
@@ -43,6 +45,7 @@ type Props = {
     openings: Opening[];
     events: HomeEvent[];
     notifications: NotifySettings;
+    automations: Automations;
     climate: Climate;
     candidates: Device[];
     rooms: Room[];
@@ -116,6 +119,7 @@ export default function SmartHome({
     openings,
     events,
     notifications,
+    automations,
     candidates,
     can,
 }: Props) {
@@ -174,6 +178,13 @@ export default function SmartHome({
                     <ClimateChart climate={climate} kind="temperature" />
                     <ClimateChart climate={climate} kind="humidity" />
                 </div>
+
+                {connection && devices.length > 0 && (
+                    <AutomationsCard
+                        automations={automations}
+                        canManage={can.manage}
+                    />
+                )}
 
                 {connection && (
                     <NotificationsCard

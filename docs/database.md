@@ -21,6 +21,8 @@ erDiagram
     ai_conversations ||--o{ ai_messages : "conversation_id"
     ai_conversations ||--o{ ai_pending_actions : "conversation_id"
     users ||--o{ ai_pending_actions : "user_id"
+    users |o--o{ automation_rules : "created_by"
+    automation_rules ||--o{ automation_runs : "rule_id"
     users ||--o{ briefings : "user_id"
     chores ||--o{ chore_completions : "chore_id"
     chores ||--o{ chore_completions : "chore_id"
@@ -832,6 +834,33 @@ erDiagram
         timestamp finished_at "nullable"
         int duration_ms "nullable"
     }
+    automation_rules {
+        char id PK
+        char household_id FK
+        bigint created_by FK "nullable"
+        varchar name
+        tinyint enabled
+        varchar template "nullable"
+        json trigger
+        json conditions
+        json actions
+        smallint cooldown_minutes
+        timestamp last_fired_at "nullable"
+    }
+    automation_runs {
+        char id PK
+        char rule_id FK
+        char household_id FK
+        varchar trigger
+        enum status
+        varchar reason "nullable"
+        json results "nullable"
+        timestamp ran_at
+    }
+    users |o--o{ automation_rules : "created_by"
+    households ||--o{ automation_rules : "household_id"
+    households ||--o{ automation_runs : "household_id"
+    automation_rules ||--o{ automation_runs : "rule_id"
     smart_devices ||--o{ smart_device_readings : "device_id"
     households ||--o{ smart_device_readings : "household_id"
     smart_home_connections ||--o{ smart_devices : "connection_id"
