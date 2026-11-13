@@ -13,7 +13,8 @@ use Carbon\CarbonImmutable;
  * the reply to a button press, so a change is announced exactly once:
  *
  *   - an older state never overwrites a newer one (the webhook and a sync
- *     can arrive in either order): Home Assistant's last_changed decides
+ *     can arrive in either order, and pushes run in parallel): Home
+ *     Assistant's last_changed decides, also when the state is the same
  *   - only a different state fires DeviceStateChanged; attribute changes
  *     (brightness, a battery level) are just saved
  */
@@ -38,7 +39,11 @@ class StateChanges
             'state' => $state,
             'ha_attributes' => self::keep($attributes),
             'available' => ! in_array($state, SmartDevice::UNAVAILABLE, true) && $state !== null,
-            'last_changed_at' => $changed || ! $device->last_changed_at ? $changedAt : $device->last_changed_at,
+            // The same state with a newer last_changed still moves it forward: Home Assistant only
+            // moves last_changed on a change, so something happened in between (on, then off
+            // again) and the push for it, arriving late, must not win (day 84: forwarding runs
+            // in parallel, docs/smart-home/testing.md)
+            'last_changed_at' => $changed || $lastChanged || ! $device->last_changed_at ? $changedAt : $device->last_changed_at,
             'seen_at' => CarbonImmutable::now(),
         ]);
         if (isset($attributes['friendly_name']) && is_string($attributes['friendly_name'])) {

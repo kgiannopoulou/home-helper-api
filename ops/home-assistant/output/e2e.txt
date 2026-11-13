@@ -1,0 +1,118 @@
+
+### Home Assistant up and onboarded
+   ok a long-lived token (183 characters)
+
+### setup
+
+== A household of two: the owner and a member, with the test home's rooms
+   ok E2E smart home (01m7aea64aprrsnhrf2typmeh7)
+
+== Connect: the token is checked against Home Assistant itself
+   ok Home Helper test home, Home Assistant 2026.11.1
+
+== Discover and import every device
+   ok found 28 devices
+   ok imported 17: 2 door, 3 humidity, 3 light, 1 lock, 1 motion, 3 switch, 3 temperature, 1 window
+   ok light.living_room_lamp is in the Living room (from the Home Assistant area)
+   ok sensor.bathroom_humidity is in the Bathroom (from the Home Assistant area)
+   ok lock.front_door_lock is in the Hallway (from the Home Assistant area)
+   7 checks passed (setup)
+
+### Home Assistant forwards state changes to http://hh-web:8077
+Reloaded rest_command: HTTP 200
+Reloaded automation: HTTP 200
+
+### devices
+   ok the house is back to its start
+
+== Light: on from the dashboard, Home Assistant switches it, the reply updates Home Helper
+   ok action done
+   ok Home Assistant says on
+   ok Home Helper says on
+
+== Dimming in percent becomes Home Assistant's 0-255
+   ok brightness 102/255
+   ok Home Helper shows 40 %
+
+== Plug: a member switches the dehumidifier on and off
+   ok on
+   ok off
+
+== The physical world: a door opens in Home Assistant, the webhook tells Home Helper
+   ok front door open in Home Helper
+   ok arrived in 6.3 s
+   ok a "door opened" event
+   ok closed again
+
+== Sensors: the bathroom warms up, a reading is stored
+   ok 24.5 °C in Home Helper
+   ok the latest reading is 24.5
+
+== Automation: a shower (humidity 78 %) switches the dehumidifier on, 55 % off again
+   ok the dehumidifier workflow found its devices
+   ok dehumidifier on in Home Assistant
+   ok and off
+   ok two runs, both done
+
+== Sensitive: a member's unlock waits for the owner; the owner approves; locking up never waits
+   ok waiting for the owner
+   ok still locked in Home Assistant
+   ok approved: unlocked
+   ok member locks up at once
+   ok locked
+
+== Failure: the lamp is unplugged
+   ok Home Helper marks it unavailable
+   ok refused: Living room lamp isn't answering in Home Assistant. Is it plugged in?
+   ok and nothing was sent
+   ok plugged back in
+
+== Failure: a wrong or revoked token
+   ok Home Assistant refuses it: Home Assistant refused the token. Create a new long-lived access token and connect again.
+
+== Failure: the webhook with a wrong secret, and a replayed old state
+   ok wrong secret: HTTP 401
+   ok the lock stays locked in Home Helper
+   ok replayed old state accepted (HTTP 202)
+   ok but ignored: older than what Home Helper has
+   32 checks passed (devices)
+
+### offline: docker stop homeassistant
+
+== Home Assistant is off: a sync fails fast and the connection says so
+   ok unreachable: No answer from http://homeassistant:8123.
+   ok gave up after 5.2 s, not 30
+   ok connection status: unreachable (Home Assistant is not answering. Is it switched on, and can this server reach its address?)
+   ok a hub.offline event for the phones
+
+== The devices keep their last known state, and a button press records a failure, not a hang
+   ok the lamp is still there
+   ok action failed: Home Assistant is not answering. Is it switched on, and can this server reach its address?
+   ok answered in 3.9 s
+
+== An approval given while Home Assistant is off fails cleanly
+   ok the request still waits for the owner
+   ok approved, then failed: Home Assistant is not answering. Is it switched on, and can this server reach its address?
+   9 checks passed (offline)
+
+### recovered: docker start homeassistant
+
+== Home Assistant is back: the next sync heals the connection
+   ok a sync works
+   ok connected
+   ok a hub.online event
+   ok every device answering again
+   ok the lock is locked (restored by Home Assistant)
+
+== The restart's burst of unavailable → off did not pretend anything opened
+   ok no opening events since Home Assistant went down
+
+== And the dashboard works again
+   ok kitchen ceiling toggled
+   7 checks passed (recovered)
+
+### cleanup
+   ok deleted 1 test household(s)
+   1 checks passed (cleanup)
+
+End to end against Home Assistant: all stages passed

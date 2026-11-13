@@ -28,8 +28,11 @@ automation:
   - id: home_helper_forward_state_changes
     alias: "Home Helper: forward state changes"
     description: Sends each light, switch, sensor, door and lock change to Home Helper
-    # A burst (everything comes back after a restart) queues up instead of being dropped
-    mode: queued
+    # Parallel, not queued: one slow answer must not hold back a door opening
+    # behind it (found on day 84, docs/smart-home/testing.md). Order doesn't
+    # matter, Home Helper keeps the newest last_changed and ignores older ones.
+    # A burst (everything comes back after a restart) runs up to 100 at once.
+    mode: parallel
     max: 100
     triggers:
       - trigger: event

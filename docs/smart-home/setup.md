@@ -87,5 +87,5 @@ add-on). A Home Assistant restore puts every paired device back without re-pairi
 
 The test home stands in for real devices so every test runs anywhere, including CI. What it
 can't show is radio range, battery life, a Zigbee mesh losing a router, or a Tuya cloud outage.
-[smart-home-testing.md](smart-home-testing.md) lists what was tested against the test home and
+[testing.md](testing.md) lists what was tested against the test home and
 the checklist for a real house.
