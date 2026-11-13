@@ -203,6 +203,18 @@ return [
     'smart_home' => [
         // Home Assistant is on the local network: a button should fail fast
         'timeout_seconds' => (int) env('SMART_HOME_TIMEOUT_SECONDS', 5),
+        // Temperature and humidity history (App\SmartHome\Readings)
+        'readings_keep_days' => 30,
+        // A sensor that hasn't changed still gets a point this often, so the charts have no gaps
+        'reading_every_minutes' => 15,
+        // How a room feels (App\SmartHome\Comfort)
+        'comfort' => [
+            'temperature_low' => 18.0,
+            'temperature_high' => 26.0,
+            'humidity_low' => 30.0,
+            'humidity_high' => 65.0,
+            'humidity_very_high' => 70.0,
+        ],
     ],
 
 ];

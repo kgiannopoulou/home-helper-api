@@ -14,6 +14,7 @@ use App\Jobs\WeeklyDigest;
 use App\Jobs\WeeklySummary;
 use App\Models\AgentEvent;
 use App\Models\AgentMetric;
+use App\Models\SmartDeviceReading;
 use App\Ops\SystemHealth;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -81,7 +82,7 @@ Schedule::command('smart-home:sync')->everyMinute()->onOneServer()->withoutOverl
 // Housekeeping
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily()->onOneServer();
 Schedule::command('queue:prune-failed', ['--hours' => 24 * 14])->daily()->onOneServer();
-Schedule::command('model:prune', ['--model' => [AgentMetric::class, AgentEvent::class]])->dailyAt('04:30')->timezone($home)->onOneServer();
+Schedule::command('model:prune', ['--model' => [AgentMetric::class, AgentEvent::class, SmartDeviceReading::class]])->dailyAt('04:30')->timezone($home)->onOneServer();
 
 // Run one now, for every household: php artisan household:run PrepareShoppingList --date=2026-10-09
 Artisan::command('household:run {job} {--date= : "today" at home, YYYY-MM-DD}', function (string $job) {

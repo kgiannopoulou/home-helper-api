@@ -2,6 +2,7 @@ import { Head, router, usePage, usePoll } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import Heading from '@/components/heading';
 import AlertError from '@/components/alert-error';
+import { ClimateChart, ComfortCard } from '@/components/smart-home/climate';
 import { ConnectionCard } from '@/components/smart-home/connection-card';
 import { DeviceControls } from '@/components/smart-home/device-controls';
 import { DeviceTile } from '@/components/smart-home/device-tile';
@@ -19,7 +20,9 @@ import { groupByRoom } from '@/lib/smart-home';
 import { smartHome } from '@/routes';
 import { destroy as removeDevice } from '@/routes/smart-home/devices';
 import type {
+    Climate,
     Device,
+    RoomComfort,
     HomeSummary,
     Room,
     SmartHomeConnection,
@@ -31,6 +34,8 @@ type Props = {
     webhook: WebhookSecret | null;
     summary: HomeSummary | null;
     devices: Device[];
+    comfort: RoomComfort[];
+    climate: Climate;
     candidates: Device[];
     rooms: Room[];
     can: { manage: boolean; control: boolean };
@@ -98,6 +103,8 @@ export default function SmartHome({
     webhook,
     summary,
     devices,
+    comfort,
+    climate,
     candidates,
     can,
 }: Props) {
@@ -144,6 +151,12 @@ export default function SmartHome({
                             canControl={can.control}
                         />
                     ))}
+                </div>
+
+                <ComfortCard rooms={comfort} />
+                <div className="grid gap-4 lg:grid-cols-2">
+                    <ClimateChart climate={climate} kind="temperature" />
+                    <ClimateChart climate={climate} kind="humidity" />
                 </div>
 
                 <ConnectionCard

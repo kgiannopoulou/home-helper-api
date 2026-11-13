@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\SmartHomeConnection;
 use App\SmartHome\Discovery;
 use App\SmartHome\HomeAssistantError;
+use App\SmartHome\Readings;
 use Illuminate\Console\Command;
 
 /**
@@ -19,7 +20,7 @@ class SmartHomeSync extends Command
 
     protected $description = 'Discover devices and refresh their states from Home Assistant';
 
-    public function handle(Discovery $discovery): int
+    public function handle(Discovery $discovery, Readings $readings): int
     {
         $connections = SmartHomeConnection::query()
             ->when($this->option('household'), fn ($q, $id) => $q->where('household_id', $id))
@@ -29,6 +30,7 @@ class SmartHomeSync extends Command
         foreach ($connections as $connection) {
             try {
                 $r = $discovery->sync($connection);
+                $readings->topUp($connection->household_id);
                 $this->line("{$connection->household_id}: {$r['found']} devices, {$r['new']} new, {$r['removed']} removed, {$r['changed']} changed");
             } catch (HomeAssistantError $e) {
                 $failed++;

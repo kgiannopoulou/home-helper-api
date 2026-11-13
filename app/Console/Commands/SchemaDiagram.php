@@ -31,7 +31,7 @@ class SchemaDiagram extends Command
         'Memory and briefings' => ['household_facts', 'notes', 'household_summaries', 'memory_chunks', 'briefings', 'recommendation_feedback'],
         'Voice' => ['voice_settings'],
         'Computers (local agent)' => ['agents', 'agent_enrollment_codes', 'agent_metrics', 'agent_commands', 'agent_events', 'agent_releases'],
-        'Smart home (Home Assistant)' => ['smart_home_connections', 'smart_devices', 'smart_home_actions'],
+        'Smart home (Home Assistant)' => ['smart_home_connections', 'smart_devices', 'smart_device_readings', 'smart_home_actions'],
     ];
 
     /** Columns every synced table has; described once in the intro instead */

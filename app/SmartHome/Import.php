@@ -21,6 +21,8 @@ use Illuminate\Validation\ValidationException;
  */
 class Import
 {
+    public function __construct(private Readings $readings) {}
+
     /**
      * Discovered, not imported, and of a kind Home Helper can use
      *
@@ -54,6 +56,8 @@ class Import
         }
 
         $count = SmartDevice::query()->whereIn('id', $devices->modelKeys())->where('imported', false)->update(['imported' => true]);
+        // A first point for each sensor, so its chart starts now
+        $this->readings->topUp($household->id);
         Log::info('Smart devices imported', ['household_id' => $household->id, 'user_id' => $user->id, 'count' => $count]);
 
         return $count;

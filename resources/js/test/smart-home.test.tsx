@@ -98,6 +98,8 @@ function show(props: Partial<Parameters<typeof SmartHome>[0]> = {}) {
             webhook={null}
             summary={summary}
             devices={devices}
+            comfort={[]}
+            climate={{ sensors: [], history: [] }}
             candidates={[]}
             rooms={[]}
             can={{ manage: true, control: true }}
@@ -128,6 +130,25 @@ describe('the smart home page', () => {
                 screen.getByTestId('device-sensor.bathroom_humidity'),
             ).getByText('71 %'),
         ).toBeInTheDocument();
+    });
+
+    test('says how each room feels, and why', () => {
+        show({
+            comfort: [
+                {
+                    room: 'Bathroom',
+                    temperature: 23,
+                    humidity: 74,
+                    dew_point: 18.1,
+                    status: 'very_humid',
+                    advice: 'Mould risk: air it for 10 minutes or run the dehumidifier.',
+                },
+            ],
+        });
+        const room = screen.getByTestId('comfort-Bathroom');
+        expect(within(room).getByText('Very humid')).toBeInTheDocument();
+        expect(within(room).getByText(/Dew point 18.1 °C/)).toBeInTheDocument();
+        expect(within(room).getByText(/Mould risk/)).toBeInTheDocument();
     });
 
     test('offers the connect form when there is no Home Assistant yet', () => {

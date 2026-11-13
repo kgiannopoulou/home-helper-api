@@ -6,6 +6,7 @@ use App\Models\Household;
 use App\Models\SmartDevice;
 use App\Models\SmartHomeConnection;
 use App\Policies\SmartHomePolicy;
+use App\SmartHome\Comfort;
 use App\SmartHome\Connections;
 use App\SmartHome\Control;
 use App\SmartHome\DevicePresenter;
@@ -13,6 +14,7 @@ use App\SmartHome\Discovery;
 use App\SmartHome\HomeAssistantError;
 use App\SmartHome\HomeSummary;
 use App\SmartHome\Import;
+use App\SmartHome\Readings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,19 +26,25 @@ use Inertia\Response;
  */
 class SmartHomeController extends WebController
 {
-    public function show(Request $request, Import $import): Response
+    public function show(Request $request, Import $import, Readings $readings): Response
     {
         $household = $this->household($request);
         $user = $request->user();
         $policy = new SmartHomePolicy;
         $connection = $household->smartHomeConnection;
+        $devices = $household->smartDevices()->active()->with('room')->orderBy('name')->get();
+        $sensors = $devices->filter(fn (SmartDevice $d) => in_array($d->kind, Readings::KINDS, true))->values();
 
         return Inertia::render('smart-home', [
             'connection' => $connection ? $this->connection($connection) : null,
             'webhook' => $request->session()->get('smart_home_webhook'),
             'summary' => HomeSummary::for($household),
-            'devices' => $household->smartDevices()->active()->with('room')->orderBy('name')->get()
-                ->map(fn (SmartDevice $d) => DevicePresenter::toArray($d))->values()->all(),
+            'devices' => $devices->map(fn (SmartDevice $d) => DevicePresenter::toArray($d))->values()->all(),
+            'comfort' => Comfort::rooms($devices),
+            'climate' => [
+                'sensors' => $sensors->map(fn (SmartDevice $d) => ['id' => $d->id, 'name' => $d->name, 'kind' => $d->kind, 'room' => $d->room !== null ? $d->room->name : $d->area])->all(),
+                'history' => $readings->history($sensors),
+            ],
             'candidates' => $policy->manage($user, $household)
                 ? $import->candidates($household)->load('room')->map(fn (SmartDevice $d) => DevicePresenter::toArray($d))->values()->all()
                 : [],

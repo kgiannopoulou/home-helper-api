@@ -77,3 +77,24 @@ export type HomeSummary = {
     humidity: { max: number; room: string | null } | null;
     unavailable: string[];
 };
+
+/** App\SmartHome\Comfort */
+export type RoomComfort = {
+    room: string;
+    temperature: number | null;
+    humidity: number | null;
+    dew_point: number | null;
+    status: 'comfortable' | 'cold' | 'warm' | 'humid' | 'very_humid' | 'dry';
+    advice: string | null;
+};
+
+/** Temperature and humidity sensors and their last 24 hours (App\SmartHome\Readings) */
+export type Climate = {
+    sensors: {
+        id: string;
+        name: string;
+        kind: 'temperature' | 'humidity';
+        room: string | null;
+    }[];
+    history: ({ at: string } & Record<string, number | string>)[];
+};

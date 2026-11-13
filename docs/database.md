@@ -57,6 +57,7 @@ erDiagram
     users |o--o{ shopping_items : "added_by"
     users |o--o{ shopping_trips : "user_id"
     users ||--o{ sleep_entries : "user_id"
+    smart_devices ||--o{ smart_device_readings : "device_id"
     smart_home_connections ||--o{ smart_devices : "connection_id"
     rooms |o--o{ smart_devices : "room_id"
     users |o--o{ smart_home_actions : "decided_by"
@@ -794,6 +795,13 @@ erDiagram
         timestamp seen_at "nullable"
         timestamp removed_at "nullable"
     }
+    smart_device_readings {
+        bigint id PK
+        char device_id FK
+        char household_id FK
+        decimal value
+        timestamp recorded_at
+    }
     smart_home_actions {
         char id PK
         char household_id FK
@@ -811,6 +819,8 @@ erDiagram
         timestamp finished_at "nullable"
         int duration_ms "nullable"
     }
+    smart_devices ||--o{ smart_device_readings : "device_id"
+    households ||--o{ smart_device_readings : "household_id"
     smart_home_connections ||--o{ smart_devices : "connection_id"
     households ||--o{ smart_devices : "household_id"
     rooms |o--o{ smart_devices : "room_id"
