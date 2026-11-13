@@ -1,0 +1,8 @@
+# Home Assistant writes its database, registries, tokens and logs here.
+# Only the hand-written configuration is committed.
+*
+!.gitignore
+!configuration.yaml
+!packages/
+!packages/*.yaml
+!secrets.example.yaml

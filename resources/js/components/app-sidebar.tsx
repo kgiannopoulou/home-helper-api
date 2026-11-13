@@ -8,6 +8,7 @@ import {
     HeartPulse,
     House,
     LayoutGrid,
+    Lightbulb,
     Monitor,
     Sparkles,
     Sun,
@@ -35,6 +36,7 @@ import {
     health,
     memory,
     planner,
+    smartHome,
     spending,
 } from '@/routes';
 import { show as household } from '@/routes/household';
@@ -50,6 +52,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Health', href: health(), icon: HeartPulse },
     { title: 'Chores', href: chores(), icon: Sparkles },
     { title: 'Week planner', href: planner(), icon: CalendarCheck },
+    { title: 'Smart home', href: smartHome(), icon: Lightbulb },
     { title: 'Computers', href: computers(), icon: Monitor },
     { title: 'Household', href: household(), icon: House },
 ];

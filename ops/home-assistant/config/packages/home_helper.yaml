@@ -1,0 +1,59 @@
+# Home Helper: tell it about state changes as they happen (docs/smart-home.md#state-changes).
+#
+# Copy this file into your Home Assistant's config/packages/ folder (and add
+# `homeassistant: packages: !include_dir_named packages` to configuration.yaml
+# if it isn't there), then put the two lines Home Helper showed you when you
+# connected into config/secrets.yaml:
+#
+#   home_helper_events_url: "https://helper.example.com/api/smart-home/v1/states"
+#   home_helper_events_auth: "Bearer 01J...<the rest of the token>"
+#
+# Without this file Home Helper still works: it asks Home Assistant for every
+# state once a minute. With it, a door opening reaches Home Helper (and the
+# phones) in well under a second.
+
+rest_command:
+  home_helper_state:
+    url: !secret home_helper_events_url
+    method: post
+    headers:
+      Authorization: !secret home_helper_events_auth
+    content_type: application/json
+    payload: "{{ payload }}"
+    # Home Helper answers in milliseconds in production; a dev server on a Windows
+    # bind mount can take seconds. A slow answer must not back up Home Assistant.
+    timeout: 10
+
+automation:
+  - id: home_helper_forward_state_changes
+    alias: "Home Helper: forward state changes"
+    description: Sends each light, switch, sensor, door and lock change to Home Helper
+    # Parallel, not queued: one slow answer must not hold back a door opening
+    # behind it (found on day 84, docs/smart-home/testing.md). Order doesn't
+    # matter, Home Helper keeps the newest last_changed and ignores older ones.
+    # A burst (everything comes back after a restart) runs up to 100 at once.
+    mode: parallel
+    max: 100
+    triggers:
+      - trigger: event
+        event_type: state_changed
+    conditions:
+      - condition: template
+        value_template: >
+          {{ trigger.event.data.entity_id.split('.')[0] in
+             ['light', 'switch', 'sensor', 'binary_sensor', 'lock', 'cover', 'climate', 'fan']
+             and trigger.event.data.new_state is not none
+             and (trigger.event.data.old_state is none
+                  or trigger.event.data.old_state.state != trigger.event.data.new_state.state
+                  or trigger.event.data.old_state.attributes.get('brightness') != trigger.event.data.new_state.attributes.get('brightness')) }}
+    actions:
+      - action: rest_command.home_helper_state
+        data:
+          payload: >
+            {{ {
+              'entity_id': trigger.event.data.entity_id,
+              'state': trigger.event.data.new_state.state,
+              'attributes': trigger.event.data.new_state.attributes,
+              'last_changed': trigger.event.data.new_state.last_changed.isoformat(),
+              'old_state': trigger.event.data.old_state.state if trigger.event.data.old_state else none
+            } | to_json }}

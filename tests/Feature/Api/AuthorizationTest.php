@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AuthenticateAgent;
+use App\Http\Middleware\AuthenticateHomeAssistant;
 use App\Models\Household;
 use App\Models\User;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -20,6 +21,9 @@ const PUBLIC_API_ROUTES = ['api.login', 'api.health', 'api.agent.enroll'];
 
 /** The local agent's routes: a request signature instead of a token (tests/Feature/Agents) */
 const AGENT_API_PREFIX = 'api.agent.';
+
+/** Home Assistant's webhook: the connection's own secret (tests/Feature/SmartHome) */
+const HOME_ASSISTANT_API_PREFIX = 'api.home-assistant.';
 
 /**
  * @return list<array{string, string, string}> [name, method, uri]
@@ -61,6 +65,14 @@ test('every API route needs a token, except login', function () {
 
             continue;
         }
+        if (str_starts_with($name, HOME_ASSISTANT_API_PREFIX)) {
+            $this->json($method, fillUri($uri, $home))
+                ->assertUnauthorized()
+                ->assertJsonPath('error', 'invalid_webhook_token');
+            $checked++;
+
+            continue;
+        }
         $this->json($method, fillUri($uri, $home))
             ->assertUnauthorized()
             ->assertJsonPath('code', 'unauthenticated');
@@ -97,6 +109,7 @@ test('the public routes are only the ones we meant', function () {
         ->filter(fn (Route $r) => str_starts_with($r->uri(), 'api/'))
         ->reject(fn (Route $r) => in_array('auth:sanctum', $r->gatherMiddleware()))
         ->reject(fn (Route $r) => in_array(AuthenticateAgent::class, $r->gatherMiddleware()))
+        ->reject(fn (Route $r) => in_array(AuthenticateHomeAssistant::class, $r->gatherMiddleware()))
         ->map(fn (Route $r) => $r->getName())
         ->values()
         ->all();

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\AssistantController;
+use App\Http\Controllers\Web\AutomationsController;
 use App\Http\Controllers\Web\BriefingController;
 use App\Http\Controllers\Web\ChoresController;
 use App\Http\Controllers\Web\ComputersController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Web\HealthController;
 use App\Http\Controllers\Web\HouseholdController;
 use App\Http\Controllers\Web\MemoryController;
 use App\Http\Controllers\Web\PlannerController;
+use App\Http\Controllers\Web\SmartHomeController;
 use App\Http\Controllers\Web\SpendingController;
 use App\Http\Controllers\Web\SystemHealthController;
 use App\Http\Controllers\Web\VoiceController;
@@ -66,6 +68,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('{agent}/update', 'update')->name('.update');
             Route::patch('{agent}', 'rename')->name('.rename');
             Route::delete('{agent}', 'revoke')->name('.revoke');
+        });
+
+        // Lights, plugs and sensors through the household's Home Assistant (docs/smart-home.md)
+        Route::controller(SmartHomeController::class)->prefix('smart-home')->name('smart-home')->group(function () {
+            Route::get('/', 'show');
+            Route::post('connection', 'connect')->middleware('throttle:10,1')->name('.connection.store');
+            Route::post('connection/check', 'check')->middleware('throttle:20,1')->name('.connection.check');
+            Route::post('connection/secret', 'rotate')->middleware('throttle:10,1')->name('.connection.secret');
+            Route::delete('connection', 'disconnect')->name('.connection.destroy');
+            Route::post('sync', 'sync')->middleware('throttle:10,1')->name('.sync');
+            Route::patch('notifications', 'notifications')->name('.notifications.update');
+            Route::post('devices/import', 'import')->name('.devices.import');
+            Route::patch('devices/{device}', 'updateDevice')->name('.devices.update');
+            Route::delete('devices/{device}', 'removeDevice')->name('.devices.destroy');
+            Route::post('actions/{action}/approve', 'approve')->middleware('throttle:smart-home-control')->name('.actions.approve');
+            Route::post('actions/{action}/decline', 'decline')->name('.actions.decline');
+            Route::post('devices/{device}/actions', 'control')->middleware('throttle:smart-home-control')->name('.devices.actions.store');
+        });
+
+        // Automations (docs/smart-home.md#automations)
+        Route::controller(AutomationsController::class)->prefix('smart-home/automations')->name('smart-home.automations.')->group(function () {
+            Route::post('/', 'store')->name('store');
+            Route::post('templates/{key}', 'template')->name('templates.store');
+            Route::patch('{rule}', 'update')->name('update');
+            Route::delete('{rule}', 'destroy')->name('destroy');
+            Route::post('{rule}/run', 'run')->middleware('throttle:smart-home-control')->name('run');
         });
 
         // The assistant (docs/assistant.md)

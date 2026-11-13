@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * A home whose members share money, kitchen, shopping, chores and planner data.
@@ -221,6 +222,24 @@ class Household extends Model
     public function facts(): HasMany
     {
         return $this->hasMany(HouseholdFact::class);
+    }
+
+    /** @return HasOne<SmartHomeConnection, $this> */
+    public function smartHomeConnection(): HasOne
+    {
+        return $this->hasOne(SmartHomeConnection::class);
+    }
+
+    /** @return HasMany<AutomationRule, $this> */
+    public function automationRules(): HasMany
+    {
+        return $this->hasMany(AutomationRule::class);
+    }
+
+    /** @return HasMany<SmartDevice, $this> */
+    public function smartDevices(): HasMany
+    {
+        return $this->hasMany(SmartDevice::class);
     }
 
     /** @return HasMany<Agent, $this> */

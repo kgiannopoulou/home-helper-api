@@ -30,6 +30,8 @@ use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\ShoppingItemController;
 use App\Http\Controllers\Api\ShoppingTripController;
 use App\Http\Controllers\Api\SleepEntryController;
+use App\Http\Controllers\Api\SmartHome\StatesWebhookController;
+use App\Http\Controllers\Api\SmartHomeController;
 use App\Http\Controllers\Api\SupplyController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\TodoController;
@@ -38,6 +40,7 @@ use App\Http\Controllers\Api\WaterEntryController;
 use App\Http\Controllers\Api\WeightController;
 use App\Http\Controllers\Api\WorkoutController;
 use App\Http\Middleware\AuthenticateAgent;
+use App\Http\Middleware\AuthenticateHomeAssistant;
 use Illuminate\Support\Facades\Route;
 
 Route::name('api.')->group(function () {
@@ -48,6 +51,12 @@ Route::name('api.')->group(function () {
 
     // The local agent on the household's computers (agent/docs/protocol.md): signed
     // requests instead of a Sanctum token, every response signed back
+    // State changes pushed by the household's Home Assistant (docs/smart-home.md#state-changes):
+    // the connection's own webhook secret instead of a Sanctum token
+    Route::prefix('smart-home/v1')->name('home-assistant.')->middleware([AuthenticateHomeAssistant::class, 'throttle:smart-home-webhook'])->group(function () {
+        Route::post('states', StatesWebhookController::class)->name('states');
+    });
+
     Route::prefix('agent/v1')->name('agent.')->group(function () {
         Route::post('enroll', AgentApi\EnrollController::class)->middleware('throttle:agent-enroll')->name('enroll');
 
@@ -107,6 +116,12 @@ Route::name('api.')->group(function () {
                 'plants' => PlantController::class,
                 'plant-care-logs' => PlantCareLogController::class,
             ]);
+
+            // The smart home (docs/smart-home.md#api): imported devices and their controls
+            Route::get('smart-home', [SmartHomeController::class, 'index'])->name('smart-home.index');
+            Route::post('smart-home/approvals/{action}/approve', [SmartHomeController::class, 'decide'])->middleware('throttle:smart-home-control')->name('smart-home.approvals.approve');
+            Route::post('smart-home/approvals/{action}/decline', [SmartHomeController::class, 'decide'])->name('smart-home.approvals.decline');
+            Route::post('smart-home/devices/{device}/actions', [SmartHomeController::class, 'action'])->middleware('throttle:smart-home-control')->name('smart-home.actions.store');
 
             // The assistant (docs/assistant.md): your own conversations in this household
             Route::prefix('assistant')->name('assistant.')->controller(AssistantController::class)->group(function () {

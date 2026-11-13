@@ -126,6 +126,12 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         // A signed agent: a heartbeat every 30 s, plus events, results and inventory
+        // A busy house sends a few state changes a second at most; this is per Home Assistant
+        RateLimiter::for('smart-home-webhook', fn (Request $request) => Limit::perMinute(600)->by('ha:'.substr((string) $request->bearerToken(), 0, 26)));
+
+        // Each one is a call to the household's Home Assistant
+        RateLimiter::for('smart-home-control', fn (Request $request) => Limit::perMinute(60)->by('smart-home:'.$byUser($request)));
+
         RateLimiter::for('agent', fn (Request $request) => Limit::perMinute(60)->by('agent:'.$request->header('X-HH-Agent', $request->ip())));
     }
 

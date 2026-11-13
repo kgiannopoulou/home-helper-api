@@ -193,4 +193,37 @@ return [
         'release_secret_key' => env('AGENT_RELEASE_SECRET_KEY'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Smart home (Phase 6)
+    |--------------------------------------------------------------------------
+    |
+    | Home Assistant as the hub for lights, plugs and sensors (docs/smart-home.md).
+    */
+    'smart_home' => [
+        // Home Assistant is on the local network: a button should fail fast
+        'timeout_seconds' => (int) env('SMART_HOME_TIMEOUT_SECONDS', 5),
+        // Temperature and humidity history (App\SmartHome\Readings)
+        'readings_keep_days' => 30,
+        // A sensor that hasn't changed still gets a point this often, so the charts have no gaps
+        'reading_every_minutes' => 15,
+        // The house's event log (App\SmartHome\HomeEvents)
+        'events_keep_days' => 60,
+        // A warning when a door or window has been open this long (App\SmartHome\Openings)
+        'left_open_minutes' => ['door' => 10, 'window' => 30],
+        // Pushes (App\SmartHome\Notifications): "night" events only in these hours, home time
+        'night' => ['from' => '23:00', 'to' => '06:00'],
+        'notify_every_minutes' => 15,
+        // A sensitive action waits this long for the owner (App\SmartHome\Control::approve)
+        'approval_minutes' => 10,
+        // How a room feels (App\SmartHome\Comfort)
+        'comfort' => [
+            'temperature_low' => 18.0,
+            'temperature_high' => 26.0,
+            'humidity_low' => 30.0,
+            'humidity_high' => 65.0,
+            'humidity_very_high' => 70.0,
+        ],
+    ],
+
 ];

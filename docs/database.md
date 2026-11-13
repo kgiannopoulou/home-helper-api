@@ -21,6 +21,8 @@ erDiagram
     ai_conversations ||--o{ ai_messages : "conversation_id"
     ai_conversations ||--o{ ai_pending_actions : "conversation_id"
     users ||--o{ ai_pending_actions : "user_id"
+    users |o--o{ automation_rules : "created_by"
+    automation_rules ||--o{ automation_runs : "rule_id"
     users ||--o{ briefings : "user_id"
     chores ||--o{ chore_completions : "chore_id"
     chores ||--o{ chore_completions : "chore_id"
@@ -57,6 +59,14 @@ erDiagram
     users |o--o{ shopping_items : "added_by"
     users |o--o{ shopping_trips : "user_id"
     users ||--o{ sleep_entries : "user_id"
+    smart_devices ||--o{ smart_device_readings : "device_id"
+    smart_home_connections ||--o{ smart_devices : "connection_id"
+    rooms |o--o{ smart_devices : "room_id"
+    users |o--o{ smart_home_actions : "decided_by"
+    smart_devices ||--o{ smart_home_actions : "device_id"
+    users |o--o{ smart_home_actions : "requested_by"
+    users |o--o{ smart_home_connections : "connected_by"
+    smart_devices |o--o{ smart_home_events : "device_id"
     users ||--o{ step_counts : "user_id"
     users |o--o{ todos : "user_id"
     users ||--o{ voice_settings : "user_id"
@@ -292,8 +302,8 @@ erDiagram
     }
     chores ||--o{ chore_completions : "chore_id"
     chores ||--o{ chore_completions : "chore_id"
-    chores ||--o{ chore_completions : "household_id"
     households ||--o{ chore_completions : "household_id"
+    chores ||--o{ chore_completions : "household_id"
     users |o--o{ chore_completions : "user_id"
     users |o--o{ chores : "assignee_id"
     households ||--o{ chores : "household_id"
@@ -357,8 +367,8 @@ erDiagram
         timestamp pushed_at "nullable"
         timestamp resolved_at "nullable"
     }
-    plants ||--o{ plant_alerts : "household_id"
     households ||--o{ plant_alerts : "household_id"
+    plants ||--o{ plant_alerts : "household_id"
     plants ||--o{ plant_alerts : "plant_id"
     plants ||--o{ plant_alerts : "plant_id"
     households ||--o{ plant_care_logs : "household_id"
@@ -745,4 +755,124 @@ erDiagram
     users |o--o{ agents : "enrolled_by"
     households ||--o{ agents : "household_id"
     users |o--o{ agents : "update_requested_by"
+```
+
+## Smart home (Home Assistant)
+
+```mermaid
+erDiagram
+    smart_home_connections {
+        char id PK
+        char household_id FK, UK
+        bigint connected_by FK "nullable"
+        varchar base_url
+        text token
+        char webhook_secret_hash
+        enum status
+        varchar status_message "nullable"
+        varchar location_name "nullable"
+        varchar ha_version "nullable"
+        varchar time_zone "nullable"
+        json notify "nullable"
+        timestamp last_ok_at "nullable"
+        timestamp last_error_at "nullable"
+        timestamp last_event_at "nullable"
+        timestamp last_synced_at "nullable"
+    }
+    smart_devices {
+        char id PK
+        char household_id FK
+        char connection_id FK
+        char room_id FK "nullable"
+        varchar entity_id
+        varchar domain
+        varchar kind
+        varchar name
+        varchar area "nullable"
+        varchar device_class "nullable"
+        varchar unit "nullable"
+        varchar state "nullable"
+        json ha_attributes "nullable"
+        tinyint available
+        tinyint imported
+        tinyint sensitive
+        timestamp last_changed_at "nullable"
+        timestamp seen_at "nullable"
+        timestamp removed_at "nullable"
+    }
+    smart_device_readings {
+        bigint id PK
+        char device_id FK
+        char household_id FK
+        decimal value
+        timestamp recorded_at
+    }
+    smart_home_events {
+        char id PK
+        char household_id FK
+        char device_id FK "nullable"
+        varchar type
+        enum severity
+        varchar message
+        json data "nullable"
+        timestamp occurred_at
+        timestamp notified_at "nullable"
+    }
+    smart_home_actions {
+        char id PK
+        char household_id FK
+        char device_id FK
+        bigint requested_by FK "nullable"
+        enum source
+        char rule_id "nullable"
+        varchar action
+        json params "nullable"
+        enum status
+        varchar error "nullable"
+        bigint decided_by FK "nullable"
+        timestamp decided_at "nullable"
+        timestamp expires_at "nullable"
+        timestamp finished_at "nullable"
+        int duration_ms "nullable"
+    }
+    automation_rules {
+        char id PK
+        char household_id FK
+        bigint created_by FK "nullable"
+        varchar name
+        tinyint enabled
+        varchar template "nullable"
+        json trigger
+        json conditions
+        json actions
+        smallint cooldown_minutes
+        timestamp last_fired_at "nullable"
+    }
+    automation_runs {
+        char id PK
+        char rule_id FK
+        char household_id FK
+        varchar trigger
+        enum status
+        varchar reason "nullable"
+        json results "nullable"
+        timestamp ran_at
+    }
+    users |o--o{ automation_rules : "created_by"
+    households ||--o{ automation_rules : "household_id"
+    households ||--o{ automation_runs : "household_id"
+    automation_rules ||--o{ automation_runs : "rule_id"
+    smart_devices ||--o{ smart_device_readings : "device_id"
+    households ||--o{ smart_device_readings : "household_id"
+    smart_home_connections ||--o{ smart_devices : "connection_id"
+    households ||--o{ smart_devices : "household_id"
+    rooms |o--o{ smart_devices : "room_id"
+    users |o--o{ smart_home_actions : "decided_by"
+    smart_devices ||--o{ smart_home_actions : "device_id"
+    households ||--o{ smart_home_actions : "household_id"
+    users |o--o{ smart_home_actions : "requested_by"
+    users |o--o{ smart_home_connections : "connected_by"
+    households ||--o{ smart_home_connections : "household_id"
+    smart_devices |o--o{ smart_home_events : "device_id"
+    households ||--o{ smart_home_events : "household_id"
 ```

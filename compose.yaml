@@ -78,6 +78,26 @@ services:
             VOICE_STT_MODEL: '${VOICE_STT_MODEL:-small}'
         networks:
             - sail
+    # The test home: a real Home Assistant with simulated devices (docs/smart-home.md).
+    # Optional: docker compose --profile smart-home up -d homeassistant
+    homeassistant:
+        image: 'ghcr.io/home-assistant/home-assistant:${HOME_ASSISTANT_VERSION:-stable}'
+        container_name: homeassistant
+        profiles: ['smart-home']
+        ports:
+            - '${FORWARD_HOME_ASSISTANT_PORT:-8123}:8123'
+        environment:
+            TZ: Europe/Athens
+        volumes:
+            - './ops/home-assistant/config:/config'
+            - './ops/home-assistant/scripts:/hh-scripts:ro'
+        networks:
+            - sail
+        healthcheck:
+            test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:8123/manifest.json']
+            interval: 10s
+            retries: 12
+            timeout: 5s
 networks:
     sail:
         driver: bridge

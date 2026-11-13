@@ -9,8 +9,10 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { money, weekdayDate } from '@/lib/format';
-import { chores, dashboard, planner, spending } from '@/routes';
+import { listNames } from '@/lib/smart-home';
+import { chores, dashboard, planner, smartHome, spending } from '@/routes';
 import type { CurrentHousehold, Forecast, OverdueChore } from '@/types/home';
+import type { HomeSummary } from '@/types/smart-home';
 
 type Props = {
     forecast: Forecast;
@@ -24,6 +26,7 @@ type Props = {
     overdue: OverdueChore[];
     shoppingList: { id: string; name: string; quantity: string | null }[];
     toBuy: number;
+    smartHome: HomeSummary | null;
 };
 
 /** How often the dashboard asks for fresh numbers, so what a phone syncs shows up on its own */
@@ -36,6 +39,7 @@ export default function Dashboard({
     overdue,
     shoppingList,
     toBuy,
+    smartHome: home,
 }: Props) {
     usePoll(REFRESH_MS);
     const { household } = usePage<{ household: CurrentHousehold }>().props;
@@ -82,6 +86,57 @@ export default function Dashboard({
                         href={chores()}
                     />
                 </div>
+
+                {home && home.lights > 0 && (
+                    <div className="grid gap-4 md:grid-cols-3">
+                        <Tile
+                            title="Home"
+                            value={
+                                home.connected
+                                    ? home.open.length
+                                        ? `${home.open.length} open`
+                                        : 'All closed'
+                                    : 'Home Assistant offline'
+                            }
+                            note={
+                                home.open.length
+                                    ? listNames(home.open)
+                                    : `${home.lights_on} of ${home.lights} lights on`
+                            }
+                            href={smartHome()}
+                        />
+                        <Tile
+                            title="Temperature"
+                            value={
+                                home.temperature
+                                    ? `${home.temperature.min}–${home.temperature.max} °C`
+                                    : '–'
+                            }
+                            note={
+                                home.humidity
+                                    ? `humidity up to ${home.humidity.max}%${home.humidity.room ? ` (${home.humidity.room})` : ''}`
+                                    : 'no humidity sensor'
+                            }
+                            href={smartHome()}
+                        />
+                        <Tile
+                            title="Devices"
+                            value={
+                                home.unavailable.length
+                                    ? `${home.unavailable.length} not answering`
+                                    : 'All answering'
+                            }
+                            note={
+                                home.unavailable.length
+                                    ? listNames(home.unavailable)
+                                    : home.motion.length
+                                      ? `motion: ${listNames(home.motion)}`
+                                      : 'no motion right now'
+                            }
+                            href={smartHome()}
+                        />
+                    </div>
+                )}
 
                 <Card>
                     <CardHeader>

@@ -29,6 +29,8 @@ use App\Ai\Tools\Shopping\AddShoppingItem;
 use App\Ai\Tools\Shopping\CheckOffShoppingItem;
 use App\Ai\Tools\Shopping\GetKitchenInventory;
 use App\Ai\Tools\Shopping\GetShoppingList;
+use App\Ai\Tools\SmartHome\ControlDevice;
+use App\Ai\Tools\SmartHome\GetSmartHome;
 use App\Ai\Tools\Tasks\AddTodo;
 use App\Ai\Tools\Tasks\CompleteTodo;
 use App\Ai\Tools\Tasks\ListOverdueChores;
@@ -96,6 +98,9 @@ class AiServiceProvider extends ServiceProvider
         // The household's computers, through the local agent (Phase 5, day 65)
         GetComputers::class,
         RunComputerCommand::class,
+        // The smart home through Home Assistant (Phase 6, day 83)
+        GetSmartHome::class,
+        ControlDevice::class,
     ];
 
     public function register(): void
