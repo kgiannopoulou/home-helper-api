@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property array<string, mixed>|null $ha_attributes Home Assistant's attributes (not `attributes`: Eloquent uses that name)
  * @property bool $available
  * @property bool $imported
+ * @property bool $sensitive its risky action needs the owner's approval (App\SmartHome\Sensitivity)
  * @property CarbonImmutable|null $last_changed_at
  * @property CarbonImmutable|null $seen_at
  * @property CarbonImmutable|null $removed_at no longer in Home Assistant
@@ -54,6 +55,7 @@ class SmartDevice extends Model
             'ha_attributes' => 'array',
             'available' => 'boolean',
             'imported' => 'boolean',
+            'sensitive' => 'boolean',
             'last_changed_at' => 'immutable_datetime',
             'seen_at' => 'immutable_datetime',
             'removed_at' => 'immutable_datetime',

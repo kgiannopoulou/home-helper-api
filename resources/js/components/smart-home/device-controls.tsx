@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { Power } from 'lucide-react';
+import { Lock, LockOpen, Power, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { store as act } from '@/routes/smart-home/devices/actions';
@@ -37,10 +37,45 @@ export function DeviceControls({ device }: { device: Device }) {
         }
     }, [device.brightness, busy]);
 
+    const disabled = busy || !device.available;
+    const locked = device.state === 'locked';
+
+    if (device.capabilities.lockable) {
+        return (
+            <div className="flex items-center gap-2">
+                <Button
+                    size="sm"
+                    variant={locked ? 'outline' : 'default'}
+                    disabled={disabled}
+                    aria-label={`${locked ? 'Unlock' : 'Lock'} ${device.name}`}
+                    onClick={() => {
+                        if (
+                            locked &&
+                            !window.confirm(
+                                `Unlock ${device.name}? Unless you're the owner, the owner is asked to approve it first.`,
+                            )
+                        ) {
+                            return;
+                        }
+                        setBusy(true);
+                        send(device, locked ? 'unlock' : 'lock', {}, () =>
+                            setBusy(false),
+                        );
+                    }}
+                >
+                    {locked ? <LockOpen /> : <Lock />}{' '}
+                    {locked ? 'Unlock' : 'Lock'}
+                </Button>
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <ShieldCheck className="size-3.5" /> owner approves
+                    unlocking
+                </span>
+            </div>
+        );
+    }
     if (!device.capabilities.switchable) {
         return null;
     }
-    const disabled = busy || !device.available;
 
     return (
         <div className="flex items-center gap-2">

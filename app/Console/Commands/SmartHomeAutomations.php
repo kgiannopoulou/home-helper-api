@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\SmartHome\Automation\RuleEngine;
+use App\SmartHome\Control;
 use Illuminate\Console\Command;
 
 /**
@@ -16,8 +17,10 @@ class SmartHomeAutomations extends Command
 
     protected $description = 'Run the automations scheduled for this minute';
 
-    public function handle(RuleEngine $engine): int
+    public function handle(RuleEngine $engine, Control $control): int
     {
+        // Sensitive actions nobody approved within homehelper.smart_home.approval_minutes
+        $control->expire();
         $fired = $engine->tick();
         if ($fired > 0) {
             $this->line("{$fired} automations ran");

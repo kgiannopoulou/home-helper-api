@@ -51,6 +51,8 @@ export type Device = {
     brightness: number | null;
     available: boolean;
     imported: boolean;
+    /** Its risky action needs the owner's approval (App\SmartHome\Sensitivity) */
+    sensitive: boolean;
     capabilities: {
         switchable: boolean;
         dimmable: boolean;
@@ -166,4 +168,23 @@ export type Automations = {
     rules: AutomationRuleRow[];
     runs: AutomationRunRow[];
     templates: WorkflowTemplate[];
+};
+
+/** A sensitive action and the owner's answer (App\SmartHome\Control::approve) */
+export type Approval = {
+    id: string;
+    label: string;
+    status:
+        | 'awaiting_approval'
+        | 'approved'
+        | 'declined'
+        | 'expired'
+        | 'done'
+        | 'failed';
+    source: 'dashboard' | 'api' | 'rule' | 'assistant';
+    requested_by: string | null;
+    decided_by: string | null;
+    error: string | null;
+    expires_at: string | null;
+    created_at: string;
 };

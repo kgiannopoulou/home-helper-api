@@ -11144,6 +11144,158 @@
                 }
             }
         },
+        "/households/{household}/smart-home/approvals/{action}/approve": {
+            "post": {
+                "operationId": "smart-home.approvals.approve",
+                "summary": "POST /api/households/{household}/smart-home/approvals/{action}/approve|decline: the owner answers from the phone",
+                "tags": [
+                    "SmartHome"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "action",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "action": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "error": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "status",
+                                                "error"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "action"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/households/{household}/smart-home/approvals/{action}/decline": {
+            "post": {
+                "operationId": "smart-home.approvals.decline",
+                "summary": "POST /api/households/{household}/smart-home/approvals/{action}/approve|decline: the owner answers from the phone",
+                "tags": [
+                    "SmartHome"
+                ],
+                "parameters": [
+                    {
+                        "name": "household",
+                        "in": "path",
+                        "required": true,
+                        "description": "The household ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "action",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "action": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "error": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "status",
+                                                "error"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "action"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/households/{household}/smart-home/devices/{device}/actions": {
             "post": {
                 "operationId": "smart-home.actions.store",

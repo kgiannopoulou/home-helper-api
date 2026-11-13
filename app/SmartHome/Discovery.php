@@ -87,6 +87,7 @@ class Discovery
             if (! $device->exists) {
                 // Found, not changed: no DeviceStateChanged for a device that just appeared
                 $device->forceFill([
+                    'sensitive' => Sensitivity::byDefault($device),
                     'state' => mb_substr((string) $s['state'], 0, 255),
                     'ha_attributes' => StateChanges::keep($attributes),
                     'available' => ! in_array($s['state'], SmartDevice::UNAVAILABLE, true),

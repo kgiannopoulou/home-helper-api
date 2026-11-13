@@ -29,6 +29,7 @@ final class DevicePresenter
             'brightness' => $device->brightnessPercent(),
             'available' => $device->available,
             'imported' => $device->imported,
+            'sensitive' => $device->sensitive || $device->kind === 'lock',
             'capabilities' => Capabilities::of($device),
             'last_changed_at' => $device->last_changed_at?->toIso8601String(),
         ];

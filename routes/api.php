@@ -119,6 +119,8 @@ Route::name('api.')->group(function () {
 
             // The smart home (docs/smart-home.md#api): imported devices and their controls
             Route::get('smart-home', [SmartHomeController::class, 'index'])->name('smart-home.index');
+            Route::post('smart-home/approvals/{action}/approve', [SmartHomeController::class, 'decide'])->middleware('throttle:smart-home-control')->name('smart-home.approvals.approve');
+            Route::post('smart-home/approvals/{action}/decline', [SmartHomeController::class, 'decide'])->name('smart-home.approvals.decline');
             Route::post('smart-home/devices/{device}/actions', [SmartHomeController::class, 'action'])->middleware('throttle:smart-home-control')->name('smart-home.actions.store');
 
             // The assistant (docs/assistant.md): your own conversations in this household

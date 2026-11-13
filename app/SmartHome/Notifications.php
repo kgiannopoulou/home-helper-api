@@ -2,6 +2,7 @@
 
 namespace App\SmartHome;
 
+use App\Enums\HouseholdRole;
 use App\Models\Household;
 use App\Models\SmartHomeConnection;
 use App\Models\SmartHomeEvent;
@@ -57,12 +58,17 @@ class Notifications
             return;
         }
         $key = 'smart-home-notify:'.($event->device_id ?? $event->household_id).':'.$event->type;
-        if (! Cache::add($key, 1, now()->addMinutes((int) config('homehelper.smart_home.notify_every_minutes')))) {
+        // Every approval request matters; the rest is throttled
+        if ($event->type !== 'approval.requested' && ! Cache::add($key, 1, now()->addMinutes((int) config('homehelper.smart_home.notify_every_minutes')))) {
             return;
         }
 
         try {
-            $result = $this->push->toUsers($household->users, $this->title($event), $event->message, [
+            // Only the owner can approve, so only the owner is asked
+            $to = $event->type === 'approval.requested'
+                ? $household->users()->wherePivot('role', HouseholdRole::Owner->value)->get()
+                : $household->users;
+            $result = $this->push->toUsers($to, $this->title($event), $event->message, [
                 'type' => 'smart_home_event', 'event' => $event->type, 'event_id' => $event->id, 'url' => '/smart-home',
             ]);
             if ($result['sent'] > 0) {

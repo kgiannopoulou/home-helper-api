@@ -2,6 +2,7 @@ import { Head, router, usePage, usePoll } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import Heading from '@/components/heading';
 import AlertError from '@/components/alert-error';
+import { ApprovalsCard } from '@/components/smart-home/approvals-card';
 import { AutomationsCard } from '@/components/smart-home/automations-card';
 import { ClimateChart, ComfortCard } from '@/components/smart-home/climate';
 import { ConnectionCard } from '@/components/smart-home/connection-card';
@@ -22,8 +23,12 @@ import {
 } from '@/components/ui/card';
 import { groupByRoom } from '@/lib/smart-home';
 import { smartHome } from '@/routes';
-import { destroy as removeDevice } from '@/routes/smart-home/devices';
+import {
+    destroy as removeDevice,
+    update as updateDevice,
+} from '@/routes/smart-home/devices';
 import type {
+    Approval,
     Automations,
     Climate,
     Device,
@@ -47,10 +52,11 @@ type Props = {
     events: HomeEvent[];
     notifications: NotifySettings;
     automations: Automations;
+    approvals: Approval[];
     climate: Climate;
     candidates: Device[];
     rooms: Room[];
-    can: { manage: boolean; control: boolean };
+    can: { manage: boolean; control: boolean; approve: boolean };
 };
 
 /**
@@ -80,7 +86,28 @@ function RoomCard({
                     <DeviceTile key={d.id} device={d}>
                         {canControl && <DeviceControls device={d} />}
                         {canManage && (
-                            <div className="flex justify-end">
+                            <div className="flex items-center justify-between gap-2">
+                                {d.kind !== 'lock' &&
+                                (d.capabilities.switchable ||
+                                    d.kind === 'cover') ? (
+                                    <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <input
+                                            type="checkbox"
+                                            checked={d.sensitive}
+                                            aria-label={`${d.name} needs approval`}
+                                            onChange={() =>
+                                                router.patch(
+                                                    updateDevice.url(d.id),
+                                                    { sensitive: !d.sensitive },
+                                                    { preserveScroll: true },
+                                                )
+                                            }
+                                        />
+                                        Needs approval
+                                    </label>
+                                ) : (
+                                    <span />
+                                )}
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -121,6 +148,7 @@ export default function SmartHome({
     events,
     notifications,
     automations,
+    approvals,
     candidates,
     can,
 }: Props) {
@@ -139,6 +167,8 @@ export default function SmartHome({
                 />
 
                 {problem && <AlertError errors={[problem]} />}
+
+                <ApprovalsCard approvals={approvals} canApprove={can.approve} />
 
                 {summary && devices.length > 0 && (
                     <SummaryTiles summary={summary} />

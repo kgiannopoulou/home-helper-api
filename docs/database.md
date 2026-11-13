@@ -795,6 +795,7 @@ erDiagram
         json ha_attributes "nullable"
         tinyint available
         tinyint imported
+        tinyint sensitive
         timestamp last_changed_at "nullable"
         timestamp seen_at "nullable"
         timestamp removed_at "nullable"

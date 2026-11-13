@@ -22,6 +22,9 @@ use App\SmartHome\Import;
 use App\SmartHome\Notifications;
 use App\SmartHome\Openings;
 use App\SmartHome\Readings;
+use App\SmartHome\Sensitivity;
+use App\Models\SmartHomeAction;
+use App\Policies\SmartHomePolicy as Policy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -67,6 +70,20 @@ class SmartHomeController extends WebController
                 : [],
             'rooms' => $household->rooms()->where('personal', false)->orderBy('name')->get(['id', 'name'])->toArray(),
             'automations' => $this->automations($household),
+            'approvals' => SmartHomeAction::query()->where('household_id', $household->id)
+                ->where(fn ($q) => $q->where('status', 'awaiting_approval')->orWhere(fn ($q) => $q->whereNotNull('decided_at')->where('decided_at', '>=', now()->subDay())))
+                ->with(['device', 'requester:id,name', 'decider:id,name'])->latest()->limit(20)->get()
+                ->map(fn (SmartHomeAction $a) => [
+                    'id' => $a->id,
+                    'label' => $a->label(),
+                    'status' => $a->status,
+                    'source' => $a->source,
+                    'requested_by' => $a->requester?->name,
+                    'decided_by' => $a->decider?->name,
+                    'error' => $a->error,
+                    'expires_at' => $a->expires_at?->toIso8601String(),
+                    'created_at' => $a->created_at->toIso8601String(),
+                ])->all(),
             'notifications' => [
                 'settings' => Notifications::settings($connection),
                 'labels' => array_map(fn (array $t) => $t[1], Notifications::TYPES),
@@ -75,6 +92,7 @@ class SmartHomeController extends WebController
             'can' => [
                 'manage' => $policy->manage($user, $household),
                 'control' => $policy->control($user, $household),
+                'approve' => $policy->approve($user, $household),
             ],
         ]);
     }
@@ -207,7 +225,11 @@ class SmartHomeController extends WebController
         $this->authorizeManage($request, $household);
         $data = $request->validate([
             'room_id' => ['sometimes', 'nullable', 'string', 'exists:rooms,id,household_id,'.$household->id],
+            'sensitive' => ['sometimes', 'boolean'],
         ]);
+        if (isset($data['sensitive']) && ! Sensitivity::canChange($device)) {
+            unset($data['sensitive']);
+        }
         $device->forceFill($data)->save();
 
         return to_route('smart-home');
@@ -226,6 +248,24 @@ class SmartHomeController extends WebController
         return $action->status === 'failed'
             ? to_route('smart-home')->withErrors(['control' => $action->error])
             : to_route('smart-home');
+    }
+
+    public function approve(Request $request, SmartHomeAction $action, Control $control): RedirectResponse
+    {
+        abort_unless($action->household_id === $this->household($request)->id, 404);
+        $action = $control->approve($action, $request->user());
+
+        return $action->status === 'failed'
+            ? to_route('smart-home')->withErrors(['control' => $action->error])
+            : to_route('smart-home');
+    }
+
+    public function decline(Request $request, SmartHomeAction $action, Control $control): RedirectResponse
+    {
+        abort_unless($action->household_id === $this->household($request)->id, 404);
+        $control->decline($action, $request->user());
+
+        return to_route('smart-home');
     }
 
     /** Out of Home Helper, not out of Home Assistant */

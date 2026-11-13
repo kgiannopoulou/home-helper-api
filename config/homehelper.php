@@ -214,6 +214,8 @@ return [
         // Pushes (App\SmartHome\Notifications): "night" events only in these hours, home time
         'night' => ['from' => '23:00', 'to' => '06:00'],
         'notify_every_minutes' => 15,
+        // A sensitive action waits this long for the owner (App\SmartHome\Control::approve)
+        'approval_minutes' => 10,
         // How a room feels (App\SmartHome\Comfort)
         'comfort' => [
             'temperature_low' => 18.0,

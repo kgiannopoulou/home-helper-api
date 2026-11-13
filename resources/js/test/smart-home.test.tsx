@@ -34,6 +34,7 @@ export const device = (over: Partial<Device> = {}): Device => ({
     brightness: null,
     available: true,
     imported: true,
+    sensitive: false,
     capabilities: { ...caps, switchable: true, dimmable: true },
     last_changed_at: new Date().toISOString(),
     ...over,
@@ -102,6 +103,7 @@ function show(props: Partial<Parameters<typeof SmartHome>[0]> = {}) {
             openings={[]}
             events={[]}
             automations={{ rules: [], runs: [], templates: [] }}
+            approvals={[]}
             notifications={{
                 settings: { 'door.opened': 'night' },
                 labels: { 'door.opened': 'A door opens' },
@@ -110,7 +112,7 @@ function show(props: Partial<Parameters<typeof SmartHome>[0]> = {}) {
             climate={{ sensors: [], history: [] }}
             candidates={[]}
             rooms={[]}
-            can={{ manage: true, control: true }}
+            can={{ manage: true, control: true, approve: true }}
             {...props}
         />,
     );
@@ -289,6 +291,44 @@ describe('the smart home page', () => {
         );
     });
 
+    test('asks the owner to approve an unlock, and shows members it is waiting', () => {
+        const approvals = [
+            {
+                id: 'a1',
+                label: 'Unlock Front door lock',
+                status: 'awaiting_approval' as const,
+                source: 'assistant' as const,
+                requested_by: 'Nikos',
+                decided_by: null,
+                error: null,
+                expires_at: new Date(Date.now() + 600_000).toISOString(),
+                created_at: new Date().toISOString(),
+            },
+        ];
+        const { unmount } = show({ approvals });
+        expect(screen.getByText(/Nikos via the assistant/)).toBeInTheDocument();
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'Approve: Unlock Front door lock',
+            }),
+        );
+        expect(inertiaMock.router.post).toHaveBeenCalledWith(
+            expect.stringContaining('/smart-home/actions/a1/approve'),
+            {},
+            expect.anything(),
+        );
+        unmount();
+
+        show({
+            approvals,
+            can: { manage: false, control: true, approve: false },
+        });
+        expect(screen.getByText('Waiting for the owner')).toBeInTheDocument();
+        expect(
+            screen.queryByRole('button', { name: /Approve/ }),
+        ).not.toBeInTheDocument();
+    });
+
     test('offers the connect form when there is no Home Assistant yet', () => {
         show({ connection: null, summary: null, devices: [] });
         expect(
@@ -316,7 +356,7 @@ describe('the smart home page', () => {
 
     test('hides the import list from members', () => {
         show({
-            can: { manage: false, control: true },
+            can: { manage: false, control: true, approve: false },
             candidates: [device({ id: 'a1', imported: false })],
         });
         expect(

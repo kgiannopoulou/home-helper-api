@@ -7,6 +7,8 @@ use App\Ai\Providers\ClaudeChatModel;
 use App\Ai\Providers\OfflineChatModel;
 use App\Ai\Tools\Computers\GetComputers;
 use App\Ai\Tools\Computers\RunComputerCommand;
+use App\Ai\Tools\SmartHome\ControlDevice;
+use App\Ai\Tools\SmartHome\GetSmartHome;
 use App\Ai\Tools\Finance\GetSpendingSummary;
 use App\Ai\Tools\Finance\GetUpcomingBills;
 use App\Ai\Tools\Finance\ListExpenses;
@@ -96,6 +98,9 @@ class AiServiceProvider extends ServiceProvider
         // The household's computers, through the local agent (Phase 5, day 65)
         GetComputers::class,
         RunComputerCommand::class,
+        // The smart home through Home Assistant (Phase 6, day 83)
+        GetSmartHome::class,
+        ControlDevice::class,
     ];
 
     public function register(): void
