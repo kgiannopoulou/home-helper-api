@@ -9,7 +9,6 @@ use App\Models\SmartHomeEvent;
 use App\SmartHome\Capabilities;
 use App\SmartHome\Comfort;
 use App\SmartHome\HomeSummary;
-use App\SmartHome\Sensitivity;
 
 /**
  * The house through Home Assistant (docs/smart-home.md): every imported
