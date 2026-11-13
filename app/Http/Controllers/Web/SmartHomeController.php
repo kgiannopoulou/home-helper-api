@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Models\Household;
 use App\Models\SmartDevice;
 use App\Models\SmartHomeConnection;
+use App\Models\SmartHomeEvent;
 use App\Policies\SmartHomePolicy;
 use App\SmartHome\Comfort;
 use App\SmartHome\Connections;
@@ -14,6 +15,7 @@ use App\SmartHome\Discovery;
 use App\SmartHome\HomeAssistantError;
 use App\SmartHome\HomeSummary;
 use App\SmartHome\Import;
+use App\SmartHome\Openings;
 use App\SmartHome\Readings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +28,7 @@ use Inertia\Response;
  */
 class SmartHomeController extends WebController
 {
-    public function show(Request $request, Import $import, Readings $readings): Response
+    public function show(Request $request, Import $import, Readings $readings, Openings $openings): Response
     {
         $household = $this->household($request);
         $user = $request->user();
@@ -41,6 +43,16 @@ class SmartHomeController extends WebController
             'summary' => HomeSummary::for($household),
             'devices' => $devices->map(fn (SmartDevice $d) => DevicePresenter::toArray($d))->values()->all(),
             'comfort' => Comfort::rooms($devices),
+            'openings' => $openings->overview($devices, $this->today()->startOfDay()),
+            'events' => SmartHomeEvent::query()->where('household_id', $household->id)->with('device:id,name,kind')
+                ->orderByDesc('occurred_at')->limit(30)->get()
+                ->map(fn (SmartHomeEvent $e) => [
+                    'id' => $e->id,
+                    'type' => $e->type,
+                    'severity' => $e->severity,
+                    'message' => $e->message,
+                    'at' => $e->occurred_at->toIso8601String(),
+                ])->all(),
             'climate' => [
                 'sensors' => $sensors->map(fn (SmartDevice $d) => ['id' => $d->id, 'name' => $d->name, 'kind' => $d->kind, 'room' => $d->room !== null ? $d->room->name : $d->area])->all(),
                 'history' => $readings->history($sensors),

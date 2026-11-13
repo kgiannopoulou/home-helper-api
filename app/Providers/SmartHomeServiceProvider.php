@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\SmartHome\Events\DeviceStateChanged;
+use App\SmartHome\Openings;
 use App\SmartHome\Readings;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -16,6 +17,8 @@ class SmartHomeServiceProvider extends ServiceProvider
     public const LISTENERS = [
         // Temperature and humidity history (day 78)
         [Readings::class, 'handle'],
+        // Doors, windows and motion become events (day 79)
+        [Openings::class, 'handle'],
     ];
 
     public function boot(): void

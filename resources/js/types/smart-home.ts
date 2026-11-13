@@ -98,3 +98,24 @@ export type Climate = {
     }[];
     history: ({ at: string } & Record<string, number | string>)[];
 };
+
+/** App\SmartHome\Openings::overview */
+export type Opening = {
+    id: string;
+    name: string;
+    kind: 'door' | 'window';
+    room: string | null;
+    open: boolean;
+    available: boolean;
+    since: string | null;
+    openings_today: number;
+};
+
+/** A row of the house's event log (App\SmartHome\HomeEvents) */
+export type HomeEvent = {
+    id: string;
+    type: string;
+    severity: 'info' | 'warning' | 'critical';
+    message: string;
+    at: string;
+};

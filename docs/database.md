@@ -64,6 +64,7 @@ erDiagram
     smart_devices ||--o{ smart_home_actions : "device_id"
     users |o--o{ smart_home_actions : "requested_by"
     users |o--o{ smart_home_connections : "connected_by"
+    smart_devices |o--o{ smart_home_events : "device_id"
     users ||--o{ step_counts : "user_id"
     users |o--o{ todos : "user_id"
     users ||--o{ voice_settings : "user_id"
@@ -802,6 +803,17 @@ erDiagram
         decimal value
         timestamp recorded_at
     }
+    smart_home_events {
+        char id PK
+        char household_id FK
+        char device_id FK "nullable"
+        varchar type
+        enum severity
+        varchar message
+        json data "nullable"
+        timestamp occurred_at
+        timestamp notified_at "nullable"
+    }
     smart_home_actions {
         char id PK
         char household_id FK
@@ -830,4 +842,6 @@ erDiagram
     users |o--o{ smart_home_actions : "requested_by"
     users |o--o{ smart_home_connections : "connected_by"
     households ||--o{ smart_home_connections : "household_id"
+    smart_devices |o--o{ smart_home_events : "device_id"
+    households ||--o{ smart_home_events : "household_id"
 ```

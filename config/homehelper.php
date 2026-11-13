@@ -207,6 +207,10 @@ return [
         'readings_keep_days' => 30,
         // A sensor that hasn't changed still gets a point this often, so the charts have no gaps
         'reading_every_minutes' => 15,
+        // The house's event log (App\SmartHome\HomeEvents)
+        'events_keep_days' => 60,
+        // A warning when a door or window has been open this long (App\SmartHome\Openings)
+        'left_open_minutes' => ['door' => 10, 'window' => 30],
         // How a room feels (App\SmartHome\Comfort)
         'comfort' => [
             'temperature_low' => 18.0,

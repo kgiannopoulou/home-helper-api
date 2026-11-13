@@ -99,6 +99,8 @@ function show(props: Partial<Parameters<typeof SmartHome>[0]> = {}) {
             summary={summary}
             devices={devices}
             comfort={[]}
+            openings={[]}
+            events={[]}
             climate={{ sensors: [], history: [] }}
             candidates={[]}
             rooms={[]}
@@ -149,6 +151,36 @@ describe('the smart home page', () => {
         expect(within(room).getByText('Very humid')).toBeInTheDocument();
         expect(within(room).getByText(/Dew point 18.1 °C/)).toBeInTheDocument();
         expect(within(room).getByText(/Mould risk/)).toBeInTheDocument();
+    });
+
+    test('lists doors and windows, open ones first, and the event log', () => {
+        show({
+            openings: [
+                {
+                    id: 'o1',
+                    name: 'Bedroom window',
+                    kind: 'window',
+                    room: 'Bedroom',
+                    open: true,
+                    available: true,
+                    since: new Date(Date.now() - 12 * 60_000).toISOString(),
+                    openings_today: 2,
+                },
+            ],
+            events: [
+                {
+                    id: 'e1',
+                    type: 'window.left_open',
+                    severity: 'warning',
+                    message: 'Bedroom window has been open for 30 min',
+                    at: new Date().toISOString(),
+                },
+            ],
+        });
+        const row = screen.getByTestId('opening-Bedroom window');
+        expect(within(row).getByText('Open · 12 min ago')).toBeInTheDocument();
+        expect(within(row).getByText('2× today')).toBeInTheDocument();
+        expect(screen.getByText('window.left_open')).toBeInTheDocument();
     });
 
     test('offers the connect form when there is no Home Assistant yet', () => {

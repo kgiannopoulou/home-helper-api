@@ -15,6 +15,7 @@ use App\Jobs\WeeklySummary;
 use App\Models\AgentEvent;
 use App\Models\AgentMetric;
 use App\Models\SmartDeviceReading;
+use App\Models\SmartHomeEvent;
 use App\Ops\SystemHealth;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -78,11 +79,13 @@ Schedule::command('agents:check-offline')->everyMinute()->onOneServer()->without
 // Devices and states from each household's Home Assistant: new and removed
 // devices, and the fallback when a pushed state change was lost (docs/smart-home.md)
 Schedule::command('smart-home:sync')->everyMinute()->onOneServer()->withoutOverlapping();
+// A door or window left open (docs/smart-home.md#doors-and-windows)
+Schedule::command('smart-home:check-openings')->everyMinute()->onOneServer()->withoutOverlapping();
 
 // Housekeeping
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily()->onOneServer();
 Schedule::command('queue:prune-failed', ['--hours' => 24 * 14])->daily()->onOneServer();
-Schedule::command('model:prune', ['--model' => [AgentMetric::class, AgentEvent::class, SmartDeviceReading::class]])->dailyAt('04:30')->timezone($home)->onOneServer();
+Schedule::command('model:prune', ['--model' => [AgentMetric::class, AgentEvent::class, SmartDeviceReading::class, SmartHomeEvent::class]])->dailyAt('04:30')->timezone($home)->onOneServer();
 
 // Run one now, for every household: php artisan household:run PrepareShoppingList --date=2026-10-09
 Artisan::command('household:run {job} {--date= : "today" at home, YYYY-MM-DD}', function (string $job) {

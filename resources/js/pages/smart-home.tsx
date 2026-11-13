@@ -7,6 +7,7 @@ import { ConnectionCard } from '@/components/smart-home/connection-card';
 import { DeviceControls } from '@/components/smart-home/device-controls';
 import { DeviceTile } from '@/components/smart-home/device-tile';
 import { ImportCard } from '@/components/smart-home/import-card';
+import { EventsCard, OpeningsCard } from '@/components/smart-home/openings';
 import { SummaryTiles } from '@/components/smart-home/summary-tiles';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,8 +23,10 @@ import { destroy as removeDevice } from '@/routes/smart-home/devices';
 import type {
     Climate,
     Device,
-    RoomComfort,
+    HomeEvent,
     HomeSummary,
+    Opening,
+    RoomComfort,
     Room,
     SmartHomeConnection,
     WebhookSecret,
@@ -35,6 +38,8 @@ type Props = {
     summary: HomeSummary | null;
     devices: Device[];
     comfort: RoomComfort[];
+    openings: Opening[];
+    events: HomeEvent[];
     climate: Climate;
     candidates: Device[];
     rooms: Room[];
@@ -105,6 +110,8 @@ export default function SmartHome({
     devices,
     comfort,
     climate,
+    openings,
+    events,
     candidates,
     can,
 }: Props) {
@@ -151,6 +158,11 @@ export default function SmartHome({
                             canControl={can.control}
                         />
                     ))}
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-2">
+                    <OpeningsCard openings={openings} />
+                    {devices.length > 0 && <EventsCard events={events} />}
                 </div>
 
                 <ComfortCard rooms={comfort} />
