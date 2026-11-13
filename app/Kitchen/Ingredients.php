@@ -37,6 +37,7 @@ final class Ingredients
         'lentils' => ['lentil', 'lentils', 'φακεσ'],
         'chickpeas' => ['chickpea', 'chickpeas', 'ρεβυθια'],
         'beans' => ['bean', 'beans', 'φασολια', 'γιγαντεσ'],
+        'green beans' => ['green beans', 'φασολακια'],
         'olive oil' => ['olive oil', 'ελαιολαδο', 'ελαιολαδο παρθενο'],
         'oil' => ['oil', 'sunflower oil', 'ηλιελαιο', 'λαδι'],
         'chicken' => ['chicken', 'κοτοπουλο', 'κοτοπουλου'],

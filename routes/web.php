@@ -13,6 +13,7 @@ use App\Http\Controllers\Web\KitchenController;
 use App\Http\Controllers\Web\MemoryController;
 use App\Http\Controllers\Web\PlannerController;
 use App\Http\Controllers\Web\ReceiptController;
+use App\Http\Controllers\Web\RecipeController;
 use App\Http\Controllers\Web\SmartHomeController;
 use App\Http\Controllers\Web\SpendingController;
 use App\Http\Controllers\Web\SystemHealthController;
@@ -76,6 +77,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::controller(BarcodeController::class)->prefix('kitchen/barcodes')->name('kitchen.barcodes.')->group(function () {
             Route::get('{code}', 'show')->middleware('throttle:barcodes')->name('lookup');
             Route::post('{code}', 'apply')->name('apply');
+        });
+        Route::controller(RecipeController::class)->prefix('kitchen/recipes')->name('kitchen.recipes.')->group(function () {
+            Route::post('/', 'store')->name('store');
+            Route::get('{recipe}', 'show')->name('show');
+            Route::post('{recipe}/cook', 'cook')->name('cook');
+            Route::post('{recipe}/shopping', 'shopping')->name('shopping');
         });
         Route::controller(ReceiptController::class)->prefix('kitchen/receipts')->name('kitchen.receipts.')->group(function () {
             Route::post('/', 'store')->middleware('throttle:uploads')->name('store');

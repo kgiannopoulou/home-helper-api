@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\PlantCareLogController;
 use App\Http\Controllers\Api\PlantController;
 use App\Http\Controllers\Api\PurchaseController;
 use App\Http\Controllers\Api\ReceiptController;
+use App\Http\Controllers\Api\RecipeController;
 use App\Http\Controllers\Api\RecurringBillController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\ShoppingItemController;
@@ -166,6 +167,14 @@ Route::name('api.')->group(function () {
             // Barcodes (docs/kitchen.md#barcodes)
             Route::get('kitchen/barcodes/{code}', [BarcodeController::class, 'show'])->middleware('throttle:barcodes')->name('kitchen.barcodes.show');
             Route::post('kitchen/barcodes/{code}', [BarcodeController::class, 'apply'])->name('kitchen.barcodes.apply');
+            // Recipes (docs/kitchen.md#recipes)
+            Route::controller(RecipeController::class)->prefix('kitchen/recipes')->name('kitchen.recipes.')->group(function () {
+                Route::get('suggestions', 'suggestions')->name('suggestions');
+                Route::post('/', 'store')->name('store');
+                Route::get('{recipe}', 'show')->name('show');
+                Route::post('{recipe}/cook', 'cook')->name('cook');
+                Route::post('{recipe}/shopping', 'shopping')->name('shopping');
+            });
             // Receipts (docs/kitchen.md#receipts)
             Route::controller(ReceiptController::class)->prefix('kitchen/receipts')->name('kitchen.receipts.')->group(function () {
                 Route::post('/', 'store')->middleware('throttle:uploads')->name('store');

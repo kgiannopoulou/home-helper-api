@@ -6,7 +6,9 @@ use App\Kitchen\Expiry;
 use App\Models\Household;
 use App\Models\InventoryItem;
 use App\Push\ExpoPush;
+use App\Queries\RecipeMatchQuery;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
 
 /**
  * Every morning (docs/kitchen.md#expiry): what's in the kitchen and goes off
@@ -37,7 +39,7 @@ class CheckExpiringFood extends HouseholdJob
         $push = app(ExpoPush::class)->toUsers(
             $household->users,
             $expired === $due->count() ? '🗑️ Gone off in the kitchen' : '🥛 Use soon',
-            self::text($words),
+            self::text($words).self::idea($household, $today, $due),
             ['type' => 'kitchen_expiry', 'url' => '/kitchen'],
         );
 
@@ -47,6 +49,26 @@ class CheckExpiringFood extends HouseholdJob
         }
 
         return ['due' => $due->count(), 'items' => $due->pluck('name')->all(), 'push' => $push];
+    }
+
+    /**
+     * " Try: Strapatsada." when a recipe uses what's going off (and nothing has gone off yet)
+     *
+     * @param  Collection<int, InventoryItem>  $due
+     */
+    private static function idea(Household $household, CarbonImmutable $today, $due): string
+    {
+        $fresh = $due->filter(fn (InventoryItem $i) => (Expiry::status($i, $today)['days'] ?? -1) >= 0)->pluck('ingredient')->all();
+        if ($fresh === []) {
+            return '';
+        }
+        foreach ((new RecipeMatchQuery($household, $today, null, 5, self::AHEAD_DAYS))->get() as $r) {
+            if (array_intersect($r['uses_soon'], $fresh) !== [] && count($r['missing']) <= 1) {
+                return " Try: {$r['name']}.";
+            }
+        }
+
+        return '';
     }
 
     public static function when(int $days): string

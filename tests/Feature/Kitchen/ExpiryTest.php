@@ -104,7 +104,7 @@ describe('the morning push', function () {
         food($this->home, 'Spinach', more: ['amount' => 0, 'unit' => 'g', 'expires_on' => '2026-11-13']);
 
         (new CheckExpiringFood($this->home, '2026-11-13'))->handle();
-        expect(expiryPushes())->toBe(['🥛 Use soon | Greek yoghurt (today) and Milk (tomorrow).']);
+        expect(expiryPushes())->toBe(['🥛 Use soon | Greek yoghurt (today) and Milk (tomorrow). Try: Overnight oats.']);
 
         // The next morning: the yoghurt is a day past, the milk is due today, both already mentioned
         (new CheckExpiringFood($this->home, '2026-11-14'))->handle();

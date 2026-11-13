@@ -132,3 +132,44 @@ export type Waste = {
     value: number;
     priced: number;
 };
+
+/** App\Queries\RecipeMatchQuery: a recipe against what's in the kitchen */
+export type RecipeSuggestion = {
+    id: string;
+    slug: string | null;
+    name: string;
+    servings: number;
+    minutes: number | null;
+    tags: string[];
+    /** The household's own recipe */
+    own: boolean;
+    required: number;
+    have: number;
+    /** There, but not enough */
+    short: number;
+    missing: string[];
+    /** Ingredients going off within three days */
+    uses_soon: string[];
+    soonest: string | null;
+    /** Everything there, and enough of it */
+    ready: boolean;
+};
+
+/** GET /kitchen/recipes/{id} */
+export type RecipeDetail = {
+    id: string;
+    name: string;
+    servings: number;
+    minutes: number | null;
+    tags: string[];
+    own: boolean;
+    steps: string;
+    ingredients: {
+        ingredient: string;
+        amount: number | null;
+        unit: string | null;
+        label: string;
+        optional: boolean;
+        staple: boolean;
+    }[];
+};

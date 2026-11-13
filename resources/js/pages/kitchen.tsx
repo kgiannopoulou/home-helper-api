@@ -6,6 +6,7 @@ import { BarcodeScanner } from '@/components/kitchen/barcode-scanner';
 import { ExpiringCard, WasteCard } from '@/components/kitchen/expiry-cards';
 import { InventoryCard } from '@/components/kitchen/inventory-card';
 import { ReceiptCard } from '@/components/kitchen/receipt-card';
+import { RecipesCard } from '@/components/kitchen/recipes-card';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -23,6 +24,7 @@ import type {
     KitchenItem,
     Movement,
     ReceiptDraft,
+    RecipeSuggestion,
     Waste,
 } from '@/types/kitchen';
 
@@ -37,6 +39,8 @@ type Props = {
     /** In stock and going off within three days */
     expiring: KitchenItem[];
     waste: Waste;
+    /** What to cook, best first */
+    recipes: RecipeSuggestion[];
 };
 
 const KIND_LABEL: Record<Movement['kind'], string> = {
@@ -60,6 +64,7 @@ export default function Kitchen({
     photos,
     expiring,
     waste,
+    recipes,
 }: Props) {
     const groups = byLocation(items);
     const kitchenPlaces = locations.filter(
@@ -155,6 +160,8 @@ export default function Kitchen({
                     <ExpiringCard items={expiring} />
                     <WasteCard waste={waste} />
                 </div>
+
+                <RecipesCard recipes={recipes} />
 
                 <ReceiptCard receipt={receipt} photos={photos} />
 

@@ -59,6 +59,8 @@ erDiagram
     shopping_trips |o--o{ purchases : "shopping_trip_id"
     shopping_trips |o--o{ receipts : "shopping_trip_id"
     users |o--o{ receipts : "user_id"
+    recipes ||--o{ recipe_ingredients : "recipe_id"
+    users |o--o{ recipes : "created_by"
     users ||--o{ recommendation_feedback : "user_id"
     users |o--o{ shopping_items : "added_by"
     users |o--o{ shopping_trips : "user_id"
@@ -300,6 +302,26 @@ erDiagram
         char shopping_trip_id FK "nullable"
         timestamp imported_at "nullable"
     }
+    recipes {
+        char id PK
+        char household_id FK "nullable"
+        varchar slug UK "nullable"
+        varchar name
+        tinyint servings
+        smallint minutes "nullable"
+        json tags
+        text steps
+        bigint created_by FK "nullable"
+    }
+    recipe_ingredients {
+        bigint id PK
+        char recipe_id FK
+        varchar ingredient
+        decimal amount "nullable"
+        enum unit "nullable"
+        tinyint optional
+        tinyint staple
+    }
     households ||--o{ inventory_items : "household_id"
     households ||--o{ item_prices : "household_id"
     shopping_trips |o--o{ item_prices : "shopping_trip_id"
@@ -314,6 +336,9 @@ erDiagram
     households ||--o{ receipts : "household_id"
     shopping_trips |o--o{ receipts : "shopping_trip_id"
     users |o--o{ receipts : "user_id"
+    recipes ||--o{ recipe_ingredients : "recipe_id"
+    users |o--o{ recipes : "created_by"
+    households |o--o{ recipes : "household_id"
     users |o--o{ shopping_items : "added_by"
     households ||--o{ shopping_items : "household_id"
     households ||--o{ shopping_trips : "household_id"

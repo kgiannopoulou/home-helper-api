@@ -71,6 +71,7 @@ describe('Kitchen page', () => {
                 photos
                 expiring={[]}
                 waste={{ days: 30, items: [], value: 0, priced: 0 }}
+                recipes={[]}
             />,
         );
 
@@ -96,6 +97,7 @@ describe('Kitchen page', () => {
                 photos={false}
                 expiring={[]}
                 waste={{ days: 30, items: [], value: 0, priced: 0 }}
+                recipes={[]}
             />,
         );
 

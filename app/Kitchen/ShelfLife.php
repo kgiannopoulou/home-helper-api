@@ -39,6 +39,7 @@ final class ShelfLife
         'cucumber' => [7, null, null],
         'pepper' => [10, null, 240],
         'courgette' => [7, null, 240],
+        'green beans' => [5, null, 300],
         'aubergine' => [7, null, null],
         'carrot' => [21, null, 300],
         'spinach' => [5, null, 300],

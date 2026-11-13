@@ -11,4 +11,6 @@ enum ShoppingSource: string
 
     case Manual = 'manual';
     case Inventory = 'inventory';
+    // "Add what's missing" from a recipe or the meal plan (Phase 7)
+    case Recipe = 'recipe';
 }

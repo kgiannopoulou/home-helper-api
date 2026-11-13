@@ -29,6 +29,7 @@ use App\Ai\Tools\Shopping\AddShoppingItem;
 use App\Ai\Tools\Shopping\CheckOffShoppingItem;
 use App\Ai\Tools\Shopping\GetKitchenInventory;
 use App\Ai\Tools\Shopping\GetShoppingList;
+use App\Ai\Tools\Shopping\SuggestRecipes;
 use App\Ai\Tools\SmartHome\ControlDevice;
 use App\Ai\Tools\SmartHome\GetSmartHome;
 use App\Ai\Tools\Tasks\AddTodo;
@@ -71,6 +72,8 @@ class AiServiceProvider extends ServiceProvider
         ListUpcomingEvents::class,
         GetShoppingList::class,
         GetKitchenInventory::class,
+        // What to cook with what's there (Phase 7, day 89)
+        SuggestRecipes::class,
         AddShoppingItem::class,
         CheckOffShoppingItem::class,
         AddTodo::class,

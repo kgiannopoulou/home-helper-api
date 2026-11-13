@@ -15,10 +15,12 @@ built in [Phase 7](phase-7.md) on top of the phone's inventory, shopping list an
 | `app/Kitchen/ShelfLife`, `Expiry` | how long food keeps; estimated dates, opened, frozen, thawed |
 | `app/Jobs/CheckExpiringFood` | the 09:00 push |
 | `app/Queries/KitchenWasteQuery` | what was thrown away and what it cost |
+| `app/Queries/RecipeMatchQuery`, `app/Kitchen/Recipes/*` | what to cook, in SQL; cooking (`Cooking`), the library (`RecipeLibrary`, `database/data/recipes.php`) |
+| `app/Ai/Tools/Shopping/SuggestRecipes` | `suggest_recipes` for the assistant |
 | `app/Http/Controllers/Api/KitchenController` | use, add and history for the phone |
 | `app/Http/Controllers/Web/KitchenController` | the Kitchen page |
 
-Tables: `inventory_items` (since Phase 1, extended), `kitchen_movements`, `products`, `receipts`
+Tables: `inventory_items` (since Phase 1, extended), `kitchen_movements`, `products`, `receipts`, `recipes`, `recipe_ingredients`
 ([diagram](database.md)).
 
 ## Amounts and units
@@ -201,6 +203,40 @@ last pack cost (`purchases`, newest first by `ROW_NUMBER()`). Items never bought
 Helper have no price and say so. The Kitchen page shows it as *Thrown away*, and the API takes
 any period up to a year.
 
+## Recipes
+
+**The library.** 27 recipes written for Home Helper, mostly Greek home cooking (fakes,
+spanakorizo, briam, gemista, avgolemono, spanakopita) plus everyday staples (omelette,
+pasta, overnight oats). They live in `database/data/recipes.php` with ingredient keys and amounts
+for their servings. The migration loads them, and `php artisan kitchen:recipes` updates them
+by slug. A household adds its own on the Kitchen page or through the API, typing one ingredient
+per line ("500 g lentils", "1 onion"), and nobody else sees them. Salt, pepper, oil, olive oil,
+oregano, sugar and flour are **staples**: assumed to be there, never missing.
+
+**What to cook** is one SQL query (`RecipeMatchQuery`): the kitchen per ingredient key
+(what's in stock, how much, the soonest use-by date) joined to every recipe's ingredients. For
+each recipe it reports:
+
+| | |
+|---|---|
+| `missing` | ingredients not in the kitchen at all; optional ones and staples never count |
+| `short` | there, but less than the recipe needs, when both are measured in comparable units |
+| `uses_soon` | ingredients going off within three days |
+| `ready` | nothing missing, nothing short |
+
+Ranking: fewest missing, then the most food going off soon, then the soonest date, then the
+quickest. Recipes with nothing in the kitchen are left out. A tag filters
+(`JSON_CONTAINS(tags, …)`): vegetarian, vegan, quick, breakfast, greek, no-cook, dessert.
+
+**Cooked it** takes the ingredients out of the kitchen as `cooked` movements, scaled to the
+servings, the item going off soonest first. When the recipe and the item can't be compared
+(4 slices against 500 g of bread), the item is left unchanged rather than guessed at. **Add to
+list** puts what's missing or short on the shopping list (source `recipe`), once.
+
+The assistant has `suggest_recipes` ("what can I cook?", "what do I do with the spinach?"),
+and the morning expiry push ends with a recipe that uses what's going off: "Eggs (tomorrow).
+Try: Strapatsada."
+
 ## API
 
 | | |
@@ -215,6 +251,11 @@ any period up to a year.
 | `POST /api/households/{h}/inventory-items/{item}/still-good` | two more days |
 | `GET  /api/households/{h}/kitchen/waste` | `?days=30`: items, amounts, estimated cost |
 | `GET  /api/households/{h}/kitchen/barcodes/{code}` | the household's item, a suggestion and the product; 422 for a misread. 30 a minute |
+| `GET  /api/households/{h}/kitchen/recipes/suggestions` | `?tag=&limit=`: ranked against the kitchen |
+| `GET  /api/households/{h}/kitchen/recipes/{id}` | ingredients and steps |
+| `POST /api/households/{h}/kitchen/recipes` | `{name, servings, minutes?, tags?, steps, ingredients: [{name, amount_text?, optional?}]}` |
+| `POST /api/households/{h}/kitchen/recipes/{id}/cook` | `{servings?}`: what was used and what was missing |
+| `POST /api/households/{h}/kitchen/recipes/{id}/shopping` | `{servings?}`: what was added to the list |
 | `POST /api/households/{h}/kitchen/receipts` | multipart `photo` (jpg, png, webp, 10 MB) or `text`: a draft. 10 a minute |
 | `GET  /api/households/{h}/kitchen/receipts/{id}` | the draft |
 | `POST /api/households/{h}/kitchen/receipts/{id}/import` | `{store?, purchased_on?, lines?: {index: {include, item_id, name, amount_text, location}}}` |

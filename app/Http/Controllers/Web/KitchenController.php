@@ -12,6 +12,7 @@ use App\Kitchen\Units;
 use App\Models\InventoryItem;
 use App\Models\KitchenMovement;
 use App\Queries\KitchenWasteQuery;
+use App\Queries\RecipeMatchQuery;
 use App\Support\HomeTime;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
@@ -51,6 +52,8 @@ class KitchenController extends WebController
             'expiring' => app(Expiry::class)->expiring($household, $this->today(), 3)
                 ->map(fn (InventoryItem $i) => self::item($i))->all(),
             'waste' => (new KitchenWasteQuery($household, $this->today(), 30))->get(),
+            // What to cook with what's there, food going off first (docs/kitchen.md#recipes)
+            'recipes' => (new RecipeMatchQuery($household, $this->today(), null, 8))->get(),
         ]);
     }
 

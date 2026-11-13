@@ -89,3 +89,22 @@ export function expiryText(item: KitchenItem): string {
 
     return item.expiry_estimated ? `${when} (about)` : when;
 }
+
+/**
+ * One line of a typed ingredient list: "500 g lentils" → amount "500 g",
+ * name "lentils"; "6 eggs" → "6", "eggs"; "salt" → no amount
+ */
+export function ingredientLine(line: string): {
+    name: string;
+    amount_text: string;
+} {
+    const m = line
+        .trim()
+        .match(
+            /^(\d+(?:[.,]\d+)?\s*(?:kg|g|gr|mg|ml|cl|l|tbsp|tsp|cups?|pcs)?)\s+(.+)$/i,
+        );
+
+    return m
+        ? { amount_text: m[1].trim(), name: m[2].trim() }
+        : { amount_text: '', name: line.trim() };
+}
