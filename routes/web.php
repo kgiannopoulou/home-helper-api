@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\HealthController;
 use App\Http\Controllers\Web\HouseholdController;
 use App\Http\Controllers\Web\KitchenController;
+use App\Http\Controllers\Web\MealsController;
 use App\Http\Controllers\Web\MemoryController;
 use App\Http\Controllers\Web\PlannerController;
 use App\Http\Controllers\Web\ReceiptController;
@@ -88,6 +89,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/', 'store')->middleware('throttle:uploads')->name('store');
             Route::post('{receipt}/import', 'import')->name('import');
             Route::delete('{receipt}', 'destroy')->name('destroy');
+        });
+
+        // The meal plan (docs/kitchen.md#meal-plan)
+        Route::controller(MealsController::class)->prefix('meals')->name('meals')->group(function () {
+            Route::get('/', 'show');
+            Route::post('plan', 'auto')->name('.plan');
+            Route::post('{entry}/cooked', 'cooked')->name('.cooked');
+            Route::put('{date}/{meal}', 'set')->where(['date' => '\d{4}-\d{2}-\d{2}', 'meal' => 'breakfast|lunch|dinner'])->name('.set');
+            Route::delete('{date}/{meal}', 'clear')->where(['date' => '\d{4}-\d{2}-\d{2}', 'meal' => 'breakfast|lunch|dinner'])->name('.clear');
         });
 
         // The household's computers, through the local agent (agent/docs/design.md)

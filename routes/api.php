@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\InventoryItemController;
 use App\Http\Controllers\Api\InviteController;
 use App\Http\Controllers\Api\ItemPriceController;
 use App\Http\Controllers\Api\KitchenController;
+use App\Http\Controllers\Api\MealPlanController;
 use App\Http\Controllers\Api\MemoryController;
 use App\Http\Controllers\Api\PlantAlertController;
 use App\Http\Controllers\Api\PlantCareController;
@@ -174,6 +175,14 @@ Route::name('api.')->group(function () {
                 Route::get('{recipe}', 'show')->name('show');
                 Route::post('{recipe}/cook', 'cook')->name('cook');
                 Route::post('{recipe}/shopping', 'shopping')->name('shopping');
+            });
+            // The meal plan (docs/kitchen.md#meal-plan)
+            Route::controller(MealPlanController::class)->prefix('meal-plan')->name('meal-plan.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('plan', 'auto')->name('plan');
+                Route::post('{entry}/cooked', 'cooked')->name('cooked');
+                Route::put('{date}/{meal}', 'set')->where(['date' => '\d{4}-\d{2}-\d{2}', 'meal' => 'breakfast|lunch|dinner'])->name('set');
+                Route::delete('{date}/{meal}', 'clear')->where(['date' => '\d{4}-\d{2}-\d{2}', 'meal' => 'breakfast|lunch|dinner'])->name('clear');
             });
             // Receipts (docs/kitchen.md#receipts)
             Route::controller(ReceiptController::class)->prefix('kitchen/receipts')->name('kitchen.receipts.')->group(function () {

@@ -17,10 +17,13 @@ built in [Phase 7](phase-7.md) on top of the phone's inventory, shopping list an
 | `app/Queries/KitchenWasteQuery` | what was thrown away and what it cost |
 | `app/Queries/RecipeMatchQuery`, `app/Kitchen/Recipes/*` | what to cook, in SQL; cooking (`Cooking`), the library (`RecipeLibrary`, `database/data/recipes.php`) |
 | `app/Ai/Tools/Shopping/SuggestRecipes` | `suggest_recipes` for the assistant |
+| `app/Kitchen/Planning/*` | `MealPlanner` (plan the week), `PlanShoppingList` (the list it keeps), `MealPlan` (the actions) |
+| `app/Ai/Tools/Shopping/GetMealPlan` | `get_meal_plan`: "what's for dinner?" |
+| `app/Http/Controllers/Web/MealsController` | the Meals page |
 | `app/Http/Controllers/Api/KitchenController` | use, add and history for the phone |
 | `app/Http/Controllers/Web/KitchenController` | the Kitchen page |
 
-Tables: `inventory_items` (since Phase 1, extended), `kitchen_movements`, `products`, `receipts`, `recipes`, `recipe_ingredients`
+Tables: `inventory_items` (since Phase 1, extended), `kitchen_movements`, `products`, `receipts`, `recipes`, `recipe_ingredients`, `meal_plan_entries`
 ([diagram](database.md)).
 
 ## Amounts and units
@@ -237,6 +240,41 @@ The assistant has `suggest_recipes` ("what can I cook?", "what do I do with the 
 and the morning expiry push ends with a recipe that uses what's going off: "Eggs (tomorrow).
 Try: Strapatsada."
 
+## Meal plan
+
+The **Meals** page is a week of breakfasts, lunches and dinners. Each meal is a recipe (Home
+Helper's or the household's own) or just a title ("Eating out", "Leftovers"), for a number of
+people: the household's size unless changed.
+
+**Plan the dinners** (`MealPlanner`) fills the empty ones for the week, one day at a time,
+against a *copy* of the kitchen that each chosen meal uses up, so Tuesday doesn't plan on the
+eggs Monday already ate. Meals someone planned stay, and their ingredients come out of the copy
+first. Each recipe that fits the meal (breakfast recipes for breakfast, no desserts for dinner,
+the tag if one was asked for, not already this week) is scored:
+
+| | |
+|---|---|
+| +12 / +8 | per ingredient going off that day / the next: use it first |
+| −4 | per ingredient the kitchen won't have (it'll go on the list) |
+| −3 | the same main ingredient as yesterday |
+| −2 | over 45 minutes on a weekday |
+
+Planned meals are marked "suggested" until someone changes them. **Cooked** takes the
+ingredients out of the kitchen, like *Cooked it* for a recipe.
+
+**The shopping list keeps up with the plan** (`PlanShoppingList`): everything the planned,
+not yet cooked meals need, minus what the kitchen has, in the amounts still missing, summed
+across meals ("700 g tomato for the salad and the strapatsada"). Its own lines (source
+`meal_plan`) are added, their amounts updated and removed again as meals change or food is
+bought. Lines a person added, or already ticked, are left alone and count as already listed.
+Staples and optional ingredients never go on. Every change on the Meals page refreshes the
+list for the next seven days, and the evening before the usual shopping day
+(`PrepareShoppingList`, since Phase 5) it covers the week from the shopping day and says so in
+its push. Running it again changes nothing.
+
+The assistant has `get_meal_plan`: what's planned, whether it's cooked, and what's still
+needed.
+
 ## API
 
 | | |
@@ -256,6 +294,11 @@ Try: Strapatsada."
 | `POST /api/households/{h}/kitchen/recipes` | `{name, servings, minutes?, tags?, steps, ingredients: [{name, amount_text?, optional?}]}` |
 | `POST /api/households/{h}/kitchen/recipes/{id}/cook` | `{servings?}`: what was used and what was missing |
 | `POST /api/households/{h}/kitchen/recipes/{id}/shopping` | `{servings?}`: what was added to the list |
+| `GET  /api/households/{h}/meal-plan` | `?from=YYYY-MM-DD`: the week's meals and what they still need |
+| `PUT  /api/households/{h}/meal-plan/{date}/{meal}` | `{recipe_id \| title, servings}`; meal is breakfast, lunch or dinner |
+| `DELETE /api/households/{h}/meal-plan/{date}/{meal}` | |
+| `POST /api/households/{h}/meal-plan/plan` | `{from?, days?, meals?, tag?, servings?}`: fill the empty meals |
+| `POST /api/households/{h}/meal-plan/{entry}/cooked` | what was used and what was missing |
 | `POST /api/households/{h}/kitchen/receipts` | multipart `photo` (jpg, png, webp, 10 MB) or `text`: a draft. 10 a minute |
 | `GET  /api/households/{h}/kitchen/receipts/{id}` | the draft |
 | `POST /api/households/{h}/kitchen/receipts/{id}/import` | `{store?, purchased_on?, lines?: {index: {include, item_id, name, amount_text, location}}}` |

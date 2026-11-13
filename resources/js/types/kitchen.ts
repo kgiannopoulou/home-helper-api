@@ -173,3 +173,43 @@ export type RecipeDetail = {
         staple: boolean;
     }[];
 };
+
+export type Meal = 'breakfast' | 'lunch' | 'dinner';
+
+/** App\Kitchen\Planning\MealPlan::entry() */
+export type MealEntry = {
+    id: string;
+    date: string;
+    meal: Meal;
+    recipe_id: string | null;
+    /** The recipe's name, or what was written ("Eating out") */
+    label: string;
+    servings: number;
+    /** Chosen by "plan the week" */
+    auto: boolean;
+    cooked: boolean;
+    minutes: number | null;
+};
+
+export type MealDay = {
+    date: string;
+    meals: Record<Meal, MealEntry | null>;
+};
+
+/** A recipe for the pickers: what suits the kitchen first */
+export type RecipeChoice = {
+    id: string;
+    name: string;
+    minutes: number | null;
+    tags: string[];
+    suggested: boolean;
+};
+
+/** App\Kitchen\Planning\PlanShoppingList::needed() */
+export type PlanNeed = {
+    ingredient: string;
+    amount: number | null;
+    unit: string | null;
+    /** The recipes that need it */
+    for: string[];
+};

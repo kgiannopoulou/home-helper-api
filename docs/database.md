@@ -46,6 +46,8 @@ erDiagram
     households ||--o{ job_runs : "household_id"
     inventory_items ||--o{ kitchen_movements : "inventory_item_id"
     users |o--o{ kitchen_movements : "user_id"
+    users |o--o{ meal_plan_entries : "created_by"
+    recipes |o--o{ meal_plan_entries : "recipe_id"
     users |o--o{ memory_chunks : "user_id"
     users |o--o{ notes : "user_id"
     plants ||--o{ plant_alerts : "plant_id"
@@ -322,12 +324,27 @@ erDiagram
         tinyint optional
         tinyint staple
     }
+    meal_plan_entries {
+        char id PK
+        char household_id FK
+        date date
+        enum meal
+        char recipe_id FK "nullable"
+        varchar title "nullable"
+        tinyint servings
+        tinyint auto
+        timestamp cooked_at "nullable"
+        bigint created_by FK "nullable"
+    }
     households ||--o{ inventory_items : "household_id"
     households ||--o{ item_prices : "household_id"
     shopping_trips |o--o{ item_prices : "shopping_trip_id"
     households ||--o{ kitchen_movements : "household_id"
     inventory_items ||--o{ kitchen_movements : "inventory_item_id"
     users |o--o{ kitchen_movements : "user_id"
+    users |o--o{ meal_plan_entries : "created_by"
+    households ||--o{ meal_plan_entries : "household_id"
+    recipes |o--o{ meal_plan_entries : "recipe_id"
     households ||--o{ purchases : "household_id"
     inventory_items ||--o{ purchases : "household_id"
     inventory_items ||--o{ purchases : "inventory_item_id"

@@ -13,4 +13,6 @@ enum ShoppingSource: string
     case Inventory = 'inventory';
     // "Add what's missing" from a recipe or the meal plan (Phase 7)
     case Recipe = 'recipe';
+    // Kept up to date by the meal plan (App\Kitchen\Planning\PlanShoppingList)
+    case MealPlan = 'meal_plan';
 }

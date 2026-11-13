@@ -108,3 +108,10 @@ export function ingredientLine(line: string): {
         ? { amount_text: m[1].trim(), name: m[2].trim() }
         : { amount_text: '', name: line.trim() };
 }
+
+/** "2026-11-16" + 7 → "2026-11-23", as calendar days */
+export function addDays(date: string, days: number): string {
+    const [y, m, d] = date.split('-').map(Number);
+
+    return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}
