@@ -1,0 +1,48 @@
+# Home Assistant for Home Helper (docs/smart-home.md).
+#
+# This is the configuration of the *test home* that runs in Docker next to
+# the app (docker compose --profile smart-home up -d homeassistant). It is a
+# real Home Assistant: the same REST API, the same events, the same service
+# calls as the Raspberry Pi at home. Only the devices are simulated
+# (packages/test_home.yaml), so the end-to-end tests can open a door or
+# make the bathroom humid on demand.
+#
+# On a real installation you copy only packages/home_helper.yaml, which
+# forwards state changes to Home Helper (docs/smart-home/setup.md).
+
+homeassistant:
+  name: Home Helper test home
+  # Central Athens, not anybody's house
+  latitude: 37.9755
+  longitude: 23.7348
+  elevation: 100
+  unit_system: metric
+  time_zone: Europe/Athens
+  currency: EUR
+  country: GR
+  language: en
+  packages: !include_dir_named packages
+
+# Not default_config: discovery (zeroconf, SSDP, Bluetooth) has nothing to
+# find inside a container and only slows the start down.
+frontend:
+config:
+api:
+history:
+logbook:
+sun:
+automation:
+script:
+person:
+mobile_app:
+system_health:
+
+# The test home is reached as http://homeassistant:8123 on the sail network
+# and http://localhost:8123 from the host
+http:
+
+logger:
+  default: warning
+  logs:
+    homeassistant.components.rest_command: info
+    homeassistant.components.automation: info

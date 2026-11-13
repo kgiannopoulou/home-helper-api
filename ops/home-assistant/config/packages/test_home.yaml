@@ -1,0 +1,187 @@
+# The test home's devices (docs/smart-home.md#the-test-home).
+#
+# Each "device" is a Home Assistant template entity backed by a helper
+# (input_boolean / input_number, named sim_*). To Home Helper they are
+# indistinguishable from real ones: a light.*, switch.*, sensor.*,
+# binary_sensor.* or lock.* with the usual attributes, changed through the
+# usual service calls. The helpers let a test play the physical world:
+#
+#   open the front door     input_boolean.turn_on  sim_front_door_open
+#   make the bathroom humid input_number.set_value sim_bathroom_humidity 78
+#   unplug the lamp         input_boolean.turn_on  sim_living_room_lamp_offline
+#
+# Rooms (areas) are created by scripts/onboard.py, because Home Assistant
+# keeps areas in its registry, not in YAML.
+
+input_boolean:
+  sim_living_room_lamp: { name: "sim: living room lamp on" }
+  sim_living_room_lamp_offline: { name: "sim: living room lamp unplugged" }
+  sim_kitchen_ceiling: { name: "sim: kitchen ceiling on" }
+  sim_bedroom_lamp: { name: "sim: bedroom lamp on" }
+  sim_hallway_light: { name: "sim: hallway light on" }
+  sim_dehumidifier: { name: "sim: dehumidifier plug on" }
+  sim_coffee_machine: { name: "sim: coffee machine plug on" }
+  sim_front_door_open: { name: "sim: front door open" }
+  sim_balcony_door_open: { name: "sim: balcony door open" }
+  sim_bedroom_window_open: { name: "sim: bedroom window open" }
+  sim_hallway_motion: { name: "sim: hallway motion" }
+  sim_front_door_locked: { name: "sim: front door locked", initial: true }
+
+input_number:
+  sim_living_room_lamp_brightness: { name: "sim: lamp brightness", min: 0, max: 255, step: 1, initial: 180 }
+  sim_bedroom_lamp_brightness: { name: "sim: bedroom lamp brightness", min: 0, max: 255, step: 1, initial: 120 }
+  sim_living_room_temperature: { name: "sim: living room °C", min: -10, max: 45, step: 0.1, initial: 21.5 }
+  sim_living_room_humidity: { name: "sim: living room %", min: 0, max: 100, step: 1, initial: 48 }
+  sim_bathroom_temperature: { name: "sim: bathroom °C", min: -10, max: 45, step: 0.1, initial: 23.0 }
+  sim_bathroom_humidity: { name: "sim: bathroom %", min: 0, max: 100, step: 1, initial: 55 }
+  sim_bedroom_temperature: { name: "sim: bedroom °C", min: -10, max: 45, step: 0.1, initial: 19.5 }
+  sim_bedroom_humidity: { name: "sim: bedroom %", min: 0, max: 100, step: 1, initial: 50 }
+
+template:
+  - light:
+      - name: Living room lamp
+        unique_id: hh_living_room_lamp
+        state: "{{ is_state('input_boolean.sim_living_room_lamp', 'on') }}"
+        level: "{{ states('input_number.sim_living_room_lamp_brightness') | int(0) }}"
+        availability: "{{ is_state('input_boolean.sim_living_room_lamp_offline', 'off') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target: { entity_id: input_boolean.sim_living_room_lamp }
+        turn_off:
+          - action: input_boolean.turn_off
+            target: { entity_id: input_boolean.sim_living_room_lamp }
+        set_level:
+          - action: input_boolean.turn_on
+            target: { entity_id: input_boolean.sim_living_room_lamp }
+          - action: input_number.set_value
+            target: { entity_id: input_number.sim_living_room_lamp_brightness }
+            data: { value: "{{ brightness }}" }
+
+      - name: Bedroom lamp
+        unique_id: hh_bedroom_lamp
+        state: "{{ is_state('input_boolean.sim_bedroom_lamp', 'on') }}"
+        level: "{{ states('input_number.sim_bedroom_lamp_brightness') | int(0) }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target: { entity_id: input_boolean.sim_bedroom_lamp }
+        turn_off:
+          - action: input_boolean.turn_off
+            target: { entity_id: input_boolean.sim_bedroom_lamp }
+        set_level:
+          - action: input_boolean.turn_on
+            target: { entity_id: input_boolean.sim_bedroom_lamp }
+          - action: input_number.set_value
+            target: { entity_id: input_number.sim_bedroom_lamp_brightness }
+            data: { value: "{{ brightness }}" }
+
+      # On/off only, like most ceiling lights behind a smart relay
+      - name: Kitchen ceiling
+        unique_id: hh_kitchen_ceiling
+        state: "{{ is_state('input_boolean.sim_kitchen_ceiling', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target: { entity_id: input_boolean.sim_kitchen_ceiling }
+        turn_off:
+          - action: input_boolean.turn_off
+            target: { entity_id: input_boolean.sim_kitchen_ceiling }
+
+  - switch:
+      - name: Hallway light
+        unique_id: hh_hallway_light
+        state: "{{ is_state('input_boolean.sim_hallway_light', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target: { entity_id: input_boolean.sim_hallway_light }
+        turn_off:
+          - action: input_boolean.turn_off
+            target: { entity_id: input_boolean.sim_hallway_light }
+
+      - name: Dehumidifier plug
+        unique_id: hh_dehumidifier_plug
+        state: "{{ is_state('input_boolean.sim_dehumidifier', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target: { entity_id: input_boolean.sim_dehumidifier }
+        turn_off:
+          - action: input_boolean.turn_off
+            target: { entity_id: input_boolean.sim_dehumidifier }
+
+      # Something that heats: Home Helper treats it as sensitive (docs/smart-home.md#sensitive-actions)
+      - name: Coffee machine plug
+        unique_id: hh_coffee_machine_plug
+        state: "{{ is_state('input_boolean.sim_coffee_machine', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target: { entity_id: input_boolean.sim_coffee_machine }
+        turn_off:
+          - action: input_boolean.turn_off
+            target: { entity_id: input_boolean.sim_coffee_machine }
+
+  - sensor:
+      - name: Living room temperature
+        unique_id: hh_living_room_temperature
+        state: "{{ states('input_number.sim_living_room_temperature') | float | round(1) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+      - name: Living room humidity
+        unique_id: hh_living_room_humidity
+        state: "{{ states('input_number.sim_living_room_humidity') | int }}"
+        unit_of_measurement: "%"
+        device_class: humidity
+        state_class: measurement
+      - name: Bathroom temperature
+        unique_id: hh_bathroom_temperature
+        state: "{{ states('input_number.sim_bathroom_temperature') | float | round(1) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+      - name: Bathroom humidity
+        unique_id: hh_bathroom_humidity
+        state: "{{ states('input_number.sim_bathroom_humidity') | int }}"
+        unit_of_measurement: "%"
+        device_class: humidity
+        state_class: measurement
+      - name: Bedroom temperature
+        unique_id: hh_bedroom_temperature
+        state: "{{ states('input_number.sim_bedroom_temperature') | float | round(1) }}"
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+      - name: Bedroom humidity
+        unique_id: hh_bedroom_humidity
+        state: "{{ states('input_number.sim_bedroom_humidity') | int }}"
+        unit_of_measurement: "%"
+        device_class: humidity
+        state_class: measurement
+
+  - binary_sensor:
+      - name: Front door
+        unique_id: hh_front_door
+        state: "{{ is_state('input_boolean.sim_front_door_open', 'on') }}"
+        device_class: door
+      - name: Balcony door
+        unique_id: hh_balcony_door
+        state: "{{ is_state('input_boolean.sim_balcony_door_open', 'on') }}"
+        device_class: door
+      - name: Bedroom window
+        unique_id: hh_bedroom_window
+        state: "{{ is_state('input_boolean.sim_bedroom_window_open', 'on') }}"
+        device_class: window
+      # Like the microwave radar motion sensors (BroadLink / Smart Life kits)
+      - name: Hallway motion
+        unique_id: hh_hallway_motion
+        state: "{{ is_state('input_boolean.sim_hallway_motion', 'on') }}"
+        device_class: motion
+
+  - lock:
+      # Always sensitive in Home Helper: unlocking needs the owner's approval
+      - name: Front door lock
+        unique_id: hh_front_door_lock
+        state: "{{ is_state('input_boolean.sim_front_door_locked', 'on') }}"
+        lock:
+          - action: input_boolean.turn_on
+            target: { entity_id: input_boolean.sim_front_door_locked }
+        unlock:
+          - action: input_boolean.turn_off
+            target: { entity_id: input_boolean.sim_front_door_locked }
