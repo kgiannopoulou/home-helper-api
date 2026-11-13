@@ -5,9 +5,11 @@ namespace App\Models;
 use App\Enums\ItemCategory;
 use App\Enums\StockLevel;
 use App\Enums\StorageLocation;
+use App\Kitchen\Expiry;
 use App\Kitchen\Ingredients;
 use App\Kitchen\Units;
 use App\Models\Concerns\BelongsToHousehold;
+use App\Support\HomeTime;
 use Carbon\CarbonImmutable;
 use Database\Factories\InventoryItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -39,7 +41,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property float|null $full_amount the most it has held, in $unit
  * @property string|null $barcode the pack it was scanned as (App\Kitchen\Barcodes\Gtin)
  * @property float|null $pack_amount what one scanned pack adds, in $unit
- * @property CarbonImmutable|null $expires_on
+ * @property CarbonImmutable|null $expires_on use by; estimated (App\Kitchen\ShelfLife) unless typed
+ * @property bool $expiry_estimated
+ * @property CarbonImmutable|null $opened_on
+ * @property CarbonImmutable|null $expiry_notified_on the date the morning push already mentioned
  */
 #[Fillable(['name', 'ingredient', 'category', 'location', 'level', 'quantity', 'amount', 'unit', 'full_amount', 'expires_on'])]
 class InventoryItem extends Model
@@ -57,12 +62,19 @@ class InventoryItem extends Model
             'full_amount' => 'float',
             'pack_amount' => 'float',
             'expires_on' => 'date',
+            'expiry_estimated' => 'boolean',
+            'opened_on' => 'date',
+            'expiry_notified_on' => 'date',
         ];
     }
 
     protected static function booted(): void
     {
         static::saving(function (InventoryItem $item) {
+            // Into the freezer or out of it: a new use-by date (day 88)
+            if ($item->exists && $item->isDirty('location')) {
+                app(Expiry::class)->moved($item, StorageLocation::tryFrom((string) $item->getRawOriginal('location')), HomeTime::today());
+            }
             // The key follows the name, unless someone chose it
             if (($item->isDirty('name') && ! $item->isDirty('ingredient')) || ! $item->ingredient) {
                 $item->ingredient = Ingredients::key($item->name);

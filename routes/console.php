@@ -2,6 +2,7 @@
 
 use App\Jobs\ApplyRecurringBills;
 use App\Jobs\BudgetAlert;
+use App\Jobs\CheckExpiringFood;
 use App\Jobs\CheckPlantCare;
 use App\Jobs\DailyBriefing;
 use App\Jobs\HouseholdJob;
@@ -40,6 +41,8 @@ Schedule::job(new ApplyRecurringBills)->dailyAt('06:00')->timezone($home)->onOne
 Schedule::job(new LearnChoreFrequencies)->dailyAt('04:00')->timezone($home)->onOneServer();
 Schedule::job(new PrepareShoppingList)->dailyAt('17:00')->timezone($home)->onOneServer();
 Schedule::job(new BudgetAlert)->dailyAt('18:00')->timezone($home)->onOneServer();
+// What goes off today or tomorrow (docs/kitchen.md#expiry)
+Schedule::job(new CheckExpiringFood)->dailyAt('09:00')->timezone($home)->onOneServer();
 Schedule::job(new WeeklySummary)->sundays()->at('19:00')->timezone($home)->onOneServer();
 // One evaluator for every plant, not one schedule per plant (app/Jobs/CheckPlantCare.php)
 Schedule::job(new CheckPlantCare)->hourly()->timezone($home)->onOneServer();

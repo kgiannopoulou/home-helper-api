@@ -12,6 +12,9 @@ built in [Phase 7](phase-7.md) on top of the phone's inventory, shopping list an
 | `app/Kitchen/Pantry` | every change of an amount, recorded and locked |
 | `app/Kitchen/Barcodes/*` | `Gtin` check digits, `Scanner`, `OpenFoodFacts` behind `ProductLookup` |
 | `app/Kitchen/Receipts/*` | `TesseractOcr` behind `Ocr`, `OcrText`, `ReceiptParser`, `Receipts` (read, import, discard) |
+| `app/Kitchen/ShelfLife`, `Expiry` | how long food keeps; estimated dates, opened, frozen, thawed |
+| `app/Jobs/CheckExpiringFood` | the 09:00 push |
+| `app/Queries/KitchenWasteQuery` | what was thrown away and what it cost |
 | `app/Http/Controllers/Api/KitchenController` | use, add and history for the phone |
 | `app/Http/Controllers/Web/KitchenController` | the Kitchen page |
 
@@ -161,6 +164,43 @@ Real-OCR test: `ReceiptsTest` reads the fixture photo with the real `tesseract` 
 six food lines, the date and a total that adds up. It runs in CI (Tesseract is installed there)
 and locally in `ops/ocr/Dockerfile`'s image. Elsewhere it's skipped.
 
+## Expiry
+
+`expires_on` has been on inventory items since Phase 1, but the phone had to fill it in by
+hand. Now:
+
+- **A date typed from the pack is the truth.** Without one, Home Helper **estimates** it when food
+  comes in (bought, scanned, from a receipt) from `ShelfLife`: rough, cautious household figures
+  per ingredient (milk 7 days, chicken 2 in the fridge and 9 months frozen, rice 2 years), or
+  the storage place's default. Estimates are marked, and the page says "about". A new pack
+  doesn't replace a typed date that's still ahead, because the older pack goes off first, unless
+  the item had run out.
+- **Opened** brings the date closer, never further: yoghurt 5 days, milk 4, cream 4, olive oil
+  6 months.
+- **Into the freezer** it keeps for months. **Out of it**, two days at most.
+- **Still good** ("looked at it, smelt it") gives two more days, and asks again.
+
+Only food that's actually there counts: an item with nothing left has no date to worry about.
+
+**The morning push** (`CheckExpiringFood`, 09:00 home time) names what goes off today or
+tomorrow, or already has: "🥛 Use soon: Greek yoghurt (today) and Milk (tomorrow)." Each item is
+mentioned **once per date**, so it isn't repeated every morning until Friday. A new date (a new
+pack, opened, still good) makes it count again, and only a push that reached a phone counts as
+mentioned. When everything due has already gone off, the title says so. Nothing is ever thrown
+away by itself.
+
+**Use soon** on the Kitchen page lists the same for three days ahead, with *Used up*, *Thrown
+away* (recorded as `expired` once the date has passed), *Opened*, *Still good* and the date on
+the pack.
+
+## Waste
+
+Everything recorded as `wasted` or `expired` is waste. `KitchenWasteQuery` adds it up per item
+over the last 30 days, with an estimated cost: the share of a pack that went, times what the
+last pack cost (`purchases`, newest first by `ROW_NUMBER()`). Items never bought through Home
+Helper have no price and say so. The Kitchen page shows it as *Thrown away*, and the API takes
+any period up to a year.
+
 ## API
 
 | | |
@@ -169,6 +209,11 @@ and locally in `ops/ocr/Dockerfile`'s image. Elsewhere it's skipped.
 | `POST /api/households/{h}/inventory-items/{item}/use` | `{kind: used\|cooked\|wasted\|expired, amount?, unit?}`, no amount = all of it |
 | `POST /api/households/{h}/inventory-items/{item}/add` | `{amount, unit?}` |
 | `GET  /api/households/{h}/kitchen/movements` | `?item=&kind=`, newest first |
+| `GET  /api/households/{h}/kitchen/expiring` | `?days=7`: in stock and going off, with `expiry: {state, days}` |
+| `POST /api/households/{h}/inventory-items/{item}/opened` | the date comes closer |
+| `POST /api/households/{h}/inventory-items/{item}/expiry` | `{expires_on}`: the date on the pack |
+| `POST /api/households/{h}/inventory-items/{item}/still-good` | two more days |
+| `GET  /api/households/{h}/kitchen/waste` | `?days=30`: items, amounts, estimated cost |
 | `GET  /api/households/{h}/kitchen/barcodes/{code}` | the household's item, a suggestion and the product; 422 for a misread. 30 a minute |
 | `POST /api/households/{h}/kitchen/receipts` | multipart `photo` (jpg, png, webp, 10 MB) or `text`: a draft. 10 a minute |
 | `GET  /api/households/{h}/kitchen/receipts/{id}` | the draft |

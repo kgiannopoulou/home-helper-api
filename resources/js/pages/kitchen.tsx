@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import InputError from '@/components/input-error';
 import Heading from '@/components/heading';
 import { BarcodeScanner } from '@/components/kitchen/barcode-scanner';
+import { ExpiringCard, WasteCard } from '@/components/kitchen/expiry-cards';
 import { InventoryCard } from '@/components/kitchen/inventory-card';
 import { ReceiptCard } from '@/components/kitchen/receipt-card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,12 @@ import { Label } from '@/components/ui/label';
 import { byLocation, LOCATION_LABEL } from '@/lib/kitchen';
 import { kitchen as kitchenRoute } from '@/routes';
 import { store } from '@/routes/kitchen/items';
-import type { KitchenItem, Movement, ReceiptDraft } from '@/types/kitchen';
+import type {
+    KitchenItem,
+    Movement,
+    ReceiptDraft,
+    Waste,
+} from '@/types/kitchen';
 
 type Props = {
     items: KitchenItem[];
@@ -28,6 +34,9 @@ type Props = {
     receipt: ReceiptDraft | null;
     /** Photos can be read here (KITCHEN_OCR) */
     photos: boolean;
+    /** In stock and going off within three days */
+    expiring: KitchenItem[];
+    waste: Waste;
 };
 
 const KIND_LABEL: Record<Movement['kind'], string> = {
@@ -49,6 +58,8 @@ export default function Kitchen({
     locations,
     receipt,
     photos,
+    expiring,
+    waste,
 }: Props) {
     const groups = byLocation(items);
     const kitchenPlaces = locations.filter(
@@ -138,6 +149,11 @@ export default function Kitchen({
                             </Form>
                         </CardContent>
                     </Card>
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <ExpiringCard items={expiring} />
+                    <WasteCard waste={waste} />
                 </div>
 
                 <ReceiptCard receipt={receipt} photos={photos} />

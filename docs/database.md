@@ -245,6 +245,9 @@ erDiagram
         decimal full_amount "nullable"
         decimal pack_amount "nullable"
         date expires_on "nullable"
+        tinyint expiry_estimated
+        date opened_on "nullable"
+        date expiry_notified_on "nullable"
         tinyint alive "nullable, generated"
     }
     purchases {

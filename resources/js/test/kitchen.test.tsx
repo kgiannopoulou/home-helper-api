@@ -69,6 +69,8 @@ describe('Kitchen page', () => {
                 locations={['fridge', 'freezer', 'pantry', 'cleaning']}
                 receipt={null}
                 photos
+                expiring={[]}
+                waste={{ days: 30, items: [], value: 0, priced: 0 }}
             />,
         );
 
@@ -92,6 +94,8 @@ describe('Kitchen page', () => {
                 locations={['fridge']}
                 receipt={null}
                 photos={false}
+                expiring={[]}
+                waste={{ days: 30, items: [], value: 0, priced: 0 }}
             />,
         );
 

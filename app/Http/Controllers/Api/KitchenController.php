@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InventoryItemResource;
+use App\Kitchen\Expiry;
 use App\Kitchen\Pantry;
 use App\Models\Household;
 use App\Models\InventoryItem;
 use App\Models\KitchenMovement;
+use App\Queries\KitchenWasteQuery;
+use App\Support\HomeTime;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -67,6 +71,55 @@ class KitchenController extends Controller
             ->orderByDesc('occurred_at')->limit(100)->get();
 
         return response()->json(['data' => $rows->map(fn (KitchenMovement $m) => self::movement($m))->all()]);
+    }
+
+    /** GET kitchen/expiring?days=7: in stock and going off within the days (or already), soonest first */
+    public function expiring(Request $request, Household $household, Expiry $expiry): JsonResponse
+    {
+        Gate::authorize('viewAny', [InventoryItem::class, $household]);
+        $days = (int) ($request->validate(['days' => ['nullable', 'integer', 'between:0,60']])['days'] ?? 7);
+        $today = HomeTime::today();
+
+        return response()->json(['data' => $expiry->expiring($household, $today, $days)
+            ->map(fn (InventoryItem $i) => (new InventoryItemResource($i))->resolve() + ['expiry' => Expiry::status($i, $today)])->all()]);
+    }
+
+    /** GET kitchen/waste?days=30: what was thrown away, and roughly what it cost */
+    public function waste(Request $request, Household $household): JsonResponse
+    {
+        Gate::authorize('viewAny', [InventoryItem::class, $household]);
+        $days = (int) ($request->validate(['days' => ['nullable', 'integer', 'between:1,365']])['days'] ?? 30);
+
+        return response()->json((new KitchenWasteQuery($household, HomeTime::today(), $days))->get());
+    }
+
+    /** POST inventory-items/{item}/opened: the date can only come closer */
+    public function opened(Household $household, string $item, Expiry $expiry): JsonResponse
+    {
+        $row = $this->item($household, $item);
+        $expiry->opened($row, HomeTime::today());
+        $row->save();
+
+        return response()->json(['item' => new InventoryItemResource($row)]);
+    }
+
+    /** POST inventory-items/{item}/expiry {expires_on}: the date printed on the pack */
+    public function expiry(Request $request, Household $household, string $item, Expiry $expiry): JsonResponse
+    {
+        $row = $this->item($household, $item);
+        $data = $request->validate(['expires_on' => ['required', 'date_format:Y-m-d']]);
+        $expiry->set($row, CarbonImmutable::parse($data['expires_on'], HomeTime::zone()));
+
+        return response()->json(['item' => new InventoryItemResource($row)]);
+    }
+
+    /** POST inventory-items/{item}/still-good: checked it; ask again in two days */
+    public function stillGood(Household $household, string $item, Expiry $expiry): JsonResponse
+    {
+        $row = $this->item($household, $item);
+        $expiry->stillGood($row, HomeTime::today());
+
+        return response()->json(['item' => new InventoryItemResource($row)]);
     }
 
     /** @return array<string, mixed> */

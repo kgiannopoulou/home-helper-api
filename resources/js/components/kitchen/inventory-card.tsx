@@ -11,7 +11,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { fullness, LOCATION_LABEL } from '@/lib/kitchen';
+import { expiryText, fullness, LOCATION_LABEL } from '@/lib/kitchen';
 import { cn } from '@/lib/utils';
 import { add, destroy, take } from '@/routes/kitchen/items';
 import type { KitchenItem } from '@/types/kitchen';
@@ -68,6 +68,20 @@ export function ItemRow({ item }: { item: KitchenItem }) {
                             item.ingredient.toLowerCase() !==
                                 item.name.toLowerCase() && (
                                 <span> · {item.ingredient}</span>
+                            )}
+                        {item.expiry &&
+                            item.expiry.state !== 'none' &&
+                            item.expiry.state !== 'ok' && (
+                                <span
+                                    className={
+                                        item.expiry.state === 'expired'
+                                            ? 'text-destructive'
+                                            : ''
+                                    }
+                                >
+                                    {' '}
+                                    · {expiryText(item)}
+                                </span>
                             )}
                     </div>
                 </div>

@@ -5,6 +5,7 @@ namespace App\Kitchen;
 use App\Models\InventoryItem;
 use App\Models\KitchenMovement;
 use App\Models\User;
+use App\Support\HomeTime;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -20,6 +21,8 @@ use Illuminate\Validation\ValidationException;
  */
 class Pantry
 {
+    public function __construct(private Expiry $expiry) {}
+
     /**
      * Something came in: a shop, a receipt, a scanned pack
      *
@@ -104,10 +107,17 @@ class Pantry
         $movement->household_id = $locked->household_id;
         $movement->save();
 
+        $before = $this->current($locked, $base);
+        $wasEmpty = ! Expiry::inStock($locked);
         $locked->forceFill([
             'unit' => $base,
-            'amount' => max(0.0, $this->current($locked, $base) + $value),
-        ])->save();
+            'amount' => max(0.0, $before + $value),
+        ]);
+        // A new pack: a new use-by date, estimated unless one was typed (day 88)
+        if ($kind === 'bought' && $value > 0) {
+            $this->expiry->bought($locked, HomeTime::today(), $wasEmpty);
+        }
+        $locked->save();
 
         return $movement;
     }

@@ -68,6 +68,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('items/{item}/use', 'take')->name('.items.take');
             Route::post('items/{item}/add', 'add')->name('.items.add');
             Route::post('items/{item}/set', 'set')->name('.items.set');
+            Route::post('items/{item}/opened', 'opened')->name('.items.opened');
+            Route::post('items/{item}/expiry', 'expiry')->name('.items.expiry');
+            Route::post('items/{item}/still-good', 'stillGood')->name('.items.still-good');
             Route::delete('items/{item}', 'destroy')->name('.items.destroy');
         });
         Route::controller(BarcodeController::class)->prefix('kitchen/barcodes')->name('kitchen.barcodes.')->group(function () {

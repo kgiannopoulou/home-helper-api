@@ -157,6 +157,11 @@ Route::name('api.')->group(function () {
                 Route::post('inventory-items/{item}/use', 'take')->name('kitchen.use');
                 Route::post('inventory-items/{item}/add', 'add')->name('kitchen.add');
                 Route::get('kitchen/movements', 'movements')->name('kitchen.movements');
+                Route::get('kitchen/expiring', 'expiring')->name('kitchen.expiring');
+                Route::get('kitchen/waste', 'waste')->name('kitchen.waste');
+                Route::post('inventory-items/{item}/opened', 'opened')->name('kitchen.opened');
+                Route::post('inventory-items/{item}/expiry', 'expiry')->name('kitchen.expiry');
+                Route::post('inventory-items/{item}/still-good', 'stillGood')->name('kitchen.still-good');
             });
             // Barcodes (docs/kitchen.md#barcodes)
             Route::get('kitchen/barcodes/{code}', [BarcodeController::class, 'show'])->middleware('throttle:barcodes')->name('kitchen.barcodes.show');

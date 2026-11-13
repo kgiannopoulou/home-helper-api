@@ -68,3 +68,24 @@ export function lineAmount(line: {
 
     return `${Number(value.toFixed(2))} ${unit}`;
 }
+
+/** "today", "tomorrow", "in 3 days", "2 days ago"; "about" when estimated */
+export function expiryText(item: KitchenItem): string {
+    const days = item.expiry?.days;
+
+    if (days === null || days === undefined) {
+        return '';
+    }
+    const when =
+        days < -1
+            ? `went off ${-days} days ago`
+            : days === -1
+              ? 'went off yesterday'
+              : days === 0
+                ? 'use today'
+                : days === 1
+                  ? 'use by tomorrow'
+                  : `use within ${days} days`;
+
+    return item.expiry_estimated ? `${when} (about)` : when;
+}

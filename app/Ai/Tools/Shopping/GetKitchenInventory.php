@@ -56,6 +56,7 @@ class GetKitchenInventory extends Tool
             'amount' => $i->amountText() ?: null,
             'location' => $i->location?->value,
             'expires_on' => $i->expires_on?->toDateString(),
+            'expires_on_is_estimate' => $i->expires_on ? $i->expiry_estimated : null,
         ];
 
         $until = $context->today->addDays($input['expiring_within_days'] ?? 7)->toDateString();

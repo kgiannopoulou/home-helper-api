@@ -6,10 +6,14 @@ use App\Enums\ItemCategory;
 use App\Enums\StorageLocation;
 use App\Http\Controllers\Api\KitchenController as Api;
 use App\Http\Controllers\Api\ReceiptController as ReceiptApi;
+use App\Kitchen\Expiry;
 use App\Kitchen\Pantry;
 use App\Kitchen\Units;
 use App\Models\InventoryItem;
 use App\Models\KitchenMovement;
+use App\Queries\KitchenWasteQuery;
+use App\Support\HomeTime;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,6 +47,10 @@ class KitchenController extends WebController
             // The newest draft receipt waiting to be checked (docs/kitchen.md#receipts)
             'receipt' => ($draft = $household->receipts()->where('status', 'draft')->latest()->first()) ? ReceiptApi::receipt($draft) : null,
             'photos' => config('homehelper.kitchen.receipts.ocr') !== 'none',
+            // Use soon, and what went in the bin (docs/kitchen.md#expiry)
+            'expiring' => app(Expiry::class)->expiring($household, $this->today(), 3)
+                ->map(fn (InventoryItem $i) => self::item($i))->all(),
+            'waste' => (new KitchenWasteQuery($household, $this->today(), 30))->get(),
         ]);
     }
 
@@ -114,6 +122,34 @@ class KitchenController extends WebController
         return to_route('kitchen');
     }
 
+    /** POST /kitchen/items/{item}/opened */
+    public function opened(Request $request, string $item): RedirectResponse
+    {
+        $row = $this->find($request, $item);
+        app(Expiry::class)->opened($row, $this->today());
+        $row->save();
+
+        return to_route('kitchen');
+    }
+
+    /** POST /kitchen/items/{item}/expiry {expires_on}: the date on the pack */
+    public function expiry(Request $request, string $item): RedirectResponse
+    {
+        $row = $this->find($request, $item);
+        $data = $request->validate(['expires_on' => ['required', 'date_format:Y-m-d']]);
+        app(Expiry::class)->set($row, CarbonImmutable::parse($data['expires_on'], HomeTime::zone()));
+
+        return to_route('kitchen');
+    }
+
+    /** POST /kitchen/items/{item}/still-good */
+    public function stillGood(Request $request, string $item): RedirectResponse
+    {
+        app(Expiry::class)->stillGood($this->find($request, $item), $this->today());
+
+        return to_route('kitchen');
+    }
+
     public function destroy(Request $request, string $item): RedirectResponse
     {
         $row = $this->find($request, $item);
@@ -139,6 +175,9 @@ class KitchenController extends WebController
             'amount_text' => $i->amountText(),
             'barcode' => $i->barcode,
             'expires_on' => $i->expires_on?->toDateString(),
+            'expiry_estimated' => $i->expiry_estimated,
+            'opened_on' => $i->opened_on?->toDateString(),
+            'expiry' => Expiry::status($i, HomeTime::today()),
         ];
     }
 

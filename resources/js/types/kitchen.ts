@@ -14,6 +14,11 @@ export type KitchenItem = {
     /** "750 ml", or the phone's free text */
     amount_text: string;
     expires_on: string | null;
+    /** Estimated from how long it keeps (App\Kitchen\ShelfLife), not typed from the pack */
+    expiry_estimated?: boolean;
+    opened_on?: string | null;
+    /** App\Kitchen\Expiry::status() */
+    expiry?: Expiry;
     /** The pack it was scanned as */
     barcode: string | null;
 };
@@ -103,4 +108,27 @@ export type ReceiptDraft = {
     lines: ReceiptLine[];
     shopping_trip_id: string | null;
     created_at: string;
+};
+
+export type Expiry = {
+    state: 'expired' | 'today' | 'soon' | 'week' | 'ok' | 'none';
+    /** Days until it goes off; negative once it has */
+    days: number | null;
+};
+
+/** App\Queries\KitchenWasteQuery */
+export type Waste = {
+    days: number;
+    items: {
+        id: string;
+        name: string;
+        ingredient: string | null;
+        amount: number;
+        unit: string;
+        times: number;
+        value: number | null;
+    }[];
+    /** Euros, for the items with a price */
+    value: number;
+    priced: number;
 };
