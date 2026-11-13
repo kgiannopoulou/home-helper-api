@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $location_name
  * @property string|null $ha_version
  * @property string|null $time_zone
+ * @property array<string, string>|null $notify event type => always|night|never (App\SmartHome\Notifications)
  * @property CarbonImmutable|null $last_ok_at
  * @property CarbonImmutable|null $last_error_at
  * @property CarbonImmutable|null $last_event_at
@@ -48,6 +49,7 @@ class SmartHomeConnection extends Model
     {
         return [
             'token' => 'encrypted',
+            'notify' => 'array',
             'last_ok_at' => 'immutable_datetime',
             'last_error_at' => 'immutable_datetime',
             'last_event_at' => 'immutable_datetime',

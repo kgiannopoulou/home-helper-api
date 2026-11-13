@@ -101,6 +101,11 @@ function show(props: Partial<Parameters<typeof SmartHome>[0]> = {}) {
             comfort={[]}
             openings={[]}
             events={[]}
+            notifications={{
+                settings: { 'door.opened': 'night' },
+                labels: { 'door.opened': 'A door opens' },
+                night: { from: '23:00', to: '06:00' },
+            }}
             climate={{ sensors: [], history: [] }}
             candidates={[]}
             rooms={[]}
@@ -181,6 +186,18 @@ describe('the smart home page', () => {
         expect(within(row).getByText('Open · 12 min ago')).toBeInTheDocument();
         expect(within(row).getByText('2× today')).toBeInTheDocument();
         expect(screen.getByText('window.left_open')).toBeInTheDocument();
+    });
+
+    test('the owner chooses which events reach the phones', () => {
+        show();
+        fireEvent.change(screen.getByLabelText('A door opens'), {
+            target: { value: 'always' },
+        });
+        expect(inertiaMock.router.patch).toHaveBeenCalledWith(
+            expect.stringContaining('/smart-home/notifications'),
+            { notify: { 'door.opened': 'always' } },
+            expect.anything(),
+        );
     });
 
     test('offers the connect form when there is no Home Assistant yet', () => {

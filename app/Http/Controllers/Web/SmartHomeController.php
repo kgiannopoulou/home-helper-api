@@ -15,6 +15,7 @@ use App\SmartHome\Discovery;
 use App\SmartHome\HomeAssistantError;
 use App\SmartHome\HomeSummary;
 use App\SmartHome\Import;
+use App\SmartHome\Notifications;
 use App\SmartHome\Openings;
 use App\SmartHome\Readings;
 use Illuminate\Http\RedirectResponse;
@@ -61,6 +62,11 @@ class SmartHomeController extends WebController
                 ? $import->candidates($household)->load('room')->map(fn (SmartDevice $d) => DevicePresenter::toArray($d))->values()->all()
                 : [],
             'rooms' => $household->rooms()->where('personal', false)->orderBy('name')->get(['id', 'name'])->toArray(),
+            'notifications' => [
+                'settings' => Notifications::settings($connection),
+                'labels' => array_map(fn (array $t) => $t[1], Notifications::TYPES),
+                'night' => config('homehelper.smart_home.night'),
+            ],
             'can' => [
                 'manage' => $policy->manage($user, $household),
                 'control' => $policy->control($user, $household),
@@ -118,6 +124,22 @@ class SmartHomeController extends WebController
         $connection = $this->connectionOf($request);
 
         return $this->showWebhookOnce($connection, $connections->rotateSecret($connection));
+    }
+
+    /** Which events reach the phones: type => always | night | never */
+    public function notifications(Request $request): RedirectResponse
+    {
+        $household = $this->household($request);
+        $this->authorizeManage($request, $household);
+        $connection = $this->connectionOf($request);
+        $data = $request->validate([
+            'notify' => ['required', 'array'],
+            'notify.*' => ['required', 'in:'.implode(',', Notifications::LEVELS)],
+        ]);
+        $known = array_intersect_key($data['notify'], Notifications::TYPES);
+        $connection->forceFill(['notify' => array_merge(Notifications::settings($connection), $known)])->save();
+
+        return to_route('smart-home');
     }
 
     /** "Sync now": find new devices and refresh every state */

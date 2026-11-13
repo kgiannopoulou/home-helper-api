@@ -771,6 +771,7 @@ erDiagram
         varchar location_name "nullable"
         varchar ha_version "nullable"
         varchar time_zone "nullable"
+        json notify "nullable"
         timestamp last_ok_at "nullable"
         timestamp last_error_at "nullable"
         timestamp last_event_at "nullable"

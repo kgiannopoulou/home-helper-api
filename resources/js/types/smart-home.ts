@@ -119,3 +119,12 @@ export type HomeEvent = {
     message: string;
     at: string;
 };
+
+export type NotifyLevel = 'always' | 'night' | 'never';
+
+/** App\SmartHome\Notifications */
+export type NotifySettings = {
+    settings: Record<string, NotifyLevel>;
+    labels: Record<string, string>;
+    night: { from: string; to: string };
+};

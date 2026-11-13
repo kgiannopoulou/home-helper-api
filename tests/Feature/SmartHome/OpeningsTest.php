@@ -63,7 +63,8 @@ it('does not call a flat battery an opening', function () {
     pushState($this, 'binary_sensor.front_door', 'unavailable');
     pushState($this, 'binary_sensor.front_door', 'on');
 
-    expect(eventTypes())->toBe([]);
+    // It stopped and started answering (App\SmartHome\Alerts), but nobody opened anything
+    expect(eventTypes())->toBe(['device.unavailable', 'device.back']);
 });
 
 it('ignores devices that are not imported', function () {

@@ -7,6 +7,7 @@ import { ConnectionCard } from '@/components/smart-home/connection-card';
 import { DeviceControls } from '@/components/smart-home/device-controls';
 import { DeviceTile } from '@/components/smart-home/device-tile';
 import { ImportCard } from '@/components/smart-home/import-card';
+import { NotificationsCard } from '@/components/smart-home/notifications-card';
 import { EventsCard, OpeningsCard } from '@/components/smart-home/openings';
 import { SummaryTiles } from '@/components/smart-home/summary-tiles';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ import type {
     Device,
     HomeEvent,
     HomeSummary,
+    NotifySettings,
     Opening,
     RoomComfort,
     Room,
@@ -40,6 +42,7 @@ type Props = {
     comfort: RoomComfort[];
     openings: Opening[];
     events: HomeEvent[];
+    notifications: NotifySettings;
     climate: Climate;
     candidates: Device[];
     rooms: Room[];
@@ -112,6 +115,7 @@ export default function SmartHome({
     climate,
     openings,
     events,
+    notifications,
     candidates,
     can,
 }: Props) {
@@ -170,6 +174,13 @@ export default function SmartHome({
                     <ClimateChart climate={climate} kind="temperature" />
                     <ClimateChart climate={climate} kind="humidity" />
                 </div>
+
+                {connection && (
+                    <NotificationsCard
+                        notifications={notifications}
+                        canManage={can.manage}
+                    />
+                )}
 
                 <ConnectionCard
                     connection={connection}

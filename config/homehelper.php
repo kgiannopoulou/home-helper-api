@@ -211,6 +211,9 @@ return [
         'events_keep_days' => 60,
         // A warning when a door or window has been open this long (App\SmartHome\Openings)
         'left_open_minutes' => ['door' => 10, 'window' => 30],
+        // Pushes (App\SmartHome\Notifications): "night" events only in these hours, home time
+        'night' => ['from' => '23:00', 'to' => '06:00'],
+        'notify_every_minutes' => 15,
         // How a room feels (App\SmartHome\Comfort)
         'comfort' => [
             'temperature_low' => 18.0,

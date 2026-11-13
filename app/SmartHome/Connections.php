@@ -21,6 +21,8 @@ use Illuminate\Validation\ValidationException;
  */
 class Connections
 {
+    public function __construct(private HomeEvents $events) {}
+
     /**
      * Connect, or replace the existing connection: the token is checked
      * against Home Assistant first, so a typo never gets saved.
@@ -98,6 +100,9 @@ class Connections
 
     public function succeeded(SmartHomeConnection $connection): void
     {
+        if (! $connection->isConnected()) {
+            $this->events->record($connection->household_id, null, 'hub.online', 'info', 'Home Assistant is answering again');
+        }
         $connection->forceFill(['status' => 'connected', 'status_message' => null, 'last_ok_at' => CarbonImmutable::now()])->save();
     }
 
@@ -111,6 +116,7 @@ class Connections
         ])->save();
 
         if ($wasConnected) {
+            $this->events->record($connection->household_id, null, 'hub.offline', 'warning', $e->advice(), ['kind' => $e->kind]);
             Log::warning('Home Assistant call failed', ['household_id' => $connection->household_id, 'kind' => $e->kind, 'error' => $e->getMessage()]);
         }
     }
