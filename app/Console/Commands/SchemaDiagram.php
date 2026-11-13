@@ -22,7 +22,7 @@ class SchemaDiagram extends Command
     private const MODULES = [
         'Households and accounts' => ['users', 'households', 'household_user', 'invites', 'devices', 'personal_access_tokens', 'job_runs'],
         'Money' => ['recurring_bills', 'expenses', 'budgets'],
-        'Shopping and kitchen' => ['shopping_trips', 'shopping_items', 'item_prices', 'inventory_items', 'purchases'],
+        'Shopping and kitchen' => ['shopping_trips', 'shopping_items', 'item_prices', 'inventory_items', 'purchases', 'kitchen_movements', 'products'],
         'Chores' => ['rooms', 'chores', 'chore_completions', 'supplies'],
         'Plant care' => ['plants', 'plant_care_logs', 'plant_alerts'],
         'Health logs' => ['food_entries', 'water_entries', 'sleep_entries', 'workouts', 'weights', 'step_counts'],

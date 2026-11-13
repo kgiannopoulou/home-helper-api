@@ -133,6 +133,7 @@ class KitchenController extends WebController
             'unit' => $i->unit,
             'full_amount' => $i->full_amount,
             'amount_text' => $i->amountText(),
+            'barcode' => $i->barcode,
             'expires_on' => $i->expires_on?->toDateString(),
         ];
     }

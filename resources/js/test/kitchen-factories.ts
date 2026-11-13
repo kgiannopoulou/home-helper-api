@@ -13,5 +13,6 @@ export const kitchenItem = (over: Partial<KitchenItem> = {}): KitchenItem => ({
     full_amount: 1000,
     amount_text: '1 l',
     expires_on: null,
+    barcode: null,
     ...over,
 });

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\AutomationsController;
+use App\Http\Controllers\Web\BarcodeController;
 use App\Http\Controllers\Web\BriefingController;
 use App\Http\Controllers\Web\ChoresController;
 use App\Http\Controllers\Web\ComputersController;
@@ -67,6 +68,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('items/{item}/add', 'add')->name('.items.add');
             Route::post('items/{item}/set', 'set')->name('.items.set');
             Route::delete('items/{item}', 'destroy')->name('.items.destroy');
+        });
+        Route::controller(BarcodeController::class)->prefix('kitchen/barcodes')->name('kitchen.barcodes.')->group(function () {
+            Route::get('{code}', 'show')->middleware('throttle:barcodes')->name('lookup');
+            Route::post('{code}', 'apply')->name('apply');
         });
 
         // The household's computers, through the local agent (agent/docs/design.md)

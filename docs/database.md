@@ -44,6 +44,8 @@ erDiagram
     users |o--o{ invites : "invited_by"
     shopping_trips |o--o{ item_prices : "shopping_trip_id"
     households ||--o{ job_runs : "household_id"
+    inventory_items ||--o{ kitchen_movements : "inventory_item_id"
+    users |o--o{ kitchen_movements : "user_id"
     users |o--o{ memory_chunks : "user_id"
     users |o--o{ notes : "user_id"
     plants ||--o{ plant_alerts : "plant_id"
@@ -231,6 +233,7 @@ erDiagram
         char household_id FK
         varchar name
         varchar ingredient "nullable"
+        varchar barcode "nullable"
         enum category
         enum location
         enum level
@@ -238,6 +241,7 @@ erDiagram
         decimal amount "nullable"
         enum unit "nullable"
         decimal full_amount "nullable"
+        decimal pack_amount "nullable"
         date expires_on "nullable"
         tinyint alive "nullable, generated"
     }
@@ -249,9 +253,38 @@ erDiagram
         date bought_on
         decimal price "nullable"
     }
+    kitchen_movements {
+        char id PK
+        char household_id FK
+        char inventory_item_id FK
+        bigint user_id FK "nullable"
+        enum kind
+        decimal amount
+        enum unit
+        varchar note "nullable"
+        timestamp occurred_at
+    }
+    products {
+        varchar gtin PK
+        tinyint found
+        varchar name "nullable"
+        varchar brand "nullable"
+        varchar quantity "nullable"
+        decimal amount "nullable"
+        enum unit "nullable"
+        varchar ingredient "nullable"
+        enum category "nullable"
+        enum location "nullable"
+        varchar image_url "nullable"
+        varchar source
+        timestamp fetched_at
+    }
     households ||--o{ inventory_items : "household_id"
     households ||--o{ item_prices : "household_id"
     shopping_trips |o--o{ item_prices : "shopping_trip_id"
+    households ||--o{ kitchen_movements : "household_id"
+    inventory_items ||--o{ kitchen_movements : "inventory_item_id"
+    users |o--o{ kitchen_movements : "user_id"
     households ||--o{ purchases : "household_id"
     inventory_items ||--o{ purchases : "household_id"
     inventory_items ||--o{ purchases : "inventory_item_id"

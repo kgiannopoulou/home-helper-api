@@ -10,10 +10,11 @@ built in [Phase 7](phase-7.md) on top of the phone's inventory, shopping list an
 | `app/Kitchen/Units` | amounts: parse "1,5 kg", "2 x 500g", "6 eggs"; base units; format |
 | `app/Kitchen/Ingredients` | one key per ingredient, English and Greek |
 | `app/Kitchen/Pantry` | every change of an amount, recorded and locked |
+| `app/Kitchen/Barcodes/*` | `Gtin` check digits, `Scanner`, `OpenFoodFacts` behind `ProductLookup` |
 | `app/Http/Controllers/Api/KitchenController` | use, add and history for the phone |
 | `app/Http/Controllers/Web/KitchenController` | the Kitchen page |
 
-Tables: `inventory_items` (since Phase 1, extended), `kitchen_movements`
+Tables: `inventory_items` (since Phase 1, extended), `kitchen_movements`, `products`
 ([diagram](database.md)).
 
 ## Amounts and units
@@ -71,6 +72,37 @@ succeed.
 - **Units must fit.** Pieces for something weighed are refused. Grams for something in
   millilitres are converted, and the item keeps its unit.
 
+## Barcodes
+
+Scanning a pack adds it in one tap, with its name, size and storage place.
+
+1. **Check digits first.** EAN-13, EAN-8, UPC-A and GTIN-14 carry a check digit, and a camera
+   misreads a digit now and then. A wrong one is refused before anything is looked up, in the
+   browser and again on the server. UPC-A is stored as EAN-13 with a leading zero.
+2. **The household's own item** with that barcode, if there is one.
+3. **The product.** From the `products` cache, else from [Open Food Facts](https://world.openfoodfacts.org),
+   the open product database, which knows Greek packs well, often with a Greek name. Only
+   the barcode is sent: no account, key or anything about the household. Answers are cached
+   for 30 days, "not found" for 7. Shop-internal codes (prefix 2: the deli counter, weighed
+   fruit) are never looked up. If Open Food Facts is down, the scan still works by hand.
+4. **A suggestion.** No item with that barcode, but the household has the same ingredient
+   ("You have Greek yoghurt: is this it?"). Yes joins the barcode to that item instead of
+   making a second yoghurt.
+
+The product's categories decide where it goes: dairy, meat and fresh things to the fridge,
+frozen to the freezer, the rest to the cupboard. When the name is a brand ("Δωδώνη"), the
+categories give the ingredient (`en:feta` → `feta`).
+
+The **barcode and pack size stay on the item**, so the next scan is one tap even for a product
+Open Food Facts doesn't know: the household names it once. `products` is shared by all
+households, because it holds public product data and nothing about who scanned. What a
+household names stays on its own item.
+
+**In the browser:** the camera with the browser's own `BarcodeDetector` (Chrome, Edge,
+Android), else [ZXing](https://github.com/zxing-js/browser), loaded only then (Safari, Firefox),
+else type the digits. A USB scanner types them too. `KITCHEN_BARCODES=none` keeps every scan on
+the server.
+
 ## API
 
 | | |
@@ -79,6 +111,8 @@ succeed.
 | `POST /api/households/{h}/inventory-items/{item}/use` | `{kind: used\|cooked\|wasted\|expired, amount?, unit?}`, no amount = all of it |
 | `POST /api/households/{h}/inventory-items/{item}/add` | `{amount, unit?}` |
 | `GET  /api/households/{h}/kitchen/movements` | `?item=&kind=`, newest first |
+| `GET  /api/households/{h}/kitchen/barcodes/{code}` | the household's item, a suggestion and the product; 422 for a misread. 30 a minute |
+| `POST /api/households/{h}/kitchen/barcodes/{code}` | `{action: add\|use, item_id?, name?, location?, amount_text?}`: one pack unless an amount is given |
 
 ## The Kitchen page
 

@@ -226,4 +226,24 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | The kitchen (Phase 7)
+    |--------------------------------------------------------------------------
+    |
+    | Inventory with amounts, barcodes, receipts, expiry, recipes and the meal
+    | plan (docs/kitchen.md).
+    */
+    'kitchen' => [
+        'barcodes' => [
+            // openfoodfacts | none (every scan stays on this server)
+            'provider' => env('KITCHEN_BARCODES', 'openfoodfacts'),
+            'url' => env('OPEN_FOOD_FACTS_URL', 'https://world.openfoodfacts.org'),
+            'timeout_seconds' => 5,
+            // How long an answer is kept before asking again
+            'found_days' => 30,
+            'missing_days' => 7,
+        ],
+    ],
+
 ];

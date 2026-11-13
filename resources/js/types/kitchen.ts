@@ -14,6 +14,8 @@ export type KitchenItem = {
     /** "750 ml", or the phone's free text */
     amount_text: string;
     expires_on: string | null;
+    /** The pack it was scanned as */
+    barcode: string | null;
 };
 
 export type MovementKind =
@@ -37,4 +39,32 @@ export type Movement = {
     by: string | null;
     note: string | null;
     occurred_at: string;
+};
+
+/** A barcode's product (App\Kitchen\Barcodes\ProductInfo) */
+export type Product = {
+    gtin: string;
+    name: string;
+    brand: string | null;
+    /** As printed on the pack: "1 kg" */
+    quantity: string | null;
+    amount: number | null;
+    unit: 'g' | 'ml' | 'pcs' | null;
+    ingredient: string;
+    category: string;
+    location: string;
+    image_url: string | null;
+    source: string;
+};
+
+/** GET /kitchen/barcodes/{code} (App\Kitchen\Barcodes\Scanner::scan) */
+export type ScanResult = {
+    gtin: string;
+    /** The household's item with this barcode */
+    item: KitchenItem | null;
+    /** No item yet, but one with the same ingredient: "is this it?" */
+    suggestion: KitchenItem | null;
+    product: Product | null;
+    /** Open Food Facts couldn't be asked */
+    lookup_error: string | null;
 };

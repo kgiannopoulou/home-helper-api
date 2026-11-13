@@ -36,7 +36,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $quantity
  * @property float|null $amount in $unit
  * @property string|null $unit g|ml|pcs
- * @property float|null $full_amount a full pack, in $unit
+ * @property float|null $full_amount the most it has held, in $unit
+ * @property string|null $barcode the pack it was scanned as (App\Kitchen\Barcodes\Gtin)
+ * @property float|null $pack_amount what one scanned pack adds, in $unit
  * @property CarbonImmutable|null $expires_on
  */
 #[Fillable(['name', 'ingredient', 'category', 'location', 'level', 'quantity', 'amount', 'unit', 'full_amount', 'expires_on'])]
@@ -53,6 +55,7 @@ class InventoryItem extends Model
             'level' => StockLevel::class,
             'amount' => 'float',
             'full_amount' => 'float',
+            'pack_amount' => 'float',
             'expires_on' => 'date',
         ];
     }

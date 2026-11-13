@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminItemController;
 use App\Http\Controllers\Api\Agent as AgentApi;
 use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BarcodeController;
 use App\Http\Controllers\Api\BriefingController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\ChoreCompletionController;
@@ -156,6 +157,9 @@ Route::name('api.')->group(function () {
                 Route::post('inventory-items/{item}/add', 'add')->name('kitchen.add');
                 Route::get('kitchen/movements', 'movements')->name('kitchen.movements');
             });
+            // Barcodes (docs/kitchen.md#barcodes)
+            Route::get('kitchen/barcodes/{code}', [BarcodeController::class, 'show'])->middleware('throttle:barcodes')->name('kitchen.barcodes.show');
+            Route::post('kitchen/barcodes/{code}', [BarcodeController::class, 'apply'])->name('kitchen.barcodes.apply');
 
             // Memory (docs/memory.md#api): facts, notes and documents, search
             Route::prefix('memory')->name('memory.')->controller(MemoryController::class)->group(function () {

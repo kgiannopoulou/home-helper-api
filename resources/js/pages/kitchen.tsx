@@ -2,6 +2,7 @@ import { Form, Head } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import InputError from '@/components/input-error';
 import Heading from '@/components/heading';
+import { BarcodeScanner } from '@/components/kitchen/barcode-scanner';
 import { InventoryCard } from '@/components/kitchen/inventory-card';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,6 +40,9 @@ const KIND_LABEL: Record<Movement['kind'], string> = {
  */
 export default function Kitchen({ items, movements, locations }: Props) {
     const groups = byLocation(items);
+    const kitchenPlaces = locations.filter(
+        (l) => l !== 'bathroom' && l !== 'cleaning',
+    );
 
     return (
         <>
@@ -49,80 +53,81 @@ export default function Kitchen({ items, movements, locations }: Props) {
                     description="What's in the fridge, freezer and cupboards, and how much."
                 />
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Add to the kitchen</CardTitle>
-                        <CardDescription>
-                            Amounts like "500 g", "1,5 kg", "2 x 1 l" or "6".
-                            Greek names work too.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Form
-                            {...store.form()}
-                            options={{ preserveScroll: true }}
-                            resetOnSuccess
-                            className="flex flex-wrap items-end gap-3"
-                        >
-                            {({ errors, processing }) => (
-                                <>
-                                    <div className="grid gap-1">
-                                        <Label htmlFor="kitchen-name">
-                                            Name
-                                        </Label>
-                                        <Input
-                                            id="kitchen-name"
-                                            name="name"
-                                            required
-                                            placeholder="Greek yoghurt"
-                                        />
-                                        <InputError message={errors.name} />
-                                    </div>
-                                    <div className="grid gap-1">
-                                        <Label htmlFor="kitchen-location">
-                                            Where
-                                        </Label>
-                                        <select
-                                            id="kitchen-location"
-                                            name="location"
-                                            defaultValue="fridge"
-                                            className="h-9 rounded-md border bg-transparent px-3 text-sm"
-                                        >
-                                            {locations
-                                                .filter(
-                                                    (l) =>
-                                                        l !== 'bathroom' &&
-                                                        l !== 'cleaning',
-                                                )
-                                                .map((l) => (
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <BarcodeScanner locations={kitchenPlaces} />
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Add to the kitchen</CardTitle>
+                            <CardDescription>
+                                Amounts like "500 g", "1,5 kg", "2 x 1 l" or
+                                "6". Greek names work too.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Form
+                                {...store.form()}
+                                options={{ preserveScroll: true }}
+                                resetOnSuccess
+                                className="flex flex-wrap items-end gap-3"
+                            >
+                                {({ errors, processing }) => (
+                                    <>
+                                        <div className="grid gap-1">
+                                            <Label htmlFor="kitchen-name">
+                                                Name
+                                            </Label>
+                                            <Input
+                                                id="kitchen-name"
+                                                name="name"
+                                                required
+                                                placeholder="Greek yoghurt"
+                                            />
+                                            <InputError message={errors.name} />
+                                        </div>
+                                        <div className="grid gap-1">
+                                            <Label htmlFor="kitchen-location">
+                                                Where
+                                            </Label>
+                                            <select
+                                                id="kitchen-location"
+                                                name="location"
+                                                defaultValue="fridge"
+                                                className="h-9 rounded-md border bg-transparent px-3 text-sm"
+                                            >
+                                                {kitchenPlaces.map((l) => (
                                                     <option key={l} value={l}>
                                                         {LOCATION_LABEL[l] ?? l}
                                                     </option>
                                                 ))}
-                                        </select>
-                                    </div>
-                                    <div className="grid gap-1">
-                                        <Label htmlFor="kitchen-amount">
-                                            How much
-                                        </Label>
-                                        <Input
-                                            id="kitchen-amount"
-                                            name="amount_text"
-                                            placeholder="500 g"
-                                            className="w-32"
-                                        />
-                                        <InputError
-                                            message={errors.amount_text}
-                                        />
-                                    </div>
-                                    <Button type="submit" disabled={processing}>
-                                        <Plus /> Add
-                                    </Button>
-                                </>
-                            )}
-                        </Form>
-                    </CardContent>
-                </Card>
+                                            </select>
+                                        </div>
+                                        <div className="grid gap-1">
+                                            <Label htmlFor="kitchen-amount">
+                                                How much
+                                            </Label>
+                                            <Input
+                                                id="kitchen-amount"
+                                                name="amount_text"
+                                                placeholder="500 g"
+                                                className="w-32"
+                                            />
+                                            <InputError
+                                                message={errors.amount_text}
+                                            />
+                                        </div>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            <Plus /> Add
+                                        </Button>
+                                    </>
+                                )}
+                            </Form>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {groups.length === 0 ? (
                     <p className="text-muted-foreground">
