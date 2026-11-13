@@ -230,10 +230,14 @@ erDiagram
         char id PK
         char household_id FK
         varchar name
+        varchar ingredient "nullable"
         enum category
         enum location
         enum level
         varchar quantity "nullable"
+        decimal amount "nullable"
+        enum unit "nullable"
+        decimal full_amount "nullable"
         date expires_on "nullable"
         tinyint alive "nullable, generated"
     }

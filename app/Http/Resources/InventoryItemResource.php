@@ -23,6 +23,11 @@ class InventoryItemResource extends JsonResource
             'location' => $this->location?->value,
             'level' => $this->level?->value,
             'quantity' => $this->quantity,
+            'ingredient' => $this->ingredient,
+            'amount' => $this->amount,
+            'unit' => $this->unit,
+            'full_amount' => $this->full_amount,
+            'amount_text' => $this->amountText(),
             'expires_on' => $this->expires_on?->toDateString(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

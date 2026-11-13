@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\ComputersController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\HealthController;
 use App\Http\Controllers\Web\HouseholdController;
+use App\Http\Controllers\Web\KitchenController;
 use App\Http\Controllers\Web\MemoryController;
 use App\Http\Controllers\Web\PlannerController;
 use App\Http\Controllers\Web\SmartHomeController;
@@ -56,6 +57,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('turns', 'turn')->middleware('throttle:ai')->name('turns.store');
             Route::post('turns/{turn}/cancel', 'cancel')->name('turns.cancel');
             Route::post('speak', 'speak')->middleware('throttle:voice')->name('speak');
+        });
+
+        // The kitchen: inventory with amounts (docs/kitchen.md)
+        Route::controller(KitchenController::class)->prefix('kitchen')->name('kitchen')->group(function () {
+            Route::get('/', 'show');
+            Route::post('items', 'store')->name('.items.store');
+            Route::post('items/{item}/use', 'take')->name('.items.take');
+            Route::post('items/{item}/add', 'add')->name('.items.add');
+            Route::post('items/{item}/set', 'set')->name('.items.set');
+            Route::delete('items/{item}', 'destroy')->name('.items.destroy');
         });
 
         // The household's computers, through the local agent (agent/docs/design.md)

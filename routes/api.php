@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\InsightController;
 use App\Http\Controllers\Api\InventoryItemController;
 use App\Http\Controllers\Api\InviteController;
 use App\Http\Controllers\Api\ItemPriceController;
+use App\Http\Controllers\Api\KitchenController;
 use App\Http\Controllers\Api\MemoryController;
 use App\Http\Controllers\Api\PlantAlertController;
 use App\Http\Controllers\Api\PlantCareController;
@@ -147,6 +148,13 @@ Route::name('api.')->group(function () {
             Route::prefix('plant-care')->name('plant-care.')->controller(PlantCareController::class)->group(function () {
                 Route::get('today', 'today')->name('today');
                 Route::get('plan', 'plan')->name('plan');
+            });
+
+            // The kitchen (docs/kitchen.md#api): amounts in and out of the inventory
+            Route::controller(KitchenController::class)->group(function () {
+                Route::post('inventory-items/{item}/use', 'take')->name('kitchen.use');
+                Route::post('inventory-items/{item}/add', 'add')->name('kitchen.add');
+                Route::get('kitchen/movements', 'movements')->name('kitchen.movements');
             });
 
             // Memory (docs/memory.md#api): facts, notes and documents, search
