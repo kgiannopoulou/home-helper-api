@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\ShoppingItemController;
 use App\Http\Controllers\Api\ShoppingTripController;
 use App\Http\Controllers\Api\SleepEntryController;
+use App\Http\Controllers\Api\SmartHome\StatesWebhookController;
 use App\Http\Controllers\Api\SupplyController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\TodoController;
@@ -38,6 +39,7 @@ use App\Http\Controllers\Api\WaterEntryController;
 use App\Http\Controllers\Api\WeightController;
 use App\Http\Controllers\Api\WorkoutController;
 use App\Http\Middleware\AuthenticateAgent;
+use App\Http\Middleware\AuthenticateHomeAssistant;
 use Illuminate\Support\Facades\Route;
 
 Route::name('api.')->group(function () {
@@ -48,6 +50,12 @@ Route::name('api.')->group(function () {
 
     // The local agent on the household's computers (agent/docs/protocol.md): signed
     // requests instead of a Sanctum token, every response signed back
+    // State changes pushed by the household's Home Assistant (docs/smart-home.md#state-changes):
+    // the connection's own webhook secret instead of a Sanctum token
+    Route::prefix('smart-home/v1')->name('smart-home.')->middleware([AuthenticateHomeAssistant::class, 'throttle:smart-home-webhook'])->group(function () {
+        Route::post('states', StatesWebhookController::class)->name('states');
+    });
+
     Route::prefix('agent/v1')->name('agent.')->group(function () {
         Route::post('enroll', AgentApi\EnrollController::class)->middleware('throttle:agent-enroll')->name('enroll');
 

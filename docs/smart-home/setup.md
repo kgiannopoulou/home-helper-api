@@ -43,34 +43,34 @@ creates a long-lived access token, so the whole thing is scriptable.
 
 What I'd use, and what the guide pointed at:
 
-| Part | Why |
-|---|---|
-| Raspberry Pi 4 (4 GB) or 5, official power supply | Home Assistant OS runs well on it; 5 W |
-| A 64 GB+ SSD over USB, or a good A2 SD card | SD cards wear out under a database; an SSD lasts |
+| Part                                                                               | Why                                                                            |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Raspberry Pi 4 (4 GB) or 5, official power supply                                  | Home Assistant OS runs well on it; 5 W                                         |
+| A 64 GB+ SSD over USB, or a good A2 SD card                                        | SD cards wear out under a database; an SSD lasts                               |
 | A Zigbee USB stick (e.g. Sonoff ZBDongle-E / SkyConnect), on a USB extension cable | Most cheap sensors are Zigbee; the cable keeps it away from USB 3 interference |
-| Smart lights / plugs from the shop (Hue, IKEA, Tuya/Smart Life, Shelly) | Shelly and Hue work locally; Tuya/Smart Life goes through their cloud |
-| Door/window contact sensors, temperature + humidity sensors (Aqara, Sonoff, IKEA) | Zigbee, battery-powered for a year or two |
-| A BroadLink hub and its radar (microwave) motion sensor kit | The BroadLink integration; radar sees someone sitting still, PIR doesn't |
+| Smart lights / plugs from the shop (Hue, IKEA, Tuya/Smart Life, Shelly)            | Shelly and Hue work locally; Tuya/Smart Life goes through their cloud          |
+| Door/window contact sensors, temperature + humidity sensors (Aqara, Sonoff, IKEA)  | Zigbee, battery-powered for a year or two                                      |
+| A BroadLink hub and its radar (microwave) motion sensor kit                        | The BroadLink integration; radar sees someone sitting still, PIR doesn't       |
 
 ### Install
 
-1. **Flash Home Assistant OS.** Raspberry Pi Imager → *Other specific-purpose OS → Home
-   assistants and home automation → Home Assistant* → your Pi model → the SSD/SD card.
+1. **Flash Home Assistant OS.** Raspberry Pi Imager → _Other specific-purpose OS → Home
+   assistants and home automation → Home Assistant_ → your Pi model → the SSD/SD card.
 2. **Boot it on wired Ethernet** and wait ~5 minutes, then open <http://homeassistant.local:8123>.
 3. **Onboard:** owner account, home location (used for sunset), time zone, units.
-4. **Add the devices:** *Settings → Devices & services → Add integration*:
-   - Zigbee stick → **ZHA**, then *Add device* and pair each sensor (hold its button).
-   - Tuya / Smart Life devices → **Tuya** (log in with the Smart Life app account, scan the QR code).
-   - BroadLink hub → **BroadLink** (found automatically on the network).
-   - Hue, IKEA, Shelly → usually discovered on their own.
-5. **Give everything a room:** *Settings → Areas* — name them like your rooms in Home
+4. **Add the devices:** _Settings → Devices & services → Add integration_:
+    - Zigbee stick → **ZHA**, then _Add device_ and pair each sensor (hold its button).
+    - Tuya / Smart Life devices → **Tuya** (log in with the Smart Life app account, scan the QR code).
+    - BroadLink hub → **BroadLink** (found automatically on the network).
+    - Hue, IKEA, Shelly → usually discovered on their own.
+5. **Give everything a room:** _Settings → Areas_ — name them like your rooms in Home
    Helper (Living room, Kitchen, ...); Home Helper matches them by name.
 6. **Give the Pi a fixed address** in the router (DHCP reservation), e.g. `192.168.1.20`.
 
 ### Connect it to Home Helper
 
-On the Pi: *Profile (bottom left) → Security → Long-lived access tokens → Create token*, name it
-"Home Helper". Then in Home Helper: *Smart home → Connect*: the address
+On the Pi: _Profile (bottom left) → Security → Long-lived access tokens → Create token_, name it
+"Home Helper". Then in Home Helper: _Smart home → Connect_: the address
 (`http://192.168.1.20:8123`) and the token. The rest is in [smart-home.md](../smart-home.md).
 
 > **Where Home Helper runs matters.** It must be able to reach the Pi's address. Home Helper on
@@ -80,7 +80,7 @@ On the Pi: *Profile (bottom left) → Security → Long-lived access tokens → 
 
 ### Back it up
 
-*Settings → System → Backups*: automatic daily backups, copied off the Pi (Google Drive / a NAS
+_Settings → System → Backups_: automatic daily backups, copied off the Pi (Google Drive / a NAS
 add-on). A Home Assistant restore puts every paired device back without re-pairing.
 
 ## Hardware I don't have yet

@@ -193,4 +193,16 @@ return [
         'release_secret_key' => env('AGENT_RELEASE_SECRET_KEY'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Smart home (Phase 6)
+    |--------------------------------------------------------------------------
+    |
+    | Home Assistant as the hub for lights, plugs and sensors (docs/smart-home.md).
+    */
+    'smart_home' => [
+        // Home Assistant is on the local network: a button should fail fast
+        'timeout_seconds' => (int) env('SMART_HOME_TIMEOUT_SECONDS', 5),
+    ],
+
 ];

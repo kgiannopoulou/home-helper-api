@@ -11,6 +11,11 @@ What it does, each step skipped if already done:
   2. finishes the other onboarding steps (location, analytics, integrations)
   3. creates the rooms as Home Assistant areas and puts each test device in its room
   4. creates a long-lived access token named "Home Helper"
+  5. with --events-url and --events-token: writes secrets.yaml so the
+     forwarding automation (packages/home_helper.yaml) reaches Home Helper,
+     and reloads it
+
+    docker exec homeassistant python3 /hh-scripts/onboard.py \n        --events-url http://hh-web:8077/api/smart-home/v1/states --events-token 01J....xyz
 
 It prints the token on the last line, and nothing else goes to stdout, so
 scripts can do TOKEN=$(docker exec ... | tail -1). Never commit the token.
@@ -18,6 +23,7 @@ scripts can do TOKEN=$(docker exec ... | tail -1). Never commit the token.
 
 from __future__ import annotations
 
+import argparse
 import asyncio
 import json
 import os
@@ -115,10 +121,33 @@ class Socket:
                 return reply.get("result")
 
 
+def write_secrets(url: str, token: str) -> None:
+    with open("/config/secrets.yaml", "w", encoding="utf-8") as f:
+        f.write("# Written by /hh-scripts/onboard.py; git-ignored\n")
+        f.write(f"home_helper_events_url: {json.dumps(url)}\n")
+        f.write(f"home_helper_events_auth: {json.dumps('Bearer ' + token)}\n")
+    os.chmod("/config/secrets.yaml", 0o600)
+
+
+async def reload_forwarding(session: aiohttp.ClientSession, access: str) -> None:
+    headers = {"Authorization": "Bearer " + access}
+    for service in ("rest_command/reload", "automation/reload"):
+        async with session.post(f"{BASE}/api/services/{service}", json={}, headers=headers) as r:
+            log(f"Reloaded {service.split('/')[0]}: HTTP {r.status}")
+
+
 async def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--events-url")
+    parser.add_argument("--events-token")
+    args = parser.parse_args()
+
     async with aiohttp.ClientSession() as session:
         await wait_until_up(session)
         access = await onboard(session)
+        if args.events_url and args.events_token:
+            write_secrets(args.events_url, args.events_token)
+            await reload_forwarding(session, access)
 
         async with session.ws_connect(BASE.replace("http", "ws", 1) + "/api/websocket") as ws:
             await ws.receive_json()  # auth_required

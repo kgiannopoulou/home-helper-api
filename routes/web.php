@@ -9,6 +9,7 @@ use App\Http\Controllers\Web\HealthController;
 use App\Http\Controllers\Web\HouseholdController;
 use App\Http\Controllers\Web\MemoryController;
 use App\Http\Controllers\Web\PlannerController;
+use App\Http\Controllers\Web\SmartHomeController;
 use App\Http\Controllers\Web\SpendingController;
 use App\Http\Controllers\Web\SystemHealthController;
 use App\Http\Controllers\Web\VoiceController;
@@ -66,6 +67,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('{agent}/update', 'update')->name('.update');
             Route::patch('{agent}', 'rename')->name('.rename');
             Route::delete('{agent}', 'revoke')->name('.revoke');
+        });
+
+        // Lights, plugs and sensors through the household's Home Assistant (docs/smart-home.md)
+        Route::controller(SmartHomeController::class)->prefix('smart-home')->name('smart-home')->group(function () {
+            Route::get('/', 'show');
+            Route::post('connection', 'connect')->middleware('throttle:10,1')->name('.connection.store');
+            Route::post('connection/check', 'check')->middleware('throttle:20,1')->name('.connection.check');
+            Route::post('connection/secret', 'rotate')->middleware('throttle:10,1')->name('.connection.secret');
+            Route::delete('connection', 'disconnect')->name('.connection.destroy');
         });
 
         // The assistant (docs/assistant.md)
