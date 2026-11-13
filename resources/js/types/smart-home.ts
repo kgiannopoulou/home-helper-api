@@ -20,3 +20,46 @@ export type SmartHomeConnection = {
 
 /** Shown once, after connecting or rotating the secret */
 export type WebhookSecret = { url: string; token: string };
+
+export type DeviceKind =
+    | 'light'
+    | 'switch'
+    | 'lock'
+    | 'temperature'
+    | 'humidity'
+    | 'door'
+    | 'window'
+    | 'motion'
+    | 'sensor'
+    | 'binary_sensor'
+    | 'cover'
+    | 'climate'
+    | 'fan';
+
+export type Device = {
+    id: string;
+    entity_id: string;
+    name: string;
+    kind: DeviceKind;
+    room: string | null;
+    room_id: string | null;
+    state: string | null;
+    state_label: string;
+    on: boolean;
+    value: number | null;
+    unit: string | null;
+    brightness: number | null;
+    available: boolean;
+    imported: boolean;
+    capabilities: {
+        switchable: boolean;
+        dimmable: boolean;
+        lockable: boolean;
+        reading: boolean;
+        contact: boolean;
+        motion: boolean;
+    };
+    last_changed_at: string | null;
+};
+
+export type Room = { id: string; name: string };

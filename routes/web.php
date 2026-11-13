@@ -76,6 +76,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('connection/check', 'check')->middleware('throttle:20,1')->name('.connection.check');
             Route::post('connection/secret', 'rotate')->middleware('throttle:10,1')->name('.connection.secret');
             Route::delete('connection', 'disconnect')->name('.connection.destroy');
+            Route::post('sync', 'sync')->middleware('throttle:10,1')->name('.sync');
+            Route::post('devices/import', 'import')->name('.devices.import');
+            Route::patch('devices/{device}', 'updateDevice')->name('.devices.update');
+            Route::delete('devices/{device}', 'removeDevice')->name('.devices.destroy');
         });
 
         // The assistant (docs/assistant.md)

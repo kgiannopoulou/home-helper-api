@@ -3,9 +3,14 @@
 namespace App\Http\Controllers\Web;
 
 use App\Models\Household;
+use App\Models\SmartDevice;
 use App\Models\SmartHomeConnection;
 use App\Policies\SmartHomePolicy;
 use App\SmartHome\Connections;
+use App\SmartHome\DevicePresenter;
+use App\SmartHome\Discovery;
+use App\SmartHome\HomeAssistantError;
+use App\SmartHome\Import;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,7 +22,7 @@ use Inertia\Response;
  */
 class SmartHomeController extends WebController
 {
-    public function show(Request $request): Response
+    public function show(Request $request, Import $import): Response
     {
         $household = $this->household($request);
         $user = $request->user();
@@ -27,6 +32,12 @@ class SmartHomeController extends WebController
         return Inertia::render('smart-home', [
             'connection' => $connection ? $this->connection($connection) : null,
             'webhook' => $request->session()->get('smart_home_webhook'),
+            'devices' => $household->smartDevices()->active()->with('room')->orderBy('name')->get()
+                ->map(fn (SmartDevice $d) => DevicePresenter::toArray($d))->values()->all(),
+            'candidates' => $policy->manage($user, $household)
+                ? $import->candidates($household)->load('room')->map(fn (SmartDevice $d) => DevicePresenter::toArray($d))->values()->all()
+                : [],
+            'rooms' => $household->rooms()->where('personal', false)->orderBy('name')->get(['id', 'name'])->toArray(),
             'can' => [
                 'manage' => $policy->manage($user, $household),
                 'control' => $policy->control($user, $household),
@@ -50,7 +61,7 @@ class SmartHomeController extends WebController
         ];
     }
 
-    public function connect(Request $request, Connections $connections): RedirectResponse
+    public function connect(Request $request, Connections $connections, Discovery $discovery): RedirectResponse
     {
         $household = $this->household($request);
         $this->authorizeManage($request, $household);
@@ -59,6 +70,12 @@ class SmartHomeController extends WebController
             'token' => ['required', 'string', 'min:20', 'max:1000'],
         ]);
         [$connection, $secret] = $connections->connect($household, $request->user(), $data['url'], $data['token']);
+        // Straight away, so the owner can choose devices on the next page
+        try {
+            $discovery->sync($connection);
+        } catch (HomeAssistantError) {
+            // Shown on the connection's status; the scheduled sync tries again
+        }
 
         return $this->showWebhookOnce($connection, $secret);
     }
@@ -78,6 +95,54 @@ class SmartHomeController extends WebController
         $connection = $this->connectionOf($request);
 
         return $this->showWebhookOnce($connection, $connections->rotateSecret($connection));
+    }
+
+    /** "Sync now": find new devices and refresh every state */
+    public function sync(Request $request, Discovery $discovery): RedirectResponse
+    {
+        try {
+            $discovery->sync($this->connectionOf($request));
+        } catch (HomeAssistantError $e) {
+            return to_route('smart-home')->withErrors(['sync' => $e->advice()]);
+        }
+
+        return to_route('smart-home');
+    }
+
+    public function import(Request $request, Import $import): RedirectResponse
+    {
+        $data = $request->validate(['devices' => ['required', 'array', 'min:1', 'max:200'], 'devices.*' => ['string', 'size:26']]);
+        $import->import($this->household($request), $request->user(), array_values($data['devices']));
+
+        return to_route('smart-home');
+    }
+
+    public function updateDevice(Request $request, SmartDevice $device): RedirectResponse
+    {
+        $household = $this->household($request);
+        $this->inHousehold($request, $device);
+        $this->authorizeManage($request, $household);
+        $data = $request->validate([
+            'room_id' => ['sometimes', 'nullable', 'string', 'exists:rooms,id,household_id,'.$household->id],
+        ]);
+        $device->forceFill($data)->save();
+
+        return to_route('smart-home');
+    }
+
+    /** Out of Home Helper, not out of Home Assistant */
+    public function removeDevice(Request $request, SmartDevice $device, Import $import): RedirectResponse
+    {
+        $this->inHousehold($request, $device);
+        $import->remove($device, $request->user());
+
+        return to_route('smart-home');
+    }
+
+    /** Another household's device is a 404, not a 403 */
+    protected function inHousehold(Request $request, SmartDevice $device): void
+    {
+        abort_unless($device->household_id === $this->household($request)->id, 404);
     }
 
     /** Devices, readings and rules go with it (foreign keys cascade) */
