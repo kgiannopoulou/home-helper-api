@@ -101,7 +101,7 @@ function show(props: Partial<Parameters<typeof SmartHome>[0]> = {}) {
             comfort={[]}
             openings={[]}
             events={[]}
-            automations={{ rules: [], runs: [] }}
+            automations={{ rules: [], runs: [], templates: [] }}
             notifications={{
                 settings: { 'door.opened': 'night' },
                 labels: { 'door.opened': 'A door opens' },
@@ -219,6 +219,29 @@ describe('the smart home page', () => {
                         last_fired_at: null,
                     },
                 ],
+                templates: [
+                    {
+                        key: 'welcome_light',
+                        name: 'Light on when you come home after dark',
+                        description: 'The front door opens after sunset.',
+                        ready: true,
+                        devices: {
+                            door: [{ id: 'd1', name: 'Front door' }],
+                            light: [{ id: 'd2', name: 'Hallway light' }],
+                        },
+                        missing: [],
+                        added: false,
+                    },
+                    {
+                        key: 'cold_window',
+                        name: 'Window open and the room is getting cold',
+                        description: 'x',
+                        ready: false,
+                        devices: {},
+                        missing: ['temperature', 'window'],
+                        added: false,
+                    },
+                ],
                 runs: [
                     {
                         id: 'u1',
@@ -237,6 +260,26 @@ describe('the smart home page', () => {
             within(rule).getByText(/When Front door opens, if after dark/),
         ).toBeInTheDocument();
         expect(screen.getByText(/the sun is not down/)).toBeInTheDocument();
+
+        const welcome = screen.getByTestId('template-welcome_light');
+        expect(
+            within(welcome).getByText('Uses: Front door, Hallway light'),
+        ).toBeInTheDocument();
+        fireEvent.click(
+            within(welcome).getByRole('button', { name: /Add Light on/ }),
+        );
+        expect(inertiaMock.router.post).toHaveBeenCalledWith(
+            expect.stringContaining(
+                '/smart-home/automations/templates/welcome_light',
+            ),
+            {},
+            expect.anything(),
+        );
+        expect(
+            within(screen.getByTestId('template-cold_window')).getByRole(
+                'button',
+            ),
+        ).toBeDisabled();
 
         fireEvent.click(screen.getByLabelText('Switch off Hall light'));
         expect(inertiaMock.router.patch).toHaveBeenCalledWith(

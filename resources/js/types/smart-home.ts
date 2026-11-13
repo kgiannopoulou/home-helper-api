@@ -152,7 +152,18 @@ export type AutomationRunRow = {
     at: string;
 };
 
+export type WorkflowTemplate = {
+    key: string;
+    name: string;
+    description: string;
+    ready: boolean;
+    devices: Record<string, { id: string; name: string }[]>;
+    missing: string[];
+    added: boolean;
+};
+
 export type Automations = {
     rules: AutomationRuleRow[];
     runs: AutomationRunRow[];
+    templates: WorkflowTemplate[];
 };

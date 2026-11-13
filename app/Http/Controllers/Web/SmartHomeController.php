@@ -10,6 +10,7 @@ use App\Models\SmartHomeConnection;
 use App\Models\SmartHomeEvent;
 use App\Policies\SmartHomePolicy;
 use App\SmartHome\Automation\Describe;
+use App\SmartHome\Automation\Templates;
 use App\SmartHome\Comfort;
 use App\SmartHome\Connections;
 use App\SmartHome\Control;
@@ -98,6 +99,7 @@ class SmartHomeController extends WebController
                 'cooldown_minutes' => $r->cooldown_minutes,
                 'last_fired_at' => $r->last_fired_at?->toIso8601String(),
             ])->values()->all(),
+            'templates' => Templates::suggestions($household),
             'runs' => $lastRuns->map(fn (AutomationRun $run) => [
                 'id' => $run->id,
                 'rule' => $rules->firstWhere('id', $run->rule_id)?->name,

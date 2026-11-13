@@ -11,6 +11,7 @@ import { ImportCard } from '@/components/smart-home/import-card';
 import { NotificationsCard } from '@/components/smart-home/notifications-card';
 import { EventsCard, OpeningsCard } from '@/components/smart-home/openings';
 import { SummaryTiles } from '@/components/smart-home/summary-tiles';
+import { WorkflowTemplates } from '@/components/smart-home/workflow-templates';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -183,7 +184,13 @@ export default function SmartHome({
                     <AutomationsCard
                         automations={automations}
                         canManage={can.manage}
-                    />
+                    >
+                        {can.manage && (
+                            <WorkflowTemplates
+                                templates={automations.templates}
+                            />
+                        )}
+                    </AutomationsCard>
                 )}
 
                 {connection && (

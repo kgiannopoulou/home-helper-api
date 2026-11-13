@@ -88,6 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Automations (docs/smart-home.md#automations)
         Route::controller(AutomationsController::class)->prefix('smart-home/automations')->name('smart-home.automations.')->group(function () {
             Route::post('/', 'store')->name('store');
+            Route::post('templates/{key}', 'template')->name('templates.store');
             Route::patch('{rule}', 'update')->name('update');
             Route::delete('{rule}', 'destroy')->name('destroy');
             Route::post('{rule}/run', 'run')->middleware('throttle:smart-home-control')->name('run');
