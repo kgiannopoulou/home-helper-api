@@ -1,7 +1,9 @@
-import { Head, router, usePoll } from '@inertiajs/react';
+import { Head, router, usePage, usePoll } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import Heading from '@/components/heading';
+import AlertError from '@/components/alert-error';
 import { ConnectionCard } from '@/components/smart-home/connection-card';
+import { DeviceControls } from '@/components/smart-home/device-controls';
 import { DeviceTile } from '@/components/smart-home/device-tile';
 import { ImportCard } from '@/components/smart-home/import-card';
 import { SummaryTiles } from '@/components/smart-home/summary-tiles';
@@ -44,10 +46,12 @@ function RoomCard({
     room,
     devices,
     canManage,
+    canControl,
 }: {
     room: string;
     devices: Device[];
     canManage: boolean;
+    canControl: boolean;
 }) {
     return (
         <Card className="gap-3" role="region" aria-label={room}>
@@ -57,6 +61,7 @@ function RoomCard({
             <CardContent className="grid gap-2 sm:grid-cols-2">
                 {devices.map((d) => (
                     <DeviceTile key={d.id} device={d}>
+                        {canControl && <DeviceControls device={d} />}
                         {canManage && (
                             <div className="flex justify-end">
                                 <Button
@@ -97,6 +102,9 @@ export default function SmartHome({
     can,
 }: Props) {
     usePoll(REFRESH_MS);
+    const { errors } = usePage<{ errors: Record<string, string> }>().props;
+    const problem =
+        errors?.control ?? errors?.device ?? errors?.action ?? errors?.sync;
 
     return (
         <>
@@ -106,6 +114,8 @@ export default function SmartHome({
                     title="Smart home"
                     description="Lights, plugs and sensors, through the household's Home Assistant."
                 />
+
+                {problem && <AlertError errors={[problem]} />}
 
                 {summary && devices.length > 0 && (
                     <SummaryTiles summary={summary} />
@@ -131,6 +141,7 @@ export default function SmartHome({
                             room={room}
                             devices={list}
                             canManage={can.manage}
+                            canControl={can.control}
                         />
                     ))}
                 </div>

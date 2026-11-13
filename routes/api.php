@@ -31,6 +31,7 @@ use App\Http\Controllers\Api\ShoppingItemController;
 use App\Http\Controllers\Api\ShoppingTripController;
 use App\Http\Controllers\Api\SleepEntryController;
 use App\Http\Controllers\Api\SmartHome\StatesWebhookController;
+use App\Http\Controllers\Api\SmartHomeController;
 use App\Http\Controllers\Api\SupplyController;
 use App\Http\Controllers\Api\SyncController;
 use App\Http\Controllers\Api\TodoController;
@@ -52,7 +53,7 @@ Route::name('api.')->group(function () {
     // requests instead of a Sanctum token, every response signed back
     // State changes pushed by the household's Home Assistant (docs/smart-home.md#state-changes):
     // the connection's own webhook secret instead of a Sanctum token
-    Route::prefix('smart-home/v1')->name('smart-home.')->middleware([AuthenticateHomeAssistant::class, 'throttle:smart-home-webhook'])->group(function () {
+    Route::prefix('smart-home/v1')->name('home-assistant.')->middleware([AuthenticateHomeAssistant::class, 'throttle:smart-home-webhook'])->group(function () {
         Route::post('states', StatesWebhookController::class)->name('states');
     });
 
@@ -115,6 +116,10 @@ Route::name('api.')->group(function () {
                 'plants' => PlantController::class,
                 'plant-care-logs' => PlantCareLogController::class,
             ]);
+
+            // The smart home (docs/smart-home.md#api): imported devices and their controls
+            Route::get('smart-home', [SmartHomeController::class, 'index'])->name('smart-home.index');
+            Route::post('smart-home/devices/{device}/actions', [SmartHomeController::class, 'action'])->middleware('throttle:smart-home-control')->name('smart-home.actions.store');
 
             // The assistant (docs/assistant.md): your own conversations in this household
             Route::prefix('assistant')->name('assistant.')->controller(AssistantController::class)->group(function () {

@@ -80,6 +80,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('devices/import', 'import')->name('.devices.import');
             Route::patch('devices/{device}', 'updateDevice')->name('.devices.update');
             Route::delete('devices/{device}', 'removeDevice')->name('.devices.destroy');
+            Route::post('devices/{device}/actions', 'control')->middleware('throttle:smart-home-control')->name('.devices.actions.store');
         });
 
         // The assistant (docs/assistant.md)

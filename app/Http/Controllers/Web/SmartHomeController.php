@@ -7,6 +7,7 @@ use App\Models\SmartDevice;
 use App\Models\SmartHomeConnection;
 use App\Policies\SmartHomePolicy;
 use App\SmartHome\Connections;
+use App\SmartHome\Control;
 use App\SmartHome\DevicePresenter;
 use App\SmartHome\Discovery;
 use App\SmartHome\HomeAssistantError;
@@ -59,7 +60,7 @@ class SmartHomeController extends WebController
             'last_ok_at' => $c->last_ok_at?->toIso8601String(),
             'last_event_at' => $c->last_event_at?->toIso8601String(),
             'last_synced_at' => $c->last_synced_at?->toIso8601String(),
-            'webhook_url' => route('api.smart-home.states'),
+            'webhook_url' => route('api.home-assistant.states'),
         ];
     }
 
@@ -132,6 +133,21 @@ class SmartHomeController extends WebController
         return to_route('smart-home');
     }
 
+    /** A button on a device tile: on, off, brightness */
+    public function control(Request $request, SmartDevice $device, Control $control): RedirectResponse
+    {
+        $this->inHousehold($request, $device);
+        $data = $request->validate([
+            'action' => ['required', 'string', 'in:turn_on,turn_off,toggle,set_brightness,lock,unlock'],
+            'brightness' => ['nullable', 'integer', 'between:1,100'],
+        ]);
+        $action = $control->request($device, $request->user(), $data['action'], isset($data['brightness']) ? ['brightness' => (int) $data['brightness']] : []);
+
+        return $action->status === 'failed'
+            ? to_route('smart-home')->withErrors(['control' => $action->error])
+            : to_route('smart-home');
+    }
+
     /** Out of Home Helper, not out of Home Assistant */
     public function removeDevice(Request $request, SmartDevice $device, Import $import): RedirectResponse
     {
@@ -160,7 +176,7 @@ class SmartHomeController extends WebController
     private function showWebhookOnce(SmartHomeConnection $connection, string $secret): RedirectResponse
     {
         return to_route('smart-home')->with('smart_home_webhook', [
-            'url' => route('api.smart-home.states'),
+            'url' => route('api.home-assistant.states'),
             'token' => SmartHomeConnection::webhookToken($connection->id, $secret),
         ]);
     }

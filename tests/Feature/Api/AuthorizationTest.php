@@ -23,7 +23,7 @@ const PUBLIC_API_ROUTES = ['api.login', 'api.health', 'api.agent.enroll'];
 const AGENT_API_PREFIX = 'api.agent.';
 
 /** Home Assistant's webhook: the connection's own secret (tests/Feature/SmartHome) */
-const SMART_HOME_API_PREFIX = 'api.smart-home.';
+const HOME_ASSISTANT_API_PREFIX = 'api.home-assistant.';
 
 /**
  * @return list<array{string, string, string}> [name, method, uri]
@@ -65,7 +65,7 @@ test('every API route needs a token, except login', function () {
 
             continue;
         }
-        if (str_starts_with($name, SMART_HOME_API_PREFIX)) {
+        if (str_starts_with($name, HOME_ASSISTANT_API_PREFIX)) {
             $this->json($method, fillUri($uri, $home))
                 ->assertUnauthorized()
                 ->assertJsonPath('error', 'invalid_webhook_token');
