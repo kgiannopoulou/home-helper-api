@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * The household's Home Assistant (App\SmartHome\Connections, docs/smart-home.md).
@@ -66,6 +67,12 @@ class SmartHomeConnection extends Model
     public function connector(): BelongsTo
     {
         return $this->belongsTo(User::class, 'connected_by');
+    }
+
+    /** @return HasMany<SmartDevice, $this> */
+    public function devices(): HasMany
+    {
+        return $this->hasMany(SmartDevice::class, 'connection_id');
     }
 
     public function isConnected(): bool

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\SmartHome;
 
 use App\Http\Controllers\Controller;
 use App\Models\SmartHomeConnection;
+use App\SmartHome\StateChanges;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ use Illuminate\Http\Request;
  */
 class StatesWebhookController extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request, StateChanges $changes): JsonResponse
     {
         /** @var SmartHomeConnection $connection */
         $connection = $request->attributes->get('smart_home_connection');
@@ -29,7 +30,9 @@ class StatesWebhookController extends Controller
         ]);
 
         $connection->forceFill(['last_event_at' => CarbonImmutable::now()])->save();
+        $device = $changes->applyPushed($connection, $data['entity_id'], $data['state'] ?? null, $data['attributes'] ?? [], $data['last_changed'] ?? null);
 
-        return response()->json(['accepted' => true, 'entity_id' => $data['entity_id']], 202);
+        // Unknown entity: a new device, found by the next sync (within a minute)
+        return response()->json(['accepted' => true, 'known' => $device !== null], 202);
     }
 }

@@ -74,6 +74,10 @@ Schedule::command('db:restore-test')->sundays()->at('03:30')->timezone($home)->o
 // Computers that stopped checking in (agent.offline, pushed to the phones)
 Schedule::command('agents:check-offline')->everyMinute()->onOneServer()->withoutOverlapping();
 
+// Devices and states from each household's Home Assistant: new and removed
+// devices, and the fallback when a pushed state change was lost (docs/smart-home.md)
+Schedule::command('smart-home:sync')->everyMinute()->onOneServer()->withoutOverlapping();
+
 // Housekeeping
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily()->onOneServer();
 Schedule::command('queue:prune-failed', ['--hours' => 24 * 14])->daily()->onOneServer();

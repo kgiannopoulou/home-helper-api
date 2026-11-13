@@ -20,8 +20,9 @@ rest_command:
       Authorization: !secret home_helper_events_auth
     content_type: application/json
     payload: "{{ payload }}"
-    # Home Helper answers in milliseconds; a slow answer must not back up Home Assistant
-    timeout: 5
+    # Home Helper answers in milliseconds in production; a dev server on a Windows
+    # bind mount can take seconds. A slow answer must not back up Home Assistant.
+    timeout: 10
 
 automation:
   - id: home_helper_forward_state_changes
