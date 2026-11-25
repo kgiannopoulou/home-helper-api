@@ -1,5 +1,7 @@
 # 🏠 Home Helper API
 
+> **📦 This project has moved.** It now lives in **[kgiannopoulou/home-helper](https://github.com/kgiannopoulou/home-helper)** (folder `server/`), together with the phone app, with its full history (up to Phase 7). New work happens there; this repository is kept for reference.
+
 [![tests](https://github.com/kgiannopoulou/home-helper-api/actions/workflows/tests.yml/badge.svg)](https://github.com/kgiannopoulou/home-helper-api/actions/workflows/tests.yml)
 
 **The shared household server for [Personal Home Helper](https://github.com/kgiannopoulou/personal-home-helper)**, an offline-first Expo app for money, kitchen, shopping, chores, plants, health and planning. This Laravel app gives a household one shared copy of its data: a REST + sync API for the phones, scheduled jobs that push to them, and a React dashboard, all on MySQL. An Oracle lab runs the same data through partitioning, backup and recovery.
